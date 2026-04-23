@@ -1,1528 +1,501 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CVCF Admin Dashboard v4</title>
+  <title>CVCF Admin Dashboard</title>
   <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f3f5f7;
-      color: #1f2937;
-    }
-
-    .topbar {
-      background: #07142b;
-      color: #fff;
-      padding: 18px 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .topbar h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .topbar .subtext {
-      margin-top: 4px;
-      font-size: 13px;
-      color: #cbd5e1;
-    }
-
-    .topbar-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.18s ease;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-
-    .btn-dark {
-      background: #0f1e3d;
-      color: white;
-      border: 1px solid rgba(255,255,255,0.15);
-    }
-
-    .btn-blue { background: #2d6df6; color: white; }
-    .btn-green { background: #19a54a; color: white; }
-    .btn-gray { background: #e5e7eb; color: #111827; }
-    .btn-red { background: #ef4444; color: white; }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      min-height: calc(100vh - 78px);
-    }
-
-    .sidebar {
-      background: #ffffff;
-      border-right: 1px solid #e5e7eb;
-      padding: 18px 14px;
-    }
-
-    .sidebar h3 {
-      margin: 0 0 14px;
-      font-size: 13px;
-      color: #6b7280;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .nav button {
-      width: 100%;
-      text-align: left;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 700;
-      background: #f1f3f5;
-      color: #1f2937;
-      cursor: pointer;
-    }
-
-    .nav button.active {
-      background: #07142b;
-      color: white;
-    }
-
-    .small-note {
-      margin-top: 18px;
-      font-size: 12px;
-      color: #6b7280;
-      line-height: 1.45;
-    }
-
-    .content {
-      padding: 24px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      background: #fff;
-      border-radius: 16px;
-      border: 1px solid #e5e7eb;
-      padding: 14px 16px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-      cursor: pointer;
-    }
-
-    .stat-card.active {
-      outline: 2px solid #93c5fd;
-      background: #eff6ff;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 8px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: #111827;
-    }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .section-header h2 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-    .toolbar-card,
-    .stack-card,
-    .lead-card,
-    .table-card,
-    .placeholder-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 18px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    }
-
-    .toolbar-card {
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-
-    .toolbar-grid {
-      display: grid;
-      grid-template-columns: 1.5fr 220px 220px;
-      gap: 12px;
-    }
-
-    .toolbar-grid input,
-    .toolbar-grid select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid #d1d5db;
-      background: #fff;
-      font-size: 14px;
-    }
-
-    .stack-card {
-      padding: 16px;
-      margin-bottom: 18px;
-    }
-
-    .stack-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .stack-header h3 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .stack-note {
-      font-size: 13px;
-      color: #6b7280;
-    }
-
-    .lead-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .lead-row {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 14px;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    .lead-row:hover {
-      background: #f3f8ff;
-    }
-
-    .lead-row.active {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      outline: 2px solid #bfdbfe;
-      outline-offset: -2px;
-    }
-
-    .lead-row-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 6px;
-    }
-
-    .lead-row-name {
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .lead-row-id {
-      font-size: 12px;
-      color: #6b7280;
-      font-weight: 700;
-    }
-
-    .lead-row-sub {
-      font-size: 14px;
-      color: #374151;
-      margin-bottom: 4px;
-    }
-
-    .lead-row-meta {
-      font-size: 12px;
-      color: #6b7280;
-      line-height: 1.5;
-    }
-
-    .lead-row-chips {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .chip-red { background: #fee2e2; color: #b91c1c; }
-    .chip-green { background: #dcfce7; color: #166534; }
-    .chip-yellow { background: #fef3c7; color: #92400e; }
-    .chip-blue { background: #dbeafe; color: #1d4ed8; }
-    .chip-gray { background: #e5e7eb; color: #374151; }
-
-    .empty-state {
-      padding: 24px;
-      border-radius: 14px;
-      background: #f9fafb;
-      color: #6b7280;
-      font-size: 14px;
-      text-align: center;
-    }
-
-    .lead-card {
-      padding: 18px;
-      margin-bottom: 18px;
-    }
-
-    .lead-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
-    .lead-name {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-
-    .lead-sub {
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    .chip-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .workflow {
-      background: #f8fafc;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 16px;
-    }
-
-    .workflow-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #6b7280;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .workflow-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .stage {
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      color: #6b7280;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .stage.done { background: #dcfce7; color: #166534; }
-    .stage.current { background: #dbeafe; color: #1d4ed8; }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .info-box {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 16px;
-    }
-
-    .info-box h3 {
-      margin: 0 0 12px;
-      font-size: 16px;
-    }
-
-    .info-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #eceff3;
-      font-size: 14px;
-    }
-
-    .info-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .info-item span:first-child {
-      color: #6b7280;
-      min-width: 150px;
-    }
-
-    .info-item span:last-child {
-      text-align: right;
-      font-weight: 600;
-    }
-
-    .maps-link {
-      color: #2563eb;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .maps-link:hover {
-      text-decoration: underline;
-    }
-
-    .assignment-bar {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .assignment-box {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px;
-    }
-
-    .assignment-label {
-      font-size: 12px;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 8px;
-      font-weight: 700;
-    }
-
-    .assignment-value {
-      font-size: 14px;
-      font-weight: 700;
-      color: #111827;
-    }
-
-    .action-groups {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 8px;
-    }
-
-    .action-group {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px;
-    }
-
-    .action-group h4 {
-      margin: 0 0 12px;
-      font-size: 14px;
-    }
-
-    .action-stack {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .action-stack select,
-    .action-stack input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #d1d5db;
-      background: #fff;
-      font-size: 14px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .completed-box {
-      margin-top: 16px;
-      padding: 18px;
-    }
-
-    .completed-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 12px;
-    }
-
-    .money-card {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px;
-    }
-
-    .money-label {
-      font-size: 12px;
-      color: #6b7280;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-      font-weight: 700;
-    }
-
-    .money-value {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .placeholder-card {
-      padding: 20px;
-    }
-
-    .placeholder-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 16px;
-    }
-
-    .placeholder-box {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 16px;
-    }
-
-    .placeholder-box h3 {
-      margin: 0 0 10px;
-      font-size: 16px;
-    }
-
-    .placeholder-box ul {
-      margin: 0;
-      padding-left: 18px;
-      color: #4b5563;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 1450px) {
-      .stats {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-      .completed-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 1200px) {
-      .toolbar-grid,
-      .assignment-bar,
-      .action-groups,
-      .grid-2,
-      .placeholder-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .stats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        border-right: none;
-        border-bottom: 1px solid #e5e7eb;
-      }
-
-      .toolbar-grid,
-      .assignment-bar,
-      .action-groups,
-      .grid-2,
-      .completed-grid,
-      .placeholder-grid,
-      .stats {
-        grid-template-columns: 1fr;
-      }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:#f1f5f9;color:#0f172a}
+    .top{background:#07142b;color:white;padding:28px 32px}
+    .top h1{margin:0;font-size:28px}
+    .top p{margin:8px 0 0;color:#cbd5e1}
+    .wrap{max-width:1500px;margin:auto;padding:24px}
+    .nav{display:flex;gap:10px;flex-wrap:wrap;background:white;border:1px solid #e2e8f0;border-radius:18px;padding:10px;margin-bottom:20px}
+    .nav button,.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer}
+    .nav button{background:#f1f5f9;color:#334155}
+    .nav button.active{background:#07142b;color:white}
+    .btn.dark{background:#07142b;color:white}
+    .btn.green{background:#16a34a;color:white}
+    .btn.red{background:#fee2e2;color:#991b1b}
+    .btn.light{background:#f8fafc;border:1px solid #cbd5e1;color:#334155}
+    .grid{display:grid;gap:18px}
+    .stats{grid-template-columns:repeat(4,1fr);margin-bottom:20px}
+    .stat,.card,.panel{background:white;border:1px solid #e2e8f0;border-radius:18px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+    .stat small{display:block;color:#64748b;text-transform:uppercase;font-weight:800;font-size:12px}
+    .stat b{font-size:28px;margin-top:8px;display:block}
+    .searchbar{background:white;border:1px solid #e2e8f0;border-radius:18px;padding:16px;margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap}
+    input,select,textarea{border:1px solid #cbd5e1;border-radius:12px;padding:12px;width:100%;font:inherit;background:white}
+    .searchbar input{max-width:520px}
+    .filters{display:flex;gap:8px;flex-wrap:wrap}
+    .filters button{border:0;border-radius:999px;padding:9px 13px;background:#e2e8f0;font-weight:700;cursor:pointer}
+    .filters button.active{background:#07142b;color:white}
+    .two{grid-template-columns:430px 1fr}
+    .three{grid-template-columns:repeat(3,1fr)}
+    .four{grid-template-columns:repeat(4,1fr)}
+    .lead-card{cursor:pointer}
+    .lead-card.active{outline:3px solid #07142b}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .muted{color:#64748b}
+    .title{font-size:20px;font-weight:900;margin:4px 0}
+    .badge{display:inline-flex;align-items:center;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900;margin:2px}
+    .green{background:#dcfce7;color:#166534}
+    .yellow{background:#fef3c7;color:#92400e}
+    .red{background:#fee2e2;color:#991b1b}
+    .blue{background:#dbeafe;color:#1e40af}
+    .purple{background:#ede9fe;color:#5b21b6}
+    .slate{background:#e2e8f0;color:#334155}
+    .section-title{font-size:22px;font-weight:900;margin:0 0 14px}
+    .detail-grid{grid-template-columns:1fr 1fr}
+    .kv{display:grid;grid-template-columns:150px 1fr;gap:8px;font-size:14px;margin:8px 0}
+    .kv b{color:#0f172a}
+    .note{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px;margin:10px 0;font-size:14px}
+    .condition{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .condition div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;display:flex;justify-content:space-between;gap:10px}
+    table{width:100%;border-collapse:collapse;background:white;border-radius:18px;overflow:hidden}
+    th,td{padding:14px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:14px}
+    th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
+    .hidden{display:none}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:1100px){.two,.detail-grid,.three,.four,.stats{grid-template-columns:1fr}.searchbar input{max-width:none}}
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div>
-      <h1>CVCF Admin Dashboard</h1>
-      <div class="subtext">Dashboard UI v4 • Stacked cars by category, fuller customer/vehicle detail, completed-only P&amp;L</div>
-    </div>
-    <div class="topbar-actions">
-      <button class="btn btn-dark">Export CSV</button>
-      <button class="btn btn-blue">New Lead</button>
-      <button class="btn btn-green">Admin Actions</button>
-    </div>
-  </div>
-
-  <div class="layout">
-    <aside class="sidebar">
-      <h3>Navigation</h3>
-      <div class="nav">
-        <button class="tab-btn active" data-panel="customers">Customers</button>
-        <button class="tab-btn" data-panel="buyers">Buyers</button>
-        <button class="tab-btn" data-panel="tow">Tow Drivers</button>
-        <button class="tab-btn" data-panel="bidding">Bidding</button>
+  <header class="top">
+    <div class="row">
+      <div>
+        <h1>CVCF Admin Dashboard</h1>
+        <p>Lead management, buyer workflow, towing, inventory, alerts, audit trail, and financial P&L.</p>
       </div>
-      <div class="small-note">
-        v4 stacks cars vertically, filters by stage, expands form-style lead detail, and limits P&amp;L to completed deals only.
+      <div>
+        <button class="btn light">Export CSV</button>
+        <button class="btn green">New Lead</button>
       </div>
-    </aside>
+    </div>
+  </header>
 
-    <main class="content">
-      <section id="customers" class="panel active">
-        <div class="stats" id="statusCards"></div>
+  <main class="wrap">
+    <nav class="nav" id="nav">
+      <button class="active" data-tab="customers">Customers</button>
+      <button data-tab="inventory">Inventory</button>
+      <button data-tab="buyers">Buyers</button>
+      <button data-tab="tow">Tow Drivers</button>
+      <button data-tab="destinations">Destinations</button>
+      <button data-tab="calendar">Calendar</button>
+      <button data-tab="alerts">Alerts & Audit</button>
+      <button data-tab="pnl">P&L</button>
+    </nav>
 
-        <div class="section-header">
-          <h2>Customers</h2>
-          <button class="btn btn-gray">Filter Leads</button>
+    <section class="grid stats">
+      <div class="stat"><small>New Leads</small><b>12</b></div>
+      <div class="stat"><small>Offer Sent</small><b>9</b></div>
+      <div class="stat"><small>Inventory</small><b>18</b></div>
+      <div class="stat"><small>Emergency Tow</small><b>2</b></div>
+    </section>
+
+    <section class="searchbar">
+      <input id="search" placeholder="Search by VIN, last 6, ID, or seller name" />
+      <div class="filters" id="leadFilters">
+        <button class="active" data-filter="All">All</button>
+        <button data-filter="New Lead">New Lead</button>
+        <button data-filter="Quote Pending">Quote Pending</button>
+        <button data-filter="Offer Sent">Offer Sent</button>
+        <button data-filter="Accepted">Accepted</button>
+        <button data-filter="Declined">Declined</button>
+      </div>
+    </section>
+
+    <section id="customers" class="tab">
+      <div class="grid two">
+        <div id="leadList" class="grid"></div>
+        <div id="leadDetail" class="grid"></div>
+      </div>
+    </section>
+
+    <section id="inventory" class="tab hidden">
+      <h2 class="section-title">Inventory / Post-Sale</h2>
+      <p class="muted">After buyer Complete, vehicles move here. Complete = in inventory. Sold = out of inventory/off the books.</p>
+      <div id="inventoryList" class="grid"></div>
+    </section>
+
+    <section id="buyers" class="tab hidden">
+      <h2 class="section-title">Buyers</h2>
+      <div class="grid three" id="buyersList"></div>
+    </section>
+
+    <section id="tow" class="tab hidden">
+      <h2 class="section-title">Tow Drivers</h2>
+      <div class="grid three" id="towList"></div>
+    </section>
+
+    <section id="destinations" class="tab hidden">
+      <h2 class="section-title">Destinations</h2>
+      <p class="muted">Default route is Yard. Auction or Recycling requires admin signoff before tow order is released.</p>
+      <div class="grid three" id="destList"></div>
+    </section>
+
+    <section id="calendar" class="tab hidden">
+      <h2 class="section-title">Calendar</h2>
+      <div class="grid two">
+        <div class="panel">
+          <h3>Buyer Pickup Calendar</h3>
+          <div class="note">Today • Fresno Auto Wholesale • Maria Hernandez • 12–4 PM • Same Day</div>
+          <div class="note">Tomorrow • Valley Budget Autos • Jose Ramirez • Awaiting acceptance</div>
         </div>
-
-        <div class="toolbar-card">
-          <div class="toolbar-grid">
-            <input id="leadSearch" type="text" placeholder="Search by VIN, Lead ID, customer, address, or vehicle..." />
-            <select id="searchStageFilter">
-              <option value="all">All Stages</option>
-              <option value="new">New Lead</option>
-              <option value="offer-sent">Offer Sent</option>
-              <option value="accepted">Accepted</option>
-              <option value="assigned">Assigned</option>
-              <option value="towed">Towed</option>
-              <option value="paid">Paid</option>
-              <option value="closed">Closed</option>
-            </select>
-            <select id="searchTransportFilter">
-              <option value="all">All Transport Types</option>
-              <option value="Tow Required">Tow Required</option>
-              <option value="Drivable">Drivable</option>
-            </select>
-          </div>
+        <div class="panel">
+          <h3>Scheduling Rules</h3>
+          <p>Customer can choose 8–12, 12–4, or 4–8 pickup windows, 7 days/week.</p>
+          <p>Admin and buyer can reschedule. Every change stays in audit trail.</p>
         </div>
+      </div>
+    </section>
 
-        <div class="stack-card">
-          <div class="stack-header">
-            <div>
-              <h3 id="stackTitle">All Active Cars</h3>
-              <div class="stack-note">Click any vehicle below to load the full lead detail.</div>
-            </div>
-          </div>
-          <div class="lead-stack" id="leadStack"></div>
-        </div>
+    <section id="alerts" class="tab hidden">
+      <h2 class="section-title">Alerts & Audit</h2>
+      <div class="grid two">
+        <div class="panel" id="alertsList"></div>
+        <div class="panel" id="auditList"></div>
+      </div>
+    </section>
 
-        <div id="leadDetailMount"></div>
-      </section>
-
-      <section id="buyers" class="panel">
-        <div class="section-header">
-          <h2>Buyers</h2>
-          <button class="btn btn-gray">Add Buyer</button>
-        </div>
-
-        <div class="placeholder-card">
-          <h3 style="margin-top:0;">Buyer Profiles (structure only for now)</h3>
-          <p style="color:#6b7280; margin-top:8px;">
-            This tab stays inactive for now, but the profile structure below matches what you asked for so we can wire it up next.
-          </p>
-
-          <div class="placeholder-grid">
-            <div class="placeholder-box">
-              <h3>Buyer Profile Fields</h3>
-              <ul>
-                <li>Name</li>
-                <li>Type: Person or Business</li>
-                <li>Address</li>
-                <li>Phone</li>
-                <li>Email</li>
-                <li>SSN if person</li>
-                <li>EIN if business</li>
-                <li>Active / Inactive status</li>
-                <li>Calendar year active tracking</li>
-                <li>1099 generation at year end</li>
-              </ul>
-            </div>
-
-            <div class="placeholder-box">
-              <h3>Example Buyer</h3>
-              <ul>
-                <li>Name: Fresno Auto Wholesale</li>
-                <li>Type: Business</li>
-                <li>Address: 123 Auction Way, Fresno, CA 93722</li>
-                <li>Phone: (559) 555-2001</li>
-                <li>Email: accounting@fresnoauto.com</li>
-                <li>EIN: XX-XXXXXXX</li>
-                <li>1099 Status: Eligible for 2026 year-end export</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="tow" class="panel">
-        <div class="section-header">
-          <h2>Tow Drivers</h2>
-          <button class="btn btn-gray">Add Tow Driver</button>
-        </div>
-
-        <div class="placeholder-card">
-          <h3 style="margin-top:0;">Tow Driver Profiles (structure only for now)</h3>
-          <p style="color:#6b7280; margin-top:8px;">
-            This tab also remains inactive for now. It is structured to support person or business entities and year-end tax reporting.
-          </p>
-
-          <div class="placeholder-grid">
-            <div class="placeholder-box">
-              <h3>Tow Profile Fields</h3>
-              <ul>
-                <li>Name</li>
-                <li>Type: Person or Business</li>
-                <li>Address</li>
-                <li>Phone</li>
-                <li>Email</li>
-                <li>SSN if person</li>
-                <li>EIN if business</li>
-                <li>Service area / zone</li>
-                <li>Active / Inactive</li>
-                <li>1099 generation by calendar year</li>
-              </ul>
-            </div>
-
-            <div class="placeholder-box">
-              <h3>Example Tow Profile</h3>
-              <ul>
-                <li>Name: Valley Tow Team</li>
-                <li>Type: Business</li>
-                <li>Address: 55 Service Rd, Clovis, CA 93612</li>
-                <li>Phone: (559) 555-0102</li>
-                <li>Email: dispatch@valleytow.com</li>
-                <li>EIN: XX-XXXXXXX</li>
-                <li>Zone: Fresno / Clovis</li>
-                <li>1099 Status: Track for 2026 tax year</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="bidding" class="panel">
-        <div class="section-header">
-          <h2>Bidding</h2>
-          <button class="btn btn-gray">Create Bid Request</button>
-        </div>
-
-        <div class="placeholder-card">
-          <h3 style="margin-top:0;">Bidding Tab</h3>
-          <p style="color:#6b7280; margin-top:8px; line-height:1.6;">
-            In the next version this can hold buyer bid history, offer requests, top bid, response timestamps, expiration windows, and accepted-offer conversion into assignment flow.
-          </p>
-        </div>
-      </section>
-    </main>
-  </div>
+    <section id="pnl" class="tab hidden">
+      <h2 class="section-title">P&L</h2>
+      <p class="muted">Financial only. Post-sale operations stay in Inventory.</p>
+      <div class="panel">
+        <table id="pnlTable"></table>
+      </div>
+    </section>
+  </main>
 
   <script>
     const leads = [
       {
-        id: 'CVCF-1048',
-        name: 'Maria Lopez',
-        submitted: 'Submitted today',
-        city: 'Fresno, CA',
-        status: 'assigned',
-        phone: '(559) 555-0137',
-        email: 'maria@example.com',
-        fullAddress: '2458 E Belmont Ave, Fresno, CA 93701',
-        pickupAddress2: 'Gate code 1122, rear driveway access',
-        pickupContact: 'Maria Lopez',
-        titleInName: 'Yes',
-        keysAvailable: 'Yes',
-        runsAndDrives: 'No',
-        transportType: 'Tow Required',
-        towNeeded: 'Yes',
-        vehicleYear: '2014',
-        vehicleMake: 'Honda',
-        vehicleModel: 'Accord',
-        trim: 'EX-L',
-        vin: '1HGCR2F86EA000123',
-        mileage: '167,200',
-        color: 'White',
-        drivetrain: 'FWD',
-        engine: '2.4L 4-Cyl',
-        transmission: 'Automatic',
-        bodyStyle: 'Sedan',
-        condition: 'Mechanical issues',
-        interiorCondition: 'Fair',
-        exteriorCondition: 'Fair',
-        tireCondition: 'Usable',
-        warningLights: 'Check Engine',
-        catalyticConverter: 'Unknown',
-        missingParts: 'None reported',
-        notes: 'Customer accepted offer. Vehicle does not run reliably and needs tow.',
-        buyer: 'Buyer A - Fresno Auto',
-        tow: 'Not assigned yet',
-        emailVerified: true,
-        pickupNeeded: true,
-        purchasePrice: '$0',
-        buyerFee: '$0',
-        auctionFee: '$0',
-        marketingFee: '$0',
-        otherCost: '$0',
-        salePrice: '$0',
-        profit: '$0'
+        id:"CV-10284",status:"Accepted",priority:"Same Day",offer:800,vin:"1HGCM82633A112345",
+        year:"2012",make:"Honda",model:"Accord",trim:"EX-L",fuel:"Gasoline",body:"Sedan",drive:"FWD",trans:"Automatic",color:"Silver",miles:"184,200",
+        seller:"Maria Hernandez",phone:"(559) 555-1102",email:"mariah@example.com",address:"1458 E Olive Ave, Fresno, CA 93728",city:"Fresno",
+        window:"Today • 12–4 PM",instructions:"Back alley access behind duplex.",buyer:"Fresno Auto Wholesale",tow:"Valley Tow Team",route:"Yard",
+        title:"Clean Title",ownership:"Owned",condition:["Does not start/drive","Flat front tire","Engine/trans intact","Exterior damage","Interior OK","Catalytic converter present","Airbags not deployed","No flood/fire"],
+        notes:["Admin: Needs jump to crank. Front driver door sticks shut.","Buyer: Key is under left rear floor mat."],
+        towPacket:["Car photo","Plate photo","Key location","Verified pin"], adminOnly:["Driver license","Title","Extra vehicle angles"],
+        audit:["Lead created","VIN decoded and vehicle fields populated","Offer sent by SMS + Email","Customer accepted offer","Buyer assigned","Tow driver pre-assigned"]
       },
       {
-        id: 'CVCF-1047',
-        name: 'David Ramirez',
-        submitted: 'Submitted yesterday',
-        city: 'Clovis, CA',
-        status: 'new',
-        phone: '(559) 555-0192',
-        email: 'david@example.com',
-        fullAddress: '1442 Minnewawa Ave, Clovis, CA 93612',
-        pickupAddress2: 'Parked on street in front of house',
-        pickupContact: 'David Ramirez',
-        titleInName: 'No',
-        keysAvailable: 'Yes',
-        runsAndDrives: 'Yes',
-        transportType: 'Drivable',
-        towNeeded: 'No',
-        vehicleYear: '2011',
-        vehicleMake: 'Ford',
-        vehicleModel: 'Escape',
-        trim: 'XLT',
-        vin: '1FMCU9DG5BKA45678',
-        mileage: '192,400',
-        color: 'Gray',
-        drivetrain: 'AWD',
-        engine: '3.0L V6',
-        transmission: 'Automatic',
-        bodyStyle: 'SUV',
-        condition: 'High mileage',
-        interiorCondition: 'Good',
-        exteriorCondition: 'Fair',
-        tireCondition: 'Fair',
-        warningLights: 'None',
-        catalyticConverter: 'Present',
-        missingParts: 'None reported',
-        notes: 'Needs initial review and offer.',
-        buyer: 'Not available yet',
-        tow: 'Not available yet',
-        emailVerified: false,
-        pickupNeeded: false,
-        purchasePrice: '$0',
-        buyerFee: '$0',
-        auctionFee: '$0',
-        marketingFee: '$0',
-        otherCost: '$0',
-        salePrice: '$0',
-        profit: '$0'
+        id:"CV-10285",status:"Offer Sent",priority:"Standard",offer:450,vin:"2T1BR32E54C778899",
+        year:"2004",make:"Toyota",model:"Corolla",trim:"LE",fuel:"Gasoline",body:"Sedan",drive:"FWD",trans:"Automatic",color:"Blue",miles:"221,500",
+        seller:"Jose Ramirez",phone:"(559) 555-1414",email:"jramirez@example.com",address:"3377 N Temperance Ave, Clovis, CA 93619",city:"Clovis",
+        window:"Pending customer response",instructions:"Car parked on side yard behind gate.",buyer:"—",tow:"—",route:"Yard",
+        title:"Salvage",ownership:"Owned",condition:["Does not start/drive","Tires OK","Engine/trans intact","Exterior OK","Interior OK","Catalytic converter present","Airbags not deployed","No flood/fire"],
+        notes:["Seller: Has not started in six months. May need battery."],
+        towPacket:[], adminOnly:[],
+        audit:["Lead created","VIN decoded and vehicle fields populated","Offer sent by SMS"]
       },
       {
-        id: 'CVCF-1046',
-        name: 'Ana Torres',
-        submitted: '2 days ago',
-        city: 'Madera, CA',
-        status: 'offer-sent',
-        phone: '(559) 555-0165',
-        email: 'ana@example.com',
-        fullAddress: '865 Vineyard Ave, Madera, CA 93637',
-        pickupAddress2: 'Call before arrival',
-        pickupContact: 'Ana Torres',
-        titleInName: 'Yes',
-        keysAvailable: 'Yes',
-        runsAndDrives: 'Yes',
-        transportType: 'Drivable',
-        towNeeded: 'No',
-        vehicleYear: '2015',
-        vehicleMake: 'Nissan',
-        vehicleModel: 'Altima',
-        trim: 'SV',
-        vin: '1N4AL3AP4FC112233',
-        mileage: '141,020',
-        color: 'Black',
-        drivetrain: 'FWD',
-        engine: '2.5L',
-        transmission: 'CVT',
-        bodyStyle: 'Sedan',
-        condition: 'Average',
-        interiorCondition: 'Good',
-        exteriorCondition: 'Good',
-        tireCondition: 'Good',
-        warningLights: 'Airbag light',
-        catalyticConverter: 'Present',
-        missingParts: 'None reported',
-        notes: 'Offer sent. Awaiting customer response.',
-        buyer: 'Pending',
-        tow: 'Pending',
-        emailVerified: true,
-        pickupNeeded: false,
-        purchasePrice: '$0',
-        buyerFee: '$0',
-        auctionFee: '$0',
-        marketingFee: '$0',
-        otherCost: '$0',
-        salePrice: '$0',
-        profit: '$0'
-      },
-      {
-        id: 'CVCF-1045',
-        name: 'Chris Mendoza',
-        submitted: '3 days ago',
-        city: 'Selma, CA',
-        status: 'accepted',
-        phone: '(559) 555-0188',
-        email: 'chris@example.com',
-        fullAddress: '3201 Floral Ave, Selma, CA 93662',
-        pickupAddress2: 'Vehicle behind detached garage',
-        pickupContact: 'Chris Mendoza',
-        titleInName: 'Yes',
-        keysAvailable: 'No',
-        runsAndDrives: 'No',
-        transportType: 'Tow Required',
-        towNeeded: 'Yes',
-        vehicleYear: '2010',
-        vehicleMake: 'Toyota',
-        vehicleModel: 'Camry',
-        trim: 'LE',
-        vin: '4T1BF3EK2AU445566',
-        mileage: '203,600',
-        color: 'Silver',
-        drivetrain: 'FWD',
-        engine: '2.5L',
-        transmission: 'Automatic',
-        bodyStyle: 'Sedan',
-        condition: 'Non-runner',
-        interiorCondition: 'Fair',
-        exteriorCondition: 'Fair',
-        tireCondition: 'Poor',
-        warningLights: 'Battery, Check Engine',
-        catalyticConverter: 'Unknown',
-        missingParts: 'Keys missing',
-        notes: 'Accepted. Needs buyer and tow assignment.',
-        buyer: 'Not assigned yet',
-        tow: 'Not assigned yet',
-        emailVerified: true,
-        pickupNeeded: true,
-        purchasePrice: '$0',
-        buyerFee: '$0',
-        auctionFee: '$0',
-        marketingFee: '$0',
-        otherCost: '$0',
-        salePrice: '$0',
-        profit: '$0'
-      },
-      {
-        id: 'CVCF-1044',
-        name: 'Elena Garcia',
-        submitted: '4 days ago',
-        city: 'Fresno, CA',
-        status: 'towed',
-        phone: '(559) 555-0124',
-        email: 'elena@example.com',
-        fullAddress: '781 S Cedar Ave, Fresno, CA 93702',
-        pickupAddress2: 'Tow complete',
-        pickupContact: 'Elena Garcia',
-        titleInName: 'Yes',
-        keysAvailable: 'Yes',
-        runsAndDrives: 'No',
-        transportType: 'Tow Required',
-        towNeeded: 'Yes',
-        vehicleYear: '2012',
-        vehicleMake: 'Hyundai',
-        vehicleModel: 'Sonata',
-        trim: 'GLS',
-        vin: '5NPEB4AC7CH778899',
-        mileage: '156,900',
-        color: 'Blue',
-        drivetrain: 'FWD',
-        engine: '2.4L',
-        transmission: 'Automatic',
-        bodyStyle: 'Sedan',
-        condition: 'In yard',
-        interiorCondition: 'Good',
-        exteriorCondition: 'Fair',
-        tireCondition: 'Good',
-        warningLights: 'Engine light',
-        catalyticConverter: 'Present',
-        missingParts: 'None reported',
-        notes: 'Vehicle already picked up and at yard.',
-        buyer: 'Buyer B - Central Valley Motors',
-        tow: 'Jose Towing',
-        emailVerified: true,
-        pickupNeeded: true,
-        purchasePrice: '$0',
-        buyerFee: '$0',
-        auctionFee: '$0',
-        marketingFee: '$0',
-        otherCost: '$0',
-        salePrice: '$0',
-        profit: '$0'
-      },
-      {
-        id: 'CVCF-1043',
-        name: 'Josefina Ruiz',
-        submitted: '5 days ago',
-        city: 'Clovis, CA',
-        status: 'paid',
-        phone: '(559) 555-0111',
-        email: 'josefina@example.com',
-        fullAddress: '229 Barstow Ave, Clovis, CA 93612',
-        pickupAddress2: 'Paid, waiting closeout',
-        pickupContact: 'Josefina Ruiz',
-        titleInName: 'Yes',
-        keysAvailable: 'Yes',
-        runsAndDrives: 'Yes',
-        transportType: 'Drivable',
-        towNeeded: 'No',
-        vehicleYear: '2013',
-        vehicleMake: 'Kia',
-        vehicleModel: 'Optima',
-        trim: 'LX',
-        vin: '5XXGM4A70DG998877',
-        mileage: '133,400',
-        color: 'Red',
-        drivetrain: 'FWD',
-        engine: '2.4L',
-        transmission: 'Automatic',
-        bodyStyle: 'Sedan',
-        condition: 'Sold and paid',
-        interiorCondition: 'Good',
-        exteriorCondition: 'Good',
-        tireCondition: 'Good',
-        warningLights: 'None',
-        catalyticConverter: 'Present',
-        missingParts: 'None reported',
-        notes: 'Payment received; ready to close.',
-        buyer: 'Buyer C - Wholesale Direct',
-        tow: 'None',
-        emailVerified: true,
-        pickupNeeded: false,
-        purchasePrice: '$0',
-        buyerFee: '$0',
-        auctionFee: '$0',
-        marketingFee: '$0',
-        otherCost: '$0',
-        salePrice: '$0',
-        profit: '$0'
-      },
-      {
-        id: 'CVCF-1042',
-        name: 'Luis Herrera',
-        submitted: '1 week ago',
-        city: 'Fresno, CA',
-        status: 'closed',
-        phone: '(559) 555-0109',
-        email: 'luis@example.com',
-        fullAddress: '905 N Maple Ave, Fresno, CA 93703',
-        pickupAddress2: 'Complete',
-        pickupContact: 'Luis Herrera',
-        titleInName: 'Yes',
-        keysAvailable: 'Yes',
-        runsAndDrives: 'No',
-        transportType: 'Tow Required',
-        towNeeded: 'Yes',
-        vehicleYear: '2009',
-        vehicleMake: 'Chevrolet',
-        vehicleModel: 'Malibu',
-        trim: 'LT',
-        vin: '1G1ZH57B09F223344',
-        mileage: '188,300',
-        color: 'Tan',
-        drivetrain: 'FWD',
-        engine: '2.4L',
-        transmission: 'Automatic',
-        bodyStyle: 'Sedan',
-        condition: 'Completed deal',
-        interiorCondition: 'Fair',
-        exteriorCondition: 'Fair',
-        tireCondition: 'Fair',
-        warningLights: 'Check Engine',
-        catalyticConverter: 'Present',
-        missingParts: 'None reported',
-        notes: 'Closed deal. Final numbers recorded.',
-        buyer: 'Buyer A - Fresno Auto',
-        tow: 'Valley Tow Team',
-        emailVerified: true,
-        pickupNeeded: true,
-        purchasePrice: '$1,600',
-        buyerFee: '$150',
-        auctionFee: '$50',
-        marketingFee: '$75',
-        otherCost: '$25',
-        salePrice: '$2,950',
-        profit: '$1,050'
+        id:"CV-10286",status:"Quote Pending",priority:"Emergency",offer:1200,vin:"1FTRW08L21KD99887",
+        year:"2001",make:"Ford",model:"F-150",trim:"XLT",fuel:"Gasoline",body:"Truck",drive:"RWD",trans:"Automatic",color:"White",miles:"247,340",
+        seller:"Anthony Perez",phone:"(559) 555-2218",email:"aperez@example.com",address:"820 S Winery Ave, Fresno, CA 93727",city:"Fresno",
+        window:"Awaiting quote response",instructions:"Truck is on street, keys with cousin next door.",buyer:"—",tow:"Rapid Recovery",route:"Yard",
+        title:"Clean Title",ownership:"Owned",condition:["Does not start/drive","Tires poor","Engine/trans intact","Exterior damage","Interior damage","Catalytic converter missing","Airbags not deployed","No flood/fire"],
+        notes:["Admin: Emergency tow likely needed. Vehicle blocked by city notice."],
+        towPacket:["Car photo","Plate photo"], adminOnly:[],
+        audit:["Lead created","VIN decoded","Missing-doc override used by Admin"]
       }
     ];
 
-    let selectedLeadId = 'CVCF-1048';
-    let activeStatusView = 'all';
+    const inventory = [
+      {id:"INV-7742",status:"Delivered",vehicle:"2015 Ford Escape",vin:"1FMCU9GX7FUA44567",route:"Yard",dest:"Central Valley Yard - Fresno",purchase:950,towStatus:"Delivered",days:1,notes:["Needs jump to move around yard.","Passenger rear window broken.","Tow note: steering stiff when loading."]},
+      {id:"INV-7743",status:"Repair in Process",vehicle:"2011 Chevrolet Malibu",vin:"1G1ZC5E19BF232199",route:"Yard",dest:"Central Valley Yard - Clovis",purchase:600,towStatus:"Delivered",days:6,notes:["AC inoperative.","Hood latch bent.","Mechanic note: alternator replacement started."]},
+      {id:"INV-7744",status:"Ready for Sale",vehicle:"2013 Toyota Prius",vin:"JTDKN3DU4D5678912",route:"Auction",dest:"Golden State Auction",purchase:1100,towStatus:"Delivered",days:12,notes:["Hybrid battery tested OK.","Detail complete.","Waiting listing photos."]}
+    ];
 
-    const stageOrder = ['new', 'offer-sent', 'accepted', 'assigned', 'towed', 'paid', 'closed'];
+    const buyers = [
+      {name:"Fresno Auto Wholesale",type:"Business",phone:"(559) 555-2001",email:"accounting@fresnoauto.com",tax:"EIN: XX-XXXXXXX",assigned:7,schedule:"3 pickups today"},
+      {name:"Valley Budget Autos",type:"Business",phone:"(559) 555-7114",email:"ops@vbudgetautos.com",tax:"EIN: XX-XXXXXXX",assigned:3,schedule:"1 pickup tomorrow"}
+    ];
 
-    const stageNames = {
-      'new': 'New Lead',
-      'offer-sent': 'Offer Sent',
-      'accepted': 'Accepted',
-      'assigned': 'Assigned',
-      'towed': 'Towed',
-      'paid': 'Paid',
-      'closed': 'Closed'
-    };
+    const towDrivers = [
+      {name:"Valley Tow Team",type:"Business",phone:"(559) 555-0102",email:"dispatch@valleytow.com",tax:"EIN: XX-XXXXXXX",zone:"Fresno / Clovis",jobs:4},
+      {name:"Rapid Recovery",type:"Business",phone:"(559) 555-0120",email:"ops@rapidrecovery.com",tax:"EIN: XX-XXXXXXX",zone:"Madera / Fresno",jobs:2}
+    ];
 
-    function getWorkflowStages(status) {
-      const map = {
-        'new': ['current', '', '', '', '', '', ''],
-        'offer-sent': ['done', 'current', '', '', '', '', ''],
-        'accepted': ['done', 'done', 'current', '', '', '', ''],
-        'assigned': ['done', 'done', 'done', 'current', '', '', ''],
-        'towed': ['done', 'done', 'done', 'done', 'current', '', ''],
-        'paid': ['done', 'done', 'done', 'done', 'done', 'current', ''],
-        'closed': ['done', 'done', 'done', 'done', 'done', 'done', 'current']
-      };
-      return map[status] || map['new'];
+    const destinations = [
+      {name:"Central Valley Yard - Fresno",type:"Yard",address:"2250 S Elm Ave, Fresno, CA",phone:"(559) 555-0188",def:true},
+      {name:"Golden State Auction",type:"Auction",address:"410 Industrial Way, Fresno, CA",phone:"(559) 555-0440",def:false},
+      {name:"Eco Recycling North",type:"Recycling",address:"8125 Ave 12, Madera, CA",phone:"(559) 555-0662",def:false}
+    ];
+
+    const pnl = [
+      {id:"INV-7718",vehicle:"2013 Nissan Altima",route:"Yard",purchase:700,buyerFee:75,tow:145,auction:0,marketing:35,repair:240,other:0,sale:2200},
+      {id:"INV-7719",vehicle:"2010 Toyota Prius",route:"Auction",purchase:1100,buyerFee:100,tow:180,auction:250,marketing:45,repair:0,other:50,sale:2400}
+    ];
+
+    const alerts = [
+      {level:"red",title:"Emergency Tow",detail:"CV-10286 flagged ASAP tow priority.",age:"8 min"},
+      {level:"yellow",title:"Offer No Response",detail:"CV-10285 approaching 6-hour reminder.",age:"5h 34m"},
+      {level:"yellow",title:"Delivered No Update",detail:"INV-7742 needs next inventory status update.",age:"24h"}
+    ];
+
+    const audit = [
+      "CV-10286 emergency tow priority set by Admin",
+      "CV-10286 missing-doc override used by Admin",
+      "CV-10284 buyer rescheduled pickup window",
+      "CV-10284 customer accepted offer",
+      "CV-10284 offer sent by SMS + Email",
+      "CV-10285 offer sent by SMS"
+    ];
+
+    let selectedLead = leads[0];
+    let activeFilter = "All";
+
+    function badge(text, tone="slate"){ return `<span class="badge ${tone}">${text}</span>`; }
+    function priorityBadge(p){
+      if(p==="Emergency") return badge("Red • Emergency","red");
+      if(p==="Same Day") return badge("Yellow • Same Day","yellow");
+      return badge("Green • Standard","green");
+    }
+    function statusTone(s){
+      if(["Accepted","Sold","Ready for Sale"].includes(s)) return "green";
+      if(["Offer Sent","Quote Pending","Delivered","Repair in Process"].includes(s)) return "yellow";
+      if(s==="Declined") return "red";
+      return "blue";
     }
 
-    function getLeadChips(lead) {
-      const chips = [];
-      if (lead.status === 'new') chips.push('<span class="chip chip-red">New Lead</span>');
-      if (lead.status === 'offer-sent') chips.push('<span class="chip chip-yellow">Offer Sent</span>');
-      if (lead.status === 'accepted') chips.push('<span class="chip chip-green">Accepted</span>');
-      if (lead.status === 'assigned') chips.push('<span class="chip chip-blue">Assigned</span>');
-      if (lead.status === 'towed') chips.push('<span class="chip chip-yellow">Towed</span>');
-      if (lead.status === 'paid') chips.push('<span class="chip chip-green">Paid</span>');
-      if (lead.status === 'closed') chips.push('<span class="chip chip-gray">Closed</span>');
-      if (lead.emailVerified) chips.push('<span class="chip chip-blue">Email Verified</span>');
-      if (lead.pickupNeeded) chips.push('<span class="chip chip-yellow">Pickup Needed</span>');
-      return chips.join('');
-    }
-
-    function matchesSearch(lead, query, transportFilter) {
-      const haystack = [
-        lead.id,
-        lead.name,
-        lead.vehicleYear,
-        lead.vehicleMake,
-        lead.vehicleModel,
-        lead.trim,
-        lead.vin,
-        lead.city,
-        lead.fullAddress,
-        lead.transportType
-      ].join(' ').toLowerCase();
-
-      const queryMatch = haystack.includes(query.toLowerCase());
-      const transportMatch = transportFilter === 'all' ? true : lead.transportType === transportFilter;
-      const statusMatch = activeStatusView === 'all' ? true : lead.status === activeStatusView;
-
-      return queryMatch && transportMatch && statusMatch;
-    }
-
-    function renderStatusCards() {
-      const counts = {
-        all: leads.length,
-        new: leads.filter(l => l.status === 'new').length,
-        'offer-sent': leads.filter(l => l.status === 'offer-sent').length,
-        accepted: leads.filter(l => l.status === 'accepted').length,
-        assigned: leads.filter(l => l.status === 'assigned').length,
-        towed: leads.filter(l => l.status === 'towed').length,
-        paid: leads.filter(l => l.status === 'paid').length,
-        closed: leads.filter(l => l.status === 'closed').length
-      };
-
-      const cards = [
-        { key: 'all', label: 'All Cars', value: counts.all },
-        { key: 'new', label: 'New Leads', value: counts.new },
-        { key: 'offer-sent', label: 'Offer Sent', value: counts['offer-sent'] },
-        { key: 'accepted', label: 'Accepted', value: counts.accepted },
-        { key: 'assigned', label: 'Assigned', value: counts.assigned },
-        { key: 'towed', label: 'Towed', value: counts.towed },
-        { key: 'closed', label: 'Completed', value: counts.closed }
-      ];
-
-      const mount = document.getElementById('statusCards');
-      mount.innerHTML = cards.map(card => `
-        <div class="stat-card ${activeStatusView === card.key ? 'active' : ''}" data-status-card="${card.key}">
-          <div class="stat-label">${card.label}</div>
-          <div class="stat-value">${card.value}</div>
-        </div>
-      `).join('');
-
-      mount.querySelectorAll('[data-status-card]').forEach(card => {
-        card.addEventListener('click', () => {
-          activeStatusView = card.dataset.statusCard;
-          document.getElementById('searchStageFilter').value = activeStatusView === 'all' ? 'all' : activeStatusView;
-          renderStatusCards();
-          renderLeadStack();
-          renderLeadDetail();
-        });
-      });
-    }
-
-    function renderLeadStack() {
-      const query = document.getElementById('leadSearch').value.trim();
-      const transportFilter = document.getElementById('searchTransportFilter').value;
-      const stack = document.getElementById('leadStack');
-
-      const filtered = leads.filter(lead => matchesSearch(lead, query, transportFilter));
-
-      document.getElementById('stackTitle').textContent =
-        activeStatusView === 'all' ? 'All Matching Cars' : `${stageNames[activeStatusView]} Cars`;
-
-      if (!filtered.length) {
-        stack.innerHTML = `<div class="empty-state">No cars match this search or category.</div>`;
-        return;
-      }
-
-      stack.innerHTML = filtered.map(lead => `
-        <div class="lead-row ${lead.id === selectedLeadId ? 'active' : ''}" data-lead-row="${lead.id}">
-          <div class="lead-row-top">
-            <div class="lead-row-name">${lead.vehicleYear} ${lead.vehicleMake} ${lead.vehicleModel} ${lead.trim}</div>
-            <div class="lead-row-id">${lead.id}</div>
-          </div>
-          <div class="lead-row-sub">${lead.name} • ${lead.city}</div>
-          <div class="lead-row-meta">
-            VIN: ${lead.vin}<br>
-            Pickup: ${lead.fullAddress}
-          </div>
-          <div class="lead-row-chips">
-            ${getLeadChips(lead)}
-          </div>
-        </div>
-      `).join('');
-
-      stack.querySelectorAll('[data-lead-row]').forEach(row => {
-        row.addEventListener('click', () => {
-          selectedLeadId = row.dataset.leadRow;
-          renderLeadStack();
-          renderLeadDetail();
-        });
+    function renderLeadList(){
+      const q = document.getElementById("search").value.toLowerCase().trim();
+      const filtered = leads.filter(l=>{
+        const statusOk = activeFilter==="All" || l.status===activeFilter;
+        const hay = [l.id,l.vin,l.vin.slice(-6),l.seller,l.year,l.make,l.model].join(" ").toLowerCase();
+        return statusOk && (!q || hay.includes(q));
       });
 
-      if (!filtered.find(l => l.id === selectedLeadId)) {
-        selectedLeadId = filtered[0].id;
-        renderLeadStack();
-        renderLeadDetail();
-      }
-    }
-
-    function renderLeadDetail() {
-      const query = document.getElementById('leadSearch').value.trim();
-      const transportFilter = document.getElementById('searchTransportFilter').value;
-      const filtered = leads.filter(lead => matchesSearch(lead, query, transportFilter));
-      const lead = filtered.find(l => l.id === selectedLeadId);
-
-      if (!lead) {
-        document.getElementById('leadDetailMount').innerHTML = '';
-        return;
-      }
-
-      const stageClasses = getWorkflowStages(lead.status);
-      const showTransport = !(lead.status === 'new' || lead.status === 'offer-sent');
-      const showBuyer = ['accepted', 'assigned', 'towed', 'paid', 'closed'].includes(lead.status);
-      const showTow = ['assigned', 'towed', 'paid', 'closed'].includes(lead.status);
-      const isCompleted = lead.status === 'closed';
-
-      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.fullAddress)}`;
-
-      document.getElementById('leadDetailMount').innerHTML = `
-        <div class="lead-card">
-          <div class="lead-top">
+      document.getElementById("leadList").innerHTML = filtered.map(l=>`
+        <div class="card lead-card ${selectedLead.id===l.id?'active':''}" onclick="selectLead('${l.id}')">
+          <div class="row">
             <div>
-              <div class="lead-name">${lead.name}</div>
-              <div class="lead-sub">Lead Ref: ${lead.id} • ${lead.submitted} • ${lead.city}</div>
+              <div class="muted">${l.id}</div>
+              <div class="title">${l.year} ${l.make} ${l.model}</div>
+              <div class="muted">VIN ${l.vin} • Last 6 ${l.vin.slice(-6)}</div>
             </div>
-            <div class="chip-row">
-              ${getLeadChips(lead)}
-            </div>
+            ${badge(l.status,statusTone(l.status))}
+          </div>
+          <div style="margin-top:14px" class="grid">
+            <div class="row"><span>Seller</span><b>${l.seller}</b></div>
+            <div class="row"><span>City</span><b>${l.city}</b></div>
+            <div class="row"><span>Current Offer</span><b>$${l.offer.toLocaleString()}</b></div>
+          </div>
+          <div style="margin-top:12px">
+            ${l.buyer!=="—"?badge("Buyer • "+l.buyer,"blue"):""}
+            ${l.tow!=="—"?badge("Tow • "+l.tow,"purple"):""}
+            ${priorityBadge(l.priority)}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderLeadDetail(){
+      const l = selectedLead;
+      document.getElementById("leadDetail").innerHTML = `
+        <div class="panel">
+          <div class="row">
+            <h2 class="section-title">Lead Detail</h2>
+            <div>${badge(l.id,"blue")} ${badge("Offer $"+l.offer.toLocaleString(),"green")} ${priorityBadge(l.priority)}</div>
           </div>
 
-          <div class="workflow">
-            <div class="workflow-title">Workflow Status</div>
-            <div class="workflow-row">
-              <span class="stage ${stageClasses[0]}">New Lead</span>
-              <span class="stage ${stageClasses[1]}">Offer Sent</span>
-              <span class="stage ${stageClasses[2]}">Accepted</span>
-              <span class="stage ${stageClasses[3]}">Assigned</span>
-              <span class="stage ${stageClasses[4]}">Towed</span>
-              <span class="stage ${stageClasses[5]}">Paid</span>
-              <span class="stage ${stageClasses[6]}">Closed</span>
+          <div class="grid detail-grid">
+            <div class="panel">
+              <h3>Customer Profile</h3>
+              ${kv("Seller",l.seller)}${kv("Phone",l.phone)}${kv("Email",l.email)}
+              ${kv("Pickup Address",l.address)}${kv("Instructions",l.instructions)}
+              <button class="btn light">Open Google Maps</button>
             </div>
-          </div>
 
-          <div class="grid-2">
-            <div class="info-box">
-              <h3>Customer Information</h3>
-              <div class="info-list">
-                <div class="info-item"><span>Customer Name</span><span>${lead.name}</span></div>
-                <div class="info-item"><span>Phone</span><span>${lead.phone}</span></div>
-                <div class="info-item"><span>Email</span><span>${lead.email}</span></div>
-                <div class="info-item"><span>Pickup Address</span><span>${lead.fullAddress}</span></div>
-                <div class="info-item"><span>Address Notes</span><span>${lead.pickupAddress2}</span></div>
-                <div class="info-item"><span>Pickup Contact</span><span>${lead.pickupContact}</span></div>
-                <div class="info-item"><span>Google Maps</span><span><a class="maps-link" href="${mapsUrl}" target="_blank">Open Map</a></span></div>
-                <div class="info-item"><span>Title In Name</span><span>${lead.titleInName}</span></div>
-                <div class="info-item"><span>Keys Available</span><span>${lead.keysAvailable}</span></div>
-                <div class="info-item"><span>Runs & Drives</span><span>${lead.runsAndDrives}</span></div>
+            <div class="panel">
+              <h3>Vehicle Profile</h3>
+              ${kv("VIN",l.vin)}${kv("Mileage",l.miles)}${kv("Vehicle",`${l.year} ${l.make} ${l.model} ${l.trim}`)}
+              ${kv("Fuel",l.fuel)}${kv("Body",l.body)}${kv("Drivetrain",l.drive)}
+              ${kv("Transmission",l.trans)}${kv("Color",l.color)}${kv("Transport",l.transportType)}
+            </div>
+
+            <div class="panel">
+              <h3>Structured Condition</h3>
+              <div class="condition">
+                ${l.condition.map((c,i)=>`<div><span>${c}</span>${i===0||i===1||i===3||i===6?badge("Review","red"):badge("OK","green")}</div>`).join("")}
               </div>
             </div>
 
-            <div class="info-box">
-              <h3>Vehicle Information</h3>
-              <div class="info-list">
-                <div class="info-item"><span>Year</span><span>${lead.vehicleYear}</span></div>
-                <div class="info-item"><span>Make</span><span>${lead.vehicleMake}</span></div>
-                <div class="info-item"><span>Model</span><span>${lead.vehicleModel}</span></div>
-                <div class="info-item"><span>Trim</span><span>${lead.trim}</span></div>
-                <div class="info-item"><span>VIN</span><span>${lead.vin}</span></div>
-                <div class="info-item"><span>Mileage</span><span>${lead.mileage}</span></div>
-                <div class="info-item"><span>Color</span><span>${lead.color}</span></div>
-                <div class="info-item"><span>Body Style</span><span>${lead.bodyStyle}</span></div>
-                <div class="info-item"><span>Drivetrain</span><span>${lead.drivetrain}</span></div>
-                <div class="info-item"><span>Engine</span><span>${lead.engine}</span></div>
-                <div class="info-item"><span>Transmission</span><span>${lead.transmission}</span></div>
-                ${showTransport ? `<div class="info-item"><span>Transport Type</span><span>${lead.transportType}</span></div>` : ``}
-                <div class="info-item"><span>Tow Needed</span><span>${lead.towNeeded}</span></div>
-                <div class="info-item"><span>Condition</span><span>${lead.condition}</span></div>
-                <div class="info-item"><span>Interior Condition</span><span>${lead.interiorCondition}</span></div>
-                <div class="info-item"><span>Exterior Condition</span><span>${lead.exteriorCondition}</span></div>
-                <div class="info-item"><span>Tire Condition</span><span>${lead.tireCondition}</span></div>
-                <div class="info-item"><span>Warning Lights</span><span>${lead.warningLights}</span></div>
-                <div class="info-item"><span>Catalytic Converter</span><span>${lead.catalyticConverter}</span></div>
-                <div class="info-item"><span>Missing Parts</span><span>${lead.missingParts}</span></div>
-                <div class="info-item"><span>Notes</span><span>${lead.notes}</span></div>
-              </div>
+            <div class="panel">
+              <h3>Condition Notes</h3>
+              ${l.notes.map(n=>`<div class="note">${n}</div>`).join("")}
+              <button class="btn light">Append Note</button>
             </div>
-          </div>
 
-          <div class="assignment-bar">
-            <div class="assignment-box">
-              <div class="assignment-label">Assigned Buyer</div>
-              <div class="assignment-value">${lead.buyer}</div>
+            <div class="panel">
+              <h3>Title / Ownership</h3>
+              ${kv("Title",l.title)}${kv("Ownership",l.ownership)}
+              ${badge("Title required","yellow")} ${badge("Driver license required","yellow")} ${badge("Override allowed + logged","blue")}
             </div>
-            <div class="assignment-box">
-              <div class="assignment-label">Assigned Tow Driver</div>
-              <div class="assignment-value">${lead.tow}</div>
-            </div>
-            <div class="assignment-box">
-              <div class="assignment-label">Current Stage</div>
-              <div class="assignment-value">${stageNames[lead.status]}</div>
-            </div>
-          </div>
 
-          <div class="action-groups">
-            <div class="action-group">
-              <h4>Offer Actions</h4>
-              <div class="action-stack">
-                <button class="btn btn-blue">Send Offer</button>
-                <button class="btn btn-gray">View Details</button>
+            <div class="panel">
+              <h3>Pickup / Scheduling</h3>
+              ${kv("Window",l.window)}${kv("Address Pin","Required before tow order")}
+              <button class="btn light">Reschedule</button>
+            </div>
+
+            <div class="panel">
+              <h3>Offer / Renegotiation</h3>
+              <div class="stat"><small>Current offer visible on assigned car</small><b>$${l.offer.toLocaleString()}</b></div>
+              <div class="actions" style="margin-top:12px">
+                <button class="btn dark">Send Offer</button>
+                <button class="btn light">Replace Value</button>
+                <button class="btn light">Adjustment Builder</button>
+                <button class="btn green">Approve & Send</button>
               </div>
             </div>
 
-            <div class="action-group ${showBuyer ? '' : 'hidden'}">
-              <h4>Buyer Assignment</h4>
-              <div class="action-stack">
-                <select>
-                  <option>${lead.buyer === 'Pending' || lead.buyer === 'Not assigned yet' || lead.buyer === 'Not available yet' ? 'Assign Buyer' : lead.buyer}</option>
-                  <option>Buyer A - Fresno Auto</option>
-                  <option>Buyer B - Central Valley Motors</option>
-                  <option>Buyer C - Wholesale Direct</option>
-                </select>
-                <button class="btn btn-green">Confirm Buyer</button>
+            <div class="panel">
+              <h3>Assignments & Workflow</h3>
+              ${kv("Buyer",l.buyer)}${kv("Tow Driver",l.tow)}${kv("Route",l.route)}
+              <div class="actions">
+                <button class="btn green">Complete → Inventory</button>
+                <button class="btn light">Order Tow</button>
+                <button class="btn light">Reassign Buyer</button>
+                <button class="btn red">Cancel</button>
               </div>
             </div>
 
-            <div class="action-group ${showTow ? '' : 'hidden'}">
-              <h4>Tow Assignment</h4>
-              <div class="action-stack">
-                <select>
-                  <option>${lead.tow === 'Pending' || lead.tow === 'Not assigned yet' || lead.tow === 'Not available yet' ? 'Assign Tow Driver' : lead.tow}</option>
-                  <option>Jose Towing</option>
-                  <option>Valley Tow Team</option>
-                  <option>Rapid Pickup Services</option>
-                </select>
-                <button class="btn btn-green">Confirm Tow</button>
-                <button class="btn btn-blue">Mark Towed</button>
-              </div>
+            <div class="panel">
+              <h3>Tow Packet / Upload Split</h3>
+              <b>Shared with towing</b><br>${l.towPacket.map(x=>badge(x,"blue")).join(" ")}
+              <br><br><b>Admin only</b><br>${l.adminOnly.map(x=>badge(x,"slate")).join(" ") || badge("No files yet","yellow")}
+              <br><br><button class="btn light">Upload Photos</button> <button class="btn light">Upload Docs</button>
             </div>
-          </div>
 
-          <div class="action-groups" style="margin-top:14px;">
-            <div class="action-group">
-              <h4>Deal Progress</h4>
-              <div class="action-stack">
-                <button class="btn btn-green">Mark Assigned</button>
-                <button class="btn btn-blue">Mark Paid</button>
-                <button class="btn btn-dark">Close Deal</button>
+            <div class="panel">
+              <h3>Communications</h3>
+              <div class="actions">
+                <button class="btn dark">SMS</button>
+                <button class="btn light">Email</button>
+                <button class="btn light">Both</button>
+                <button class="btn light">Call</button>
               </div>
             </div>
 
-            <div class="action-group">
-              <h4>Communication</h4>
-              <div class="action-stack">
-                <button class="btn btn-gray">Email Customer</button>
-                <button class="btn btn-gray">Text Buyer</button>
-              </div>
-            </div>
-
-            <div class="action-group">
-              <h4>Admin Tools</h4>
-              <div class="action-stack">
-                <button class="btn btn-gray">Open Lead</button>
-                <button class="btn btn-red">Flag Issue</button>
-              </div>
+            <div class="panel" style="grid-column:1/-1">
+              <h3>Audit Trail</h3>
+              ${l.audit.map(a=>`<div class="note">${a}</div>`).join("")}
             </div>
           </div>
         </div>
-
-        ${isCompleted ? `
-          <div class="completed-box">
-            <div class="section-header" style="margin-bottom: 0;">
-              <h2 style="font-size:20px;">Completed Deal P&amp;L</h2>
-              <span class="chip chip-green">Closed</span>
-            </div>
-
-            <div class="completed-grid">
-              <div class="money-card">
-                <div class="money-label">Purchase Price</div>
-                <div class="money-value">${lead.purchasePrice}</div>
-              </div>
-              <div class="money-card">
-                <div class="money-label">Buyer Fee</div>
-                <div class="money-value">${lead.buyerFee}</div>
-              </div>
-              <div class="money-card">
-                <div class="money-label">Auction Fee</div>
-                <div class="money-value">${lead.auctionFee}</div>
-              </div>
-              <div class="money-card">
-                <div class="money-label">Marketing Fee</div>
-                <div class="money-value">${lead.marketingFee}</div>
-              </div>
-              <div class="money-card">
-                <div class="money-label">Other</div>
-                <div class="money-value">${lead.otherCost}</div>
-              </div>
-              <div class="money-card">
-                <div class="money-label">Sale Price</div>
-                <div class="money-value">${lead.salePrice}</div>
-              </div>
-              <div class="money-card">
-                <div class="money-label">Profit</div>
-                <div class="money-value" style="color:#16a34a;">${lead.profit}</div>
-              </div>
-            </div>
-          </div>
-        ` : ``}
       `;
     }
 
-    function syncStageFilter() {
-      const value = document.getElementById('searchStageFilter').value;
-      activeStatusView = value;
-      renderStatusCards();
-      renderLeadStack();
-      renderLeadDetail();
+    function kv(k,v){ return `<div class="kv"><b>${k}</b><span>${v}</span></div>`; }
+
+    function selectLead(id){
+      selectedLead = leads.find(l=>l.id===id) || leads[0];
+      renderLeadList(); renderLeadDetail();
     }
 
-    document.querySelectorAll('.tab-btn').forEach(button => {
-      button.addEventListener('click', () => {
-        const target = button.getAttribute('data-panel');
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-        button.classList.add('active');
-        document.getElementById(target).classList.add('active');
+    function renderInventory(){
+      document.getElementById("inventoryList").innerHTML = inventory.map(u=>`
+        <div class="card">
+          <div class="row">
+            <div><div class="muted">${u.id}</div><div class="title">${u.vehicle}</div><div class="muted">VIN ${u.vin} • Last 6 ${u.vin.slice(-6)}</div></div>
+            ${badge(u.status,statusTone(u.status))}
+          </div>
+          <div class="grid four" style="margin-top:14px">
+            ${kv("Route",u.route)}${kv("Destination",u.dest)}${kv("Purchase","$"+u.purchase.toLocaleString())}${kv("Days",u.days)}
+          </div>
+          <h4>Condition / Repair Notes</h4>
+          ${u.notes.map(n=>`<div class="note">${n}</div>`).join("")}
+        </div>
+      `).join("");
+    }
+
+    function renderBuyers(){
+      document.getElementById("buyersList").innerHTML = buyers.map(b=>`
+        <div class="card">
+          <div class="row"><div><div class="title">${b.name}</div><div class="muted">${b.type} • ${b.tax}</div></div>${badge("Active","green")}</div>
+          ${kv("Phone",b.phone)}${kv("Email",b.email)}${kv("Assigned Cars",b.assigned)}${kv("Schedule",b.schedule)}
+          <button class="btn dark">View Buyer Profile</button>
+          <button class="btn light">Preview Buyer Portal</button>
+        </div>
+      `).join("");
+    }
+
+    function renderTow(){
+      document.getElementById("towList").innerHTML = towDrivers.map(t=>`
+        <div class="card">
+          <div class="row"><div><div class="title">${t.name}</div><div class="muted">${t.type} • ${t.zone}</div></div>${badge("Active","green")}</div>
+          ${kv("Phone",t.phone)}${kv("Email",t.email)}${kv("Active Jobs",t.jobs)}${kv("Tax",t.tax)}
+          <button class="btn dark">View Tow Profile</button>
+          <button class="btn light">Preview Tow Portal</button>
+        </div>
+      `).join("");
+    }
+
+    function renderDest(){
+      document.getElementById("destList").innerHTML = destinations.map(d=>`
+        <div class="card">
+          <div class="row"><div><div class="title">${d.name}</div><div class="muted">${d.type}</div></div>${d.def?badge("Default","green"):badge("Active","blue")}</div>
+          ${kv("Address",d.address)}${kv("Phone",d.phone)}
+          ${d.type!=="Yard"?`<div class="note">Requires admin signoff before tow order release.</div>`:""}
+        </div>
+      `).join("");
+    }
+
+    function renderAlerts(){
+      document.getElementById("alertsList").innerHTML = `<h3>Alerts / Aging</h3>` + alerts.map(a=>`
+        <div class="note" style="border-color:${a.level==="red"?"#fecaca":"#fde68a"};background:${a.level==="red"?"#fee2e2":"#fef3c7"}">
+          <b>${a.title}</b><br>${a.detail}<br><small>${a.age}</small>
+        </div>
+      `).join("");
+
+      document.getElementById("auditList").innerHTML = `<h3>Global Audit Feed</h3>` + audit.map(a=>`<div class="note">${a}</div>`).join("");
+    }
+
+    function renderPnl(){
+      document.getElementById("pnlTable").innerHTML = `
+        <thead><tr><th>ID</th><th>Vehicle</th><th>Route</th><th>Purchase</th><th>Costs</th><th>Sale</th><th>Profit</th></tr></thead>
+        <tbody>
+          ${pnl.map(r=>{
+            const costs = r.buyerFee+r.tow+r.auction+r.marketing+r.repair+r.other;
+            const profit = r.sale-r.purchase-costs;
+            return `<tr><td>${r.id}</td><td>${r.vehicle}</td><td>${r.route}</td><td>$${r.purchase}</td><td>$${costs}</td><td>$${r.sale}</td><td><b>$${profit}</b></td></tr>`;
+          }).join("")}
+        </tbody>`;
+    }
+
+    document.querySelectorAll("#nav button").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll("#nav button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"));
+        document.getElementById(btn.dataset.tab).classList.remove("hidden");
+        document.getElementById("leadFilters").style.display = btn.dataset.tab==="customers" ? "flex" : "none";
       });
     });
 
-    document.getElementById('leadSearch').addEventListener('input', () => {
-      renderLeadStack();
-      renderLeadDetail();
+    document.querySelectorAll("#leadFilters button").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll("#leadFilters button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.dataset.filter;
+        renderLeadList();
+      });
     });
 
-    document.getElementById('searchStageFilter').addEventListener('change', syncStageFilter);
-
-    document.getElementById('searchTransportFilter').addEventListener('change', () => {
-      renderLeadStack();
-      renderLeadDetail();
+    document.getElementById("search").addEventListener("input",()=>{
+      renderLeadList();
     });
 
-    renderStatusCards();
-    renderLeadStack();
+    renderLeadList();
     renderLeadDetail();
+    renderInventory();
+    renderBuyers();
+    renderTow();
+    renderDest();
+    renderAlerts();
+    renderPnl();
   </script>
 </body>
 </html>
