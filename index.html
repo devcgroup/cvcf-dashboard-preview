@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CVCF Admin Dashboard v1</title>
+  <title>CVCF Admin Dashboard v2</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,14 +12,14 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f4f6f8;
+      background: #f3f5f7;
       color: #1f2937;
     }
 
     .topbar {
-      background: #111827;
+      background: #07142b;
       color: #fff;
-      padding: 18px 24px;
+      padding: 18px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -29,14 +29,14 @@
 
     .topbar h1 {
       margin: 0;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
     }
 
     .topbar .subtext {
+      margin-top: 4px;
       font-size: 13px;
       color: #cbd5e1;
-      margin-top: 4px;
     }
 
     .topbar-actions {
@@ -50,23 +50,28 @@
       border-radius: 10px;
       padding: 10px 14px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
     }
 
     .btn-dark {
-      background: #0f172a;
+      background: #0f1e3d;
       color: white;
-      border: 1px solid #334155;
+      border: 1px solid rgba(255,255,255,0.15);
     }
 
     .btn-blue {
-      background: #2563eb;
+      background: #2d6df6;
       color: white;
     }
 
     .btn-green {
-      background: #16a34a;
+      background: #19a54a;
       color: white;
     }
 
@@ -75,24 +80,29 @@
       color: #111827;
     }
 
+    .btn-red {
+      background: #ef4444;
+      color: white;
+    }
+
     .layout {
       display: grid;
-      grid-template-columns: 240px 1fr;
+      grid-template-columns: 210px 1fr;
       min-height: calc(100vh - 78px);
     }
 
     .sidebar {
       background: #ffffff;
       border-right: 1px solid #e5e7eb;
-      padding: 20px 16px;
+      padding: 18px 14px;
     }
 
     .sidebar h3 {
       margin: 0 0 14px;
-      font-size: 14px;
+      font-size: 13px;
       color: #6b7280;
-      text-transform: uppercase;
       letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
     .nav {
@@ -104,19 +114,26 @@
     .nav button {
       width: 100%;
       text-align: left;
-      padding: 12px 14px;
       border: none;
-      border-radius: 10px;
-      background: #f3f4f6;
-      color: #111827;
+      border-radius: 12px;
+      padding: 12px 14px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
+      background: #f1f3f5;
+      color: #1f2937;
       cursor: pointer;
     }
 
     .nav button.active {
-      background: #111827;
-      color: #ffffff;
+      background: #07142b;
+      color: white;
+    }
+
+    .small-note {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.45;
     }
 
     .content {
@@ -125,16 +142,16 @@
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 16px;
       margin-bottom: 22px;
     }
 
     .stat-card {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
+      background: #fff;
+      border-radius: 16px;
       border: 1px solid #e5e7eb;
+      padding: 16px 18px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     }
 
@@ -145,7 +162,7 @@
     }
 
     .stat-value {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 700;
       color: #111827;
     }
@@ -163,20 +180,20 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
 
     .section-header h2 {
       margin: 0;
-      font-size: 24px;
+      font-size: 22px;
     }
 
     .lead-card {
-      background: #ffffff;
+      background: #fff;
       border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: 18px;
+      padding: 18px;
       margin-bottom: 18px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     }
@@ -185,15 +202,15 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 12px;
+      gap: 14px;
       flex-wrap: wrap;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .lead-name {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     .lead-sub {
@@ -214,6 +231,7 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .chip-red {
@@ -236,6 +254,53 @@
       color: #1d4ed8;
     }
 
+    .chip-gray {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .workflow {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .workflow-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6b7280;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .workflow-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stage {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .stage.done {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .stage.current {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -246,9 +311,8 @@
     .info-box {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 16px;
-      min-height: 100%;
     }
 
     .info-box h3 {
@@ -264,7 +328,7 @@
     .info-item {
       display: flex;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       padding-bottom: 8px;
       border-bottom: 1px solid #eceff3;
       font-size: 14px;
@@ -279,20 +343,71 @@
       color: #6b7280;
     }
 
-    .actions-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    .assignment-bar {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .assignment-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .assignment-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .assignment-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .action-groups {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
       margin-top: 8px;
     }
 
-    .actions-row select {
+    .action-group {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .action-group h4 {
+      margin: 0 0 12px;
+      font-size: 14px;
+    }
+
+    .action-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .action-stack select {
+      width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
       border: 1px solid #d1d5db;
       background: #fff;
       font-size: 14px;
-      min-width: 180px;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .table-card {
@@ -327,32 +442,64 @@
       border-bottom: none;
     }
 
+    .completed-box {
+      margin-top: 16px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .completed-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .money-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .money-label {
+      font-size: 12px;
+      color: #6b7280;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .money-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
     .empty-box {
-      background: white;
+      background: #fff;
       border: 1px dashed #cbd5e1;
       border-radius: 16px;
-      padding: 32px 20px;
+      padding: 30px 20px;
       text-align: center;
       color: #6b7280;
     }
 
-    .small-note {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #6b7280;
-    }
-
-    @media (max-width: 1100px) {
+    @media (max-width: 1200px) {
       .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
-      .grid-2 {
-        grid-template-columns: 1fr;
+      .assignment-bar,
+      .action-groups,
+      .completed-grid {
+        grid-template-columns: 1fr 1fr;
       }
     }
 
-    @media (max-width: 820px) {
+    @media (max-width: 900px) {
       .layout {
         grid-template-columns: 1fr;
       }
@@ -362,6 +509,10 @@
         border-bottom: 1px solid #e5e7eb;
       }
 
+      .grid-2,
+      .assignment-bar,
+      .action-groups,
+      .completed-grid,
       .stats {
         grid-template-columns: 1fr;
       }
@@ -372,7 +523,7 @@
   <div class="topbar">
     <div>
       <h1>CVCF Admin Dashboard</h1>
-      <div class="subtext">Dashboard UI v1 • Live preview foundation for leads, buyers, towing, and bidding</div>
+      <div class="subtext">Dashboard UI v2 • Workflow, assignments, and completed profit preview</div>
     </div>
     <div class="topbar-actions">
       <button class="btn btn-dark">Export CSV</button>
@@ -391,7 +542,7 @@
         <button class="tab-btn" data-panel="bidding">Bidding</button>
       </div>
       <div class="small-note">
-        v1 is a UI preview. Buttons and dropdowns are visual for now and ready for next steps.
+        v2 adds workflow stages, assignment display, conditional actions, and a completed deal preview. This is still UI-only for now.
       </div>
     </aside>
 
@@ -410,6 +561,10 @@
           <div class="stat-value">3</div>
         </div>
         <div class="stat-card">
+          <div class="stat-label">Assigned</div>
+          <div class="stat-value">2</div>
+        </div>
+        <div class="stat-card">
           <div class="stat-label">Completed</div>
           <div class="stat-value">1</div>
         </div>
@@ -421,7 +576,7 @@
           <button class="btn btn-gray">Filter Leads</button>
         </div>
 
-        <div class="lead-card">
+        <div class="lead-card" data-lead-card data-status="accepted">
           <div class="lead-top">
             <div>
               <div class="lead-name">Maria Lopez</div>
@@ -434,6 +589,19 @@
             </div>
           </div>
 
+          <div class="workflow">
+            <div class="workflow-title">Workflow Status</div>
+            <div class="workflow-row" data-workflow-row>
+              <span class="stage done">New Lead</span>
+              <span class="stage done">Offer Sent</span>
+              <span class="stage current">Accepted</span>
+              <span class="stage">Assigned</span>
+              <span class="stage">Towed</span>
+              <span class="stage">Paid</span>
+              <span class="stage">Closed</span>
+            </div>
+          </div>
+
           <div class="grid-2">
             <div class="info-box">
               <h3>Customer Profile</h3>
@@ -442,7 +610,7 @@
                 <div class="info-item"><span>Phone</span><span>(559) 555-0137</span></div>
                 <div class="info-item"><span>Email</span><span>maria@example.com</span></div>
                 <div class="info-item"><span>Pickup Address</span><span>Fresno, CA</span></div>
-                <div class="info-item"><span>Status</span><span>Offer Accepted</span></div>
+                <div class="info-item"><span>Status</span><span data-status-label>Accepted</span></div>
               </div>
             </div>
 
@@ -453,33 +621,92 @@
                 <div class="info-item"><span>Trim</span><span>EX-L</span></div>
                 <div class="info-item"><span>VIN</span><span>1HGCR2F86EA000123</span></div>
                 <div class="info-item"><span>Mileage</span><span>167,200</span></div>
-                <div class="info-item"><span>Transport Type</span><span>Tow Required</span></div>
+                <div class="info-item transport-row"><span>Transport Type</span><span>Tow Required</span></div>
               </div>
             </div>
           </div>
 
-          <div class="actions-row">
-            <select>
-              <option selected>Assign Buyer</option>
-              <option>Buyer A - Fresno Auto</option>
-              <option>Buyer B - Central Valley Motors</option>
-              <option>Buyer C - Wholesale Direct</option>
-            </select>
+          <div class="assignment-bar">
+            <div class="assignment-box">
+              <div class="assignment-label">Assigned Buyer</div>
+              <div class="assignment-value buyer-value">Not assigned yet</div>
+            </div>
+            <div class="assignment-box">
+              <div class="assignment-label">Assigned Tow Driver</div>
+              <div class="assignment-value tow-value">Not assigned yet</div>
+            </div>
+            <div class="assignment-box">
+              <div class="assignment-label">Current Stage</div>
+              <div class="assignment-value current-stage-value">Accepted</div>
+            </div>
+          </div>
 
-            <select>
-              <option selected>Assign Tow Driver</option>
-              <option>Jose Towing</option>
-              <option>Valley Tow Team</option>
-              <option>Rapid Pickup Services</option>
-            </select>
+          <div class="action-groups">
+            <div class="action-group">
+              <h4>Offer Actions</h4>
+              <div class="action-stack">
+                <button class="btn btn-blue advance-status" data-next="accepted">Send Offer</button>
+                <button class="btn btn-gray">View Details</button>
+              </div>
+            </div>
 
-            <button class="btn btn-blue">Send Offer</button>
-            <button class="btn btn-green">Mark Assigned</button>
-            <button class="btn btn-gray">View Details</button>
+            <div class="action-group buyer-group">
+              <h4>Buyer Assignment</h4>
+              <div class="action-stack">
+                <select class="buyer-select">
+                  <option selected>Assign Buyer</option>
+                  <option>Buyer A - Fresno Auto</option>
+                  <option>Buyer B - Central Valley Motors</option>
+                  <option>Buyer C - Wholesale Direct</option>
+                </select>
+                <button class="btn btn-green assign-buyer-btn">Confirm Buyer</button>
+              </div>
+            </div>
+
+            <div class="action-group tow-group">
+              <h4>Tow Assignment</h4>
+              <div class="action-stack">
+                <select class="tow-select">
+                  <option selected>Assign Tow Driver</option>
+                  <option>Jose Towing</option>
+                  <option>Valley Tow Team</option>
+                  <option>Rapid Pickup Services</option>
+                </select>
+                <button class="btn btn-green assign-tow-btn">Confirm Tow</button>
+                <button class="btn btn-blue advance-status" data-next="towed">Mark Towed</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-groups" style="margin-top:14px;">
+            <div class="action-group">
+              <h4>Deal Progress</h4>
+              <div class="action-stack">
+                <button class="btn btn-green advance-status" data-next="assigned">Mark Assigned</button>
+                <button class="btn btn-blue advance-status" data-next="paid">Mark Paid</button>
+                <button class="btn btn-dark advance-status" data-next="closed">Close Deal</button>
+              </div>
+            </div>
+
+            <div class="action-group">
+              <h4>Communication</h4>
+              <div class="action-stack">
+                <button class="btn btn-gray">Email Customer</button>
+                <button class="btn btn-gray">Text Buyer</button>
+              </div>
+            </div>
+
+            <div class="action-group">
+              <h4>Admin Tools</h4>
+              <div class="action-stack">
+                <button class="btn btn-gray">Open Lead</button>
+                <button class="btn btn-red">Flag Issue</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="lead-card">
+        <div class="lead-card" data-lead-card data-status="new">
           <div class="lead-top">
             <div>
               <div class="lead-name">David Ramirez</div>
@@ -491,6 +718,19 @@
             </div>
           </div>
 
+          <div class="workflow">
+            <div class="workflow-title">Workflow Status</div>
+            <div class="workflow-row" data-workflow-row>
+              <span class="stage current">New Lead</span>
+              <span class="stage">Offer Sent</span>
+              <span class="stage">Accepted</span>
+              <span class="stage">Assigned</span>
+              <span class="stage">Towed</span>
+              <span class="stage">Paid</span>
+              <span class="stage">Closed</span>
+            </div>
+          </div>
+
           <div class="grid-2">
             <div class="info-box">
               <h3>Customer Profile</h3>
@@ -499,7 +739,7 @@
                 <div class="info-item"><span>Phone</span><span>(559) 555-0192</span></div>
                 <div class="info-item"><span>Email</span><span>david@example.com</span></div>
                 <div class="info-item"><span>Location</span><span>Clovis, CA</span></div>
-                <div class="info-item"><span>Status</span><span>Pending Offer</span></div>
+                <div class="info-item"><span>Status</span><span data-status-label>New Lead</span></div>
               </div>
             </div>
 
@@ -510,14 +750,113 @@
                 <div class="info-item"><span>Trim</span><span>XLT</span></div>
                 <div class="info-item"><span>VIN</span><span>1FMCU9DG5BKA45678</span></div>
                 <div class="info-item"><span>Mileage</span><span>192,400</span></div>
-                <div class="info-item"><span>Transport Type</span><span>Drivable</span></div>
+                <div class="info-item transport-row hidden"><span>Transport Type</span><span>Drivable</span></div>
               </div>
             </div>
           </div>
 
-          <div class="actions-row">
-            <button class="btn btn-blue">Review Offer</button>
-            <button class="btn btn-gray">Contact Customer</button>
+          <div class="assignment-bar">
+            <div class="assignment-box">
+              <div class="assignment-label">Assigned Buyer</div>
+              <div class="assignment-value buyer-value">Not available yet</div>
+            </div>
+            <div class="assignment-box">
+              <div class="assignment-label">Assigned Tow Driver</div>
+              <div class="assignment-value tow-value">Not available yet</div>
+            </div>
+            <div class="assignment-box">
+              <div class="assignment-label">Current Stage</div>
+              <div class="assignment-value current-stage-value">New Lead</div>
+            </div>
+          </div>
+
+          <div class="action-groups">
+            <div class="action-group">
+              <h4>Offer Actions</h4>
+              <div class="action-stack">
+                <button class="btn btn-blue advance-status" data-next="offer-sent">Send Offer</button>
+                <button class="btn btn-gray">Review Offer</button>
+                <button class="btn btn-gray">Contact Customer</button>
+              </div>
+            </div>
+
+            <div class="action-group buyer-group hidden">
+              <h4>Buyer Assignment</h4>
+              <div class="action-stack">
+                <select class="buyer-select">
+                  <option selected>Assign Buyer</option>
+                  <option>Buyer A - Fresno Auto</option>
+                  <option>Buyer B - Central Valley Motors</option>
+                  <option>Buyer C - Wholesale Direct</option>
+                </select>
+                <button class="btn btn-green assign-buyer-btn">Confirm Buyer</button>
+              </div>
+            </div>
+
+            <div class="action-group tow-group hidden">
+              <h4>Tow Assignment</h4>
+              <div class="action-stack">
+                <select class="tow-select">
+                  <option selected>Assign Tow Driver</option>
+                  <option>Jose Towing</option>
+                  <option>Valley Tow Team</option>
+                  <option>Rapid Pickup Services</option>
+                </select>
+                <button class="btn btn-green assign-tow-btn">Confirm Tow</button>
+                <button class="btn btn-blue advance-status" data-next="towed">Mark Towed</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-groups" style="margin-top:14px;">
+            <div class="action-group">
+              <h4>Deal Progress</h4>
+              <div class="action-stack">
+                <button class="btn btn-green advance-status" data-next="accepted">Accept Offer</button>
+              </div>
+            </div>
+
+            <div class="action-group">
+              <h4>Communication</h4>
+              <div class="action-stack">
+                <button class="btn btn-gray">Email Customer</button>
+                <button class="btn btn-gray">Request Photos</button>
+              </div>
+            </div>
+
+            <div class="action-group">
+              <h4>Admin Tools</h4>
+              <div class="action-stack">
+                <button class="btn btn-gray">Open Lead</button>
+                <button class="btn btn-red">Flag Issue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="completed-box">
+          <div class="section-header" style="margin-bottom: 0;">
+            <h2 style="font-size:20px;">Completed Deal Preview</h2>
+            <span class="chip chip-green">Completed</span>
+          </div>
+
+          <div class="completed-grid">
+            <div class="money-card">
+              <div class="money-label">Purchase Price</div>
+              <div class="money-value">$2,100</div>
+            </div>
+            <div class="money-card">
+              <div class="money-label">Tow Cost</div>
+              <div class="money-value">$150</div>
+            </div>
+            <div class="money-card">
+              <div class="money-label">Sale Price</div>
+              <div class="money-value">$3,450</div>
+            </div>
+            <div class="money-card">
+              <div class="money-label">Gross Profit</div>
+              <div class="money-value" style="color:#16a34a;">$1,200</div>
+            </div>
           </div>
         </div>
       </section>
@@ -649,7 +988,7 @@
         <div style="height: 18px;"></div>
 
         <div class="empty-box">
-          Analytics and profit/loss for completed deals can be added in the next version.
+          Bidding tab is ready for buyer offer actions and live bid history in the next version.
         </div>
       </section>
     </main>
@@ -662,12 +1001,112 @@
     tabButtons.forEach(button => {
       button.addEventListener('click', () => {
         const target = button.getAttribute('data-panel');
-
         tabButtons.forEach(btn => btn.classList.remove('active'));
         panels.forEach(panel => panel.classList.remove('active'));
-
         button.classList.add('active');
         document.getElementById(target).classList.add('active');
+      });
+    });
+
+    function getWorkflowStages(status) {
+      const map = {
+        'new': ['current', '', '', '', '', '', ''],
+        'offer-sent': ['done', 'current', '', '', '', '', ''],
+        'accepted': ['done', 'done', 'current', '', '', '', ''],
+        'assigned': ['done', 'done', 'done', 'current', '', '', ''],
+        'towed': ['done', 'done', 'done', 'done', 'current', '', ''],
+        'paid': ['done', 'done', 'done', 'done', 'done', 'current', ''],
+        'closed': ['done', 'done', 'done', 'done', 'done', 'done', 'current']
+      };
+      return map[status] || map['new'];
+    }
+
+    function prettyStatus(status) {
+      const map = {
+        'new': 'New Lead',
+        'offer-sent': 'Offer Sent',
+        'accepted': 'Accepted',
+        'assigned': 'Assigned',
+        'towed': 'Towed',
+        'paid': 'Paid',
+        'closed': 'Closed'
+      };
+      return map[status] || status;
+    }
+
+    function refreshLeadCard(card) {
+      const status = card.dataset.status;
+      const workflowRow = card.querySelector('[data-workflow-row]');
+      const stages = workflowRow.querySelectorAll('.stage');
+      const stageClasses = getWorkflowStages(status);
+
+      stages.forEach((stage, index) => {
+        stage.classList.remove('done', 'current');
+        if (stageClasses[index] === 'done') stage.classList.add('done');
+        if (stageClasses[index] === 'current') stage.classList.add('current');
+      });
+
+      card.querySelector('[data-status-label]').textContent = prettyStatus(status);
+      card.querySelector('.current-stage-value').textContent = prettyStatus(status);
+
+      const buyerGroup = card.querySelector('.buyer-group');
+      const towGroup = card.querySelector('.tow-group');
+      const transportRow = card.querySelector('.transport-row');
+
+      if (status === 'accepted' || status === 'assigned' || status === 'towed' || status === 'paid' || status === 'closed') {
+        if (buyerGroup) buyerGroup.classList.remove('hidden');
+        if (transportRow) transportRow.classList.remove('hidden');
+      } else {
+        if (buyerGroup) buyerGroup.classList.add('hidden');
+        if (transportRow) transportRow.classList.add('hidden');
+      }
+
+      if (status === 'assigned' || status === 'towed' || status === 'paid' || status === 'closed') {
+        if (towGroup) towGroup.classList.remove('hidden');
+      } else {
+        if (towGroup) towGroup.classList.add('hidden');
+      }
+    }
+
+    document.querySelectorAll('.lead-card').forEach(card => {
+      refreshLeadCard(card);
+
+      const buyerBtn = card.querySelector('.assign-buyer-btn');
+      const buyerSelect = card.querySelector('.buyer-select');
+      const buyerValue = card.querySelector('.buyer-value');
+
+      if (buyerBtn && buyerSelect && buyerValue) {
+        buyerBtn.addEventListener('click', () => {
+          const selected = buyerSelect.value;
+          if (selected !== 'Assign Buyer') {
+            buyerValue.textContent = selected;
+            card.dataset.status = 'assigned';
+            refreshLeadCard(card);
+          }
+        });
+      }
+
+      const towBtn = card.querySelector('.assign-tow-btn');
+      const towSelect = card.querySelector('.tow-select');
+      const towValue = card.querySelector('.tow-value');
+
+      if (towBtn && towSelect && towValue) {
+        towBtn.addEventListener('click', () => {
+          const selected = towSelect.value;
+          if (selected !== 'Assign Tow Driver') {
+            towValue.textContent = selected;
+          }
+        });
+      }
+
+      card.querySelectorAll('.advance-status').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const next = btn.dataset.next;
+          if (next) {
+            card.dataset.status = next;
+            refreshLeadCard(card);
+          }
+        });
       });
     });
   </script>
