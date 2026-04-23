@@ -1,14 +1,675 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CVCF Admin</title>
-</head>
-<body style="font-family: Arial; padding: 20px;">
-  <h1>CVCF Admin Dashboard</h1>
-  <p>This is your live preview 🚀</p>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CVCF Admin Dashboard v1</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-  <button>Assign Buyer</button>
-  <button>Assign Tow</button>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    .topbar {
+      background: #111827;
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .topbar .subtext {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-top: 4px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-dark {
+      background: #0f172a;
+      color: white;
+      border: 1px solid #334155;
+    }
+
+    .btn-blue {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-green {
+      background: #16a34a;
+      color: white;
+    }
+
+    .btn-gray {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 78px);
+    }
+
+    .sidebar {
+      background: #ffffff;
+      border-right: 1px solid #e5e7eb;
+      padding: 20px 16px;
+    }
+
+    .sidebar h3 {
+      margin: 0 0 14px;
+      font-size: 14px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav button {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border: none;
+      border-radius: 10px;
+      background: #f3f4f6;
+      color: #111827;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .nav button.active {
+      background: #111827;
+      color: #ffffff;
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .lead-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    .lead-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .lead-name {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .lead-sub {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chip-red {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .chip-green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .chip-yellow {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .chip-blue {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .info-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 100%;
+    }
+
+    .info-box h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eceff3;
+      font-size: 14px;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .info-item span:first-child {
+      color: #6b7280;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .actions-row select {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      font-size: 14px;
+      min-width: 180px;
+    }
+
+    .table-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .empty-box {
+      background: white;
+      border: 1px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 32px 20px;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .small-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 1100px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>CVCF Admin Dashboard</h1>
+      <div class="subtext">Dashboard UI v1 • Live preview foundation for leads, buyers, towing, and bidding</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-dark">Export CSV</button>
+      <button class="btn btn-blue">New Lead</button>
+      <button class="btn btn-green">Admin Actions</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Navigation</h3>
+      <div class="nav">
+        <button class="tab-btn active" data-panel="customers">Customers</button>
+        <button class="tab-btn" data-panel="buyers">Buyers</button>
+        <button class="tab-btn" data-panel="tow">Tow Drivers</button>
+        <button class="tab-btn" data-panel="bidding">Bidding</button>
+      </div>
+      <div class="small-note">
+        v1 is a UI preview. Buttons and dropdowns are visual for now and ready for next steps.
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">New Leads</div>
+          <div class="stat-value">12</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Offers Sent</div>
+          <div class="stat-value">7</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Accepted</div>
+          <div class="stat-value">3</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value">1</div>
+        </div>
+      </div>
+
+      <section id="customers" class="panel active">
+        <div class="section-header">
+          <h2>Customers</h2>
+          <button class="btn btn-gray">Filter Leads</button>
+        </div>
+
+        <div class="lead-card">
+          <div class="lead-top">
+            <div>
+              <div class="lead-name">Maria Lopez</div>
+              <div class="lead-sub">Lead Ref: CVCF-1048 • Submitted today • Fresno, CA</div>
+            </div>
+            <div class="chip-row">
+              <span class="chip chip-green">Accepted</span>
+              <span class="chip chip-blue">Email Verified</span>
+              <span class="chip chip-yellow">Pickup Needed</span>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="info-box">
+              <h3>Customer Profile</h3>
+              <div class="info-list">
+                <div class="info-item"><span>Name</span><span>Maria Lopez</span></div>
+                <div class="info-item"><span>Phone</span><span>(559) 555-0137</span></div>
+                <div class="info-item"><span>Email</span><span>maria@example.com</span></div>
+                <div class="info-item"><span>Pickup Address</span><span>Fresno, CA</span></div>
+                <div class="info-item"><span>Status</span><span>Offer Accepted</span></div>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <h3>Vehicle Profile</h3>
+              <div class="info-list">
+                <div class="info-item"><span>Year / Make / Model</span><span>2014 Honda Accord</span></div>
+                <div class="info-item"><span>Trim</span><span>EX-L</span></div>
+                <div class="info-item"><span>VIN</span><span>1HGCR2F86EA000123</span></div>
+                <div class="info-item"><span>Mileage</span><span>167,200</span></div>
+                <div class="info-item"><span>Transport Type</span><span>Tow Required</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <select>
+              <option selected>Assign Buyer</option>
+              <option>Buyer A - Fresno Auto</option>
+              <option>Buyer B - Central Valley Motors</option>
+              <option>Buyer C - Wholesale Direct</option>
+            </select>
+
+            <select>
+              <option selected>Assign Tow Driver</option>
+              <option>Jose Towing</option>
+              <option>Valley Tow Team</option>
+              <option>Rapid Pickup Services</option>
+            </select>
+
+            <button class="btn btn-blue">Send Offer</button>
+            <button class="btn btn-green">Mark Assigned</button>
+            <button class="btn btn-gray">View Details</button>
+          </div>
+        </div>
+
+        <div class="lead-card">
+          <div class="lead-top">
+            <div>
+              <div class="lead-name">David Ramirez</div>
+              <div class="lead-sub">Lead Ref: CVCF-1047 • Submitted yesterday • Clovis, CA</div>
+            </div>
+            <div class="chip-row">
+              <span class="chip chip-red">New Lead</span>
+              <span class="chip chip-yellow">Needs Review</span>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="info-box">
+              <h3>Customer Profile</h3>
+              <div class="info-list">
+                <div class="info-item"><span>Name</span><span>David Ramirez</span></div>
+                <div class="info-item"><span>Phone</span><span>(559) 555-0192</span></div>
+                <div class="info-item"><span>Email</span><span>david@example.com</span></div>
+                <div class="info-item"><span>Location</span><span>Clovis, CA</span></div>
+                <div class="info-item"><span>Status</span><span>Pending Offer</span></div>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <h3>Vehicle Profile</h3>
+              <div class="info-list">
+                <div class="info-item"><span>Year / Make / Model</span><span>2011 Ford Escape</span></div>
+                <div class="info-item"><span>Trim</span><span>XLT</span></div>
+                <div class="info-item"><span>VIN</span><span>1FMCU9DG5BKA45678</span></div>
+                <div class="info-item"><span>Mileage</span><span>192,400</span></div>
+                <div class="info-item"><span>Transport Type</span><span>Drivable</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <button class="btn btn-blue">Review Offer</button>
+            <button class="btn btn-gray">Contact Customer</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="buyers" class="panel">
+        <div class="section-header">
+          <h2>Buyers</h2>
+          <button class="btn btn-gray">Add Buyer</button>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Buyer</th>
+                <th>Email</th>
+                <th>Market</th>
+                <th>Status</th>
+                <th>Assigned Cars</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Fresno Auto</td>
+                <td>buyer1@example.com</td>
+                <td>Fresno</td>
+                <td><span class="chip chip-green">Active</span></td>
+                <td>3</td>
+              </tr>
+              <tr>
+                <td>Central Valley Motors</td>
+                <td>buyer2@example.com</td>
+                <td>Clovis</td>
+                <td><span class="chip chip-green">Active</span></td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>Wholesale Direct</td>
+                <td>buyer3@example.com</td>
+                <td>Madera</td>
+                <td><span class="chip chip-yellow">Pending</span></td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tow" class="panel">
+        <div class="section-header">
+          <h2>Tow Drivers</h2>
+          <button class="btn btn-gray">Add Tow Driver</button>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Driver</th>
+                <th>Phone</th>
+                <th>Zone</th>
+                <th>Status</th>
+                <th>Current Assignment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Jose Towing</td>
+                <td>(559) 555-0101</td>
+                <td>Fresno</td>
+                <td><span class="chip chip-green">Available</span></td>
+                <td>Maria Lopez - 2014 Accord</td>
+              </tr>
+              <tr>
+                <td>Valley Tow Team</td>
+                <td>(559) 555-0102</td>
+                <td>Clovis</td>
+                <td><span class="chip chip-yellow">Busy</span></td>
+                <td>Pickup in progress</td>
+              </tr>
+              <tr>
+                <td>Rapid Pickup Services</td>
+                <td>(559) 555-0103</td>
+                <td>Selma</td>
+                <td><span class="chip chip-green">Available</span></td>
+                <td>None</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="bidding" class="panel">
+        <div class="section-header">
+          <h2>Bidding</h2>
+          <button class="btn btn-gray">Create Bid Request</button>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Lead Ref</th>
+                <th>Vehicle</th>
+                <th>Top Bid</th>
+                <th>Buyer</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CVCF-1048</td>
+                <td>2014 Honda Accord EX-L</td>
+                <td>$2,900</td>
+                <td>Fresno Auto</td>
+                <td><span class="chip chip-green">Accepted</span></td>
+              </tr>
+              <tr>
+                <td>CVCF-1047</td>
+                <td>2011 Ford Escape XLT</td>
+                <td>$1,450</td>
+                <td>Central Valley Motors</td>
+                <td><span class="chip chip-yellow">Awaiting Approval</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="height: 18px;"></div>
+
+        <div class="empty-box">
+          Analytics and profit/loss for completed deals can be added in the next version.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.panel');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const target = button.getAttribute('data-panel');
+
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        panels.forEach(panel => panel.classList.remove('active'));
+
+        button.classList.add('active');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
