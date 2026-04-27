@@ -59,6 +59,8 @@ th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
 .detail-grid{grid-template-columns:1fr 1fr}
 .compact-label{font-size:11px;text-transform:uppercase;font-weight:900;color:#64748b;margin-bottom:2px}
 .compact-value{font-size:14px;font-weight:800;color:#0f172a}
+.inline-offer{display:flex;gap:8px;align-items:center}
+.inline-offer input{min-width:100px;width:120px;flex:0}
 @media(max-width:1100px){
   .lead-row{grid-template-columns:1fr}
   .detail-grid,.three,.four{grid-template-columns:1fr}
@@ -116,7 +118,6 @@ th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
     </div>
 
     <div id="leadList" class="lead-grid"></div>
-
     <div style="margin-top:24px" id="leadDetail"></div>
   </section>
 
@@ -346,13 +347,24 @@ function renderLeadList(){
         </div>
 
         <div onclick="event.stopPropagation()">
-          <div class="compact-label">Buyer Assignment</div>
-          <select onchange="assignBuyer('${l.id}', this.value)">
-            <option>${l.buyer === "—" ? "Select buyer" : l.buyer}</option>
-            <option>Fresno Auto Wholesale</option>
-            <option>Valley Budget Autos</option>
-            <option>Central Valley Buyer Group</option>
-          </select>
+          ${
+            l.status === "New Lead"
+              ? `<div class="compact-label">Make Offer</div>
+                 <div class="inline-offer">
+                   <input id="offer-${l.id}" type="number" placeholder="$" />
+                   <button class="btn green" onclick="makeOffer('${l.id}')">Send</button>
+                 </div>`
+              : l.status === "Accepted"
+                ? `<div class="compact-label">Buyer Assignment</div>
+                   <select onchange="assignBuyer('${l.id}', this.value)">
+                     <option>${l.buyer === "—" ? "Select buyer" : l.buyer}</option>
+                     <option>Fresno Auto Wholesale</option>
+                     <option>Valley Budget Autos</option>
+                     <option>Central Valley Buyer Group</option>
+                   </select>`
+                : `<div class="compact-label">Buyer Assignment</div>
+                   <div class="compact-value muted">Available after accepted</div>`
+          }
         </div>
       </div>
     </div>
@@ -361,9 +373,23 @@ function renderLeadList(){
   renderLeadDetail();
 }
 
+function makeOffer(id){
+  const input = document.getElementById("offer-" + id);
+  const amount = Number(input.value);
+  const lead = leads.find(l=>l.id===id);
+  if(!lead || !amount || amount <= 0) return alert("Enter a valid offer amount.");
+  lead.offer = amount;
+  lead.status = "Offer Sent";
+  lead.communication = "Offer sent by SMS + Email";
+  lead.audit.unshift("Offer sent: $" + amount.toLocaleString());
+  selectedLead = lead;
+  renderLeadList();
+}
+
 function assignBuyer(id, value){
   const lead = leads.find(l=>l.id===id);
   if(!lead || value==="Select buyer") return;
+  if(lead.status !== "Accepted") return alert("Buyer assignment is only available after the customer accepts.");
   lead.buyer = value;
   lead.audit.unshift("Buyer assigned: " + value);
   selectedLead = lead;
