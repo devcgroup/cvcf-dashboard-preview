@@ -21,13 +21,9 @@
     .btn.red{background:#fee2e2;color:#991b1b}
     .btn.light{background:#f8fafc;border:1px solid #cbd5e1;color:#334155}
     .grid{display:grid;gap:18px}
-    .two{grid-template-columns:430px 1fr}
     .three{grid-template-columns:repeat(3,1fr)}
     .four{grid-template-columns:repeat(4,1fr)}
-    .stats{grid-template-columns:repeat(4,1fr);margin-bottom:20px}
-    .stat,.card,.panel{background:white;border:1px solid #e2e8f0;border-radius:18px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
-    .stat small{display:block;color:#64748b;text-transform:uppercase;font-weight:900;font-size:12px}
-    .stat b{font-size:28px;margin-top:8px;display:block}
+    .card,.panel{background:white;border:1px solid #e2e8f0;border-radius:18px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.06)}
     .toolbar{background:white;border:1px solid #e2e8f0;border-radius:18px;padding:16px;margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
     input,select,textarea{border:1px solid #cbd5e1;border-radius:12px;padding:12px;font:inherit;background:white}
     input{min-width:340px;flex:1}
@@ -35,6 +31,7 @@
     .filters{display:flex;gap:8px;flex-wrap:wrap}
     .filters button{border:0;border-radius:999px;padding:9px 13px;background:#e2e8f0;font-weight:800;cursor:pointer}
     .filters button.active{background:#07142b;color:white}
+    .lead-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
     .lead-card{cursor:pointer}
     .lead-card.active{outline:3px solid #07142b}
     .muted{color:#64748b}
@@ -58,11 +55,14 @@
     th,td{padding:14px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:14px}
     th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
     .hidden{display:none}
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .stack-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-    @media(max-width:1100px){.two,.three,.four,.stats{grid-template-columns:1fr}.toolbar input{min-width:100%}.stack-head{flex-direction:column}}
+    .detail-grid{grid-template-columns:1fr 1fr}
+    .lead-actions{margin-top:14px;border-top:1px solid #e2e8f0;padding-top:14px}
+    @media(max-width:1200px){.lead-grid,.detail-grid,.three,.four{grid-template-columns:1fr 1fr}}
+    @media(max-width:800px){.lead-grid,.detail-grid,.three,.four{grid-template-columns:1fr}.toolbar input{min-width:100%}.stack-head{flex-direction:column}}
   </style>
 </head>
+
 <body>
   <header class="top">
     <div class="row">
@@ -89,13 +89,6 @@
       <button data-tab="pnl">P&L</button>
     </nav>
 
-    <section class="grid stats">
-      <div class="stat"><small>New Leads</small><b>12</b></div>
-      <div class="stat"><small>Offer Sent</small><b>9</b></div>
-      <div class="stat"><small>Accepted</small><b>4</b></div>
-      <div class="stat"><small>Inventory</small><b>18</b></div>
-    </section>
-
     <section id="customers" class="tab">
       <div class="toolbar">
         <input id="search" placeholder="Search VIN, last 6, ID, or seller name" />
@@ -116,16 +109,14 @@
         </select>
       </div>
 
-      <div class="grid two">
-        <div>
-          <div class="row" style="margin-bottom:10px">
-            <h2 class="section-title" id="listTitle">All Transactions</h2>
-            <span class="muted tiny" id="resultCount"></span>
-          </div>
-          <div id="leadList" class="grid"></div>
-        </div>
-        <div id="leadDetail" class="grid"></div>
+      <div class="row" style="margin-bottom:12px">
+        <h2 class="section-title" id="listTitle">All Transactions</h2>
+        <span class="muted tiny" id="resultCount"></span>
       </div>
+
+      <div id="leadList" class="lead-grid"></div>
+
+      <div style="margin-top:24px" id="leadDetail"></div>
     </section>
 
     <section id="inventory" class="tab hidden">
@@ -152,7 +143,7 @@
 
     <section id="calendar" class="tab hidden">
       <h2 class="section-title">Calendar</h2>
-      <div class="grid two">
+      <div class="grid detail-grid">
         <div class="panel">
           <h3>Buyer Pickup Calendar</h3>
           <div class="note">Today • Fresno Auto Wholesale • Maria Hernandez • 12–4 PM • Same Day</div>
@@ -168,7 +159,7 @@
 
     <section id="alerts" class="tab hidden">
       <h2 class="section-title">Alerts & Audit</h2>
-      <div class="grid two">
+      <div class="grid detail-grid">
         <div class="panel" id="alertsList"></div>
         <div class="panel" id="auditList"></div>
       </div>
@@ -351,15 +342,28 @@
             <div class="row"><span>Communication</span><b>${l.communication}</b></div>
           </div>
 
-          <div style="margin-top:12px">
-            ${l.buyer!=="—"?badge("Buyer • "+l.buyer,"blue"):""}
-            ${l.tow!=="—"?badge("Tow • "+l.tow,"purple"):""}
-            ${l.status==="Accepted"?badge("Buyer assignment allowed","green"):badge("Buyer assignment locked","slate")}
+          <div class="lead-actions" onclick="event.stopPropagation()">
+            <label class="muted tiny"><b>Buyer Assignment</b></label>
+            <select onchange="assignBuyer('${l.id}', this.value)">
+              <option>${l.buyer === "—" ? "Select buyer" : l.buyer}</option>
+              <option>Fresno Auto Wholesale</option>
+              <option>Valley Budget Autos</option>
+              <option>Central Valley Buyer Group</option>
+            </select>
           </div>
         </div>
       `).join("") || `<div class="card">No matching transactions.</div>`;
 
       renderLeadDetail();
+    }
+
+    function assignBuyer(id, value){
+      const lead = leads.find(l=>l.id===id);
+      if(!lead || value==="Select buyer") return;
+      lead.buyer = value;
+      lead.audit.unshift("Buyer assigned: " + value);
+      selectedLead = lead;
+      renderLeadList();
     }
 
     function renderLeadDetail(){
@@ -406,84 +410,12 @@
             <div class="panel" style="grid-column:1/-1">
               <h3>Notes</h3>
               <div class="grid four">
-                <div class="note">
-                  <h4>Customer Notes</h4>
-                  <textarea>${l.customerNotes || ""}</textarea>
-                </div>
-                <div class="note">
-                  <h4>Buyer Notes</h4>
-                  <textarea>${l.buyerNotes || ""}</textarea>
-                </div>
-                <div class="note">
-                  <h4>Towing Notes</h4>
-                  <textarea>${l.towingNotes || ""}</textarea>
-                </div>
-                <div class="note">
-                  <h4>Admin Notes</h4>
-                  <textarea placeholder="Admin notes">${l.adminNotes || ""}</textarea>
-                </div>
+                <div class="note"><h4>Customer Notes</h4><textarea>${l.customerNotes || ""}</textarea></div>
+                <div class="note"><h4>Buyer Notes</h4><textarea>${l.buyerNotes || ""}</textarea></div>
+                <div class="note"><h4>Towing Notes</h4><textarea>${l.towingNotes || ""}</textarea></div>
+                <div class="note"><h4>Admin Notes</h4><textarea>${l.adminNotes || ""}</textarea></div>
               </div>
               <p class="muted tiny">Admin can edit all notes. Buyer, towing, and customer notes are separated for permissions later.</p>
-            </div>
-
-            <div class="panel">
-              <h3>Offer / Status</h3>
-              ${kv("Current Offer",l.offer ? "$"+l.offer.toLocaleString() : "Not sent")}
-              ${kv("Status",l.status)}
-              ${kv("Priority",l.priority)}
-              <div class="actions">
-                <button class="btn dark">Send Offer</button>
-                <button class="btn light">Replace Value</button>
-                <button class="btn light">Adjustment Builder</button>
-                <button class="btn green">Approve & Send</button>
-              </div>
-            </div>
-
-            <div class="panel">
-              <h3>Buyer Assignment</h3>
-              ${kv("Buyer",l.buyer)}
-              ${kv("Tow Driver",l.tow)}
-              ${kv("Route",l.route)}
-              ${l.status==="Accepted" ? `
-                <select>
-                  <option>Select buyer</option>
-                  <option>Fresno Auto Wholesale</option>
-                  <option>Valley Budget Autos</option>
-                </select>
-                <br><br>
-                <button class="btn green">Assign Buyer</button>
-              ` : `
-                <div class="note">Buyer assignment only opens after customer accepts offer.</div>
-              `}
-            </div>
-
-            <div class="panel">
-              <h3>Uploads / Tow Packet</h3>
-              <b>Shared with towing</b><br>
-              ${["Car photo","Plate photo","Key location","Verified pin","Condition notes"].map(x=>badge(x,"blue")).join(" ")}
-              <br><br>
-              <b>Admin only</b><br>
-              ${["Title","Driver license","Extra photos"].map(x=>badge(x,"slate")).join(" ")}
-              <br><br>
-              <button class="btn light">Upload Photos</button>
-              <button class="btn light">Upload Docs</button>
-            </div>
-
-            <div class="panel">
-              <h3>Cancel / Complete</h3>
-              <select>
-                <option>Cancel reason</option>
-                <option>Customer Declined</option>
-                <option>Buyer Declined</option>
-                <option>Paperwork Issues</option>
-                <option>No Contact</option>
-                <option>Condition Mismatch</option>
-              </select>
-              <br><br>
-              <div class="actions">
-                <button class="btn red">Cancel</button>
-                <button class="btn green">Complete → Inventory</button>
-              </div>
             </div>
 
             <div class="panel" style="grid-column:1/-1">
