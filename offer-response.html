@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Offer</title>
 
+<style>
+body { font-family: Arial; background:#f3f4f6; margin:0; }
+.page { max-width:900px; margin:auto; padding:40px 20px; }
+.card { background:#fff; padding:30px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+
+.offer { font-size:50px; color:#047857; font-weight:900; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.row { display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; border-radius:8px; }
+
+button { padding:12px 18px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
+.accept { background:#047857; color:#fff; }
+.decline { background:#fee2e2; color:#991b1b; }
+.continue { background:#111; color:#fff; }
+
+.step { display:none; margin-top:20px; }
+.show { display:block; }
+
+.success { background:#ecfdf5; padding:12px; border-radius:10px; margin-top:10px; }
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="card" id="offerPage">
+<h2>Your Offer</h2>
+<div class="offer">$850</div>
+<p>2012 Toyota Camry</p>
+
+<div class="grid">
+<div class="row">VIN <span>4T1BF1FK5CU123456</span></div>
+<div class="row">Mileage <span>162,345</span></div>
+</div>
+
+<h3>Condition</h3>
+<div class="grid">
+<div class="row">Runs <span>Yes</span></div>
+<div class="row">Engine <span>Yes</span></div>
+<div class="row">Key <span>No</span></div>
+<div class="row">Damage <span>Yes</span></div>
+</div>
+
+<br>
+
+<button class="accept" onclick="accept()">Accept</button>
+<button class="decline" onclick="decline()">Decline</button>
+
+<div id="acceptedMsg" class="success" style="display:none;">
+Offer accepted. Schedule pickup below.
+</div>
+
+<div id="schedule" class="step">
+<h3>Schedule Pickup</h3>
+
+<input id="date" type="date"><br><br>
+
+<select id="time">
+<option value="">Select time</option>
+<option>8-12</option>
+<option>12-4</option>
+<option>4-8</option>
+</select><br><br>
+
+<input id="address" placeholder="Pickup address"><br><br>
+
+<button class="continue" onclick="saveSchedule()">Save Pickup</button>
+</div>
+
+</div>
+
+<div class="card step" id="congrats">
+<h2>✅ Congratulations</h2>
+<p>Your pickup has been scheduled.</p>
+
+<div id="summary"></div>
+
+<br>
+<button class="continue" onclick="goProfile()">Continue to Seller Profile</button>
+</div>
+
+</div>
+
+<script>
+function accept(){
+document.getElementById("acceptedMsg").style.display="block";
+document.getElementById("schedule").classList.add("show");
+}
+
+function decline(){
+alert("Offer declined");
+}
+
+function saveSchedule(){
+const date = document.getElementById("date").value;
+const time = document.getElementById("time").value;
+const address = document.getElementById("address").value;
+
+if(!date || !time || !address){
+alert("Fill all fields");
+return;
+}
+
+localStorage.setItem("pickup", JSON.stringify({date,time,address}));
+
+document.getElementById("offerPage").style.display="none";
+document.getElementById("congrats").classList.add("show");
+
+document.getElementById("summary").innerHTML =
+"<b>Date:</b> "+date+"<br>"+
+"<b>Time:</b> "+time+"<br>"+
+"<b>Address:</b> "+address;
+}
+
+function goProfile(){
+window.location.href = "seller-profile.html";
+}
+</script>
+
+</body>
+</html>
