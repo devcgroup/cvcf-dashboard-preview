@@ -1,662 +1,693 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Central Valley Cash for Cars - Offer Form</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #111827;
-    }
-
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 30px 16px;
-    }
-
-    .hero {
-      background: #111827;
-      color: white;
-      padding: 28px;
-      border-radius: 18px;
-      margin-bottom: 22px;
-    }
-
-    .hero h1 {
-      margin: 0 0 8px;
-      font-size: 34px;
-    }
-
-    .hero p {
-      margin: 0;
-      color: #d1d5db;
-      font-size: 17px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.5fr 0.8fr;
-      gap: 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    }
-
-    .steps {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .step-pill {
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .step-pill.active {
-      background: #16a34a;
-      color: white;
-    }
-
-    .form-step {
-      display: none;
-    }
-
-    .form-step.active {
-      display: block;
-    }
-
-    h2 {
-      margin: 0 0 15px;
-      font-size: 22px;
-    }
-
-    h3 {
-      margin-top: 0;
-    }
-
-    label {
-      display: block;
-      margin: 13px 0 6px;
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
-      font-size: 15px;
-      background: white;
-    }
-
-    textarea {
-      min-height: 95px;
-      resize: vertical;
-    }
-
-    .two {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .three {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-    }
-
-    .btns {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 22px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 12px;
-      padding: 13px 18px;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 15px;
-    }
-
-    .primary {
-      background: #16a34a;
-      color: white;
-    }
-
-    .secondary {
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    .decode-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .decode-row input {
-      flex: 1;
-    }
-
-    .decode-row button {
-      white-space: nowrap;
-    }
-
-    .note {
-      background: #f3f4f6;
-      padding: 14px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .msg {
-      margin-top: 8px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .success {
-      color: #15803d;
-    }
-
-    .error {
-      color: #dc2626;
-    }
-
-    @media (max-width: 850px) {
-      .grid, .two, .three {
-        grid-template-columns: 1fr;
-      }
-
-      .decode-row {
-        flex-direction: column;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CVCF Offer Form</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;background:#eef2f6;margin:0;color:#102033}
+.container{max-width:760px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:15px;border:1px solid #d8e1ec;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+input,select{width:100%;padding:11px;margin-top:8px;margin-bottom:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px;box-sizing:border-box}
+label{display:block;font-weight:700;color:#07142b;margin-top:6px}
+button{padding:12px;background:#07142b;color:#fff;border:none;border-radius:8px;width:100%;font-weight:bold;cursor:pointer}
+button.secondary{background:#f8fafc;color:#07142b;border:1px solid #cbd5e1}
+button:disabled{opacity:.65;cursor:not-allowed}
+.step{display:none}.step.active{display:block}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.small{font-size:12px;color:#64748b;line-height:1.4}
+.warn{color:#92400e;font-weight:bold}
+.ok{color:#166534;font-weight:bold}
+h3{margin-top:0;color:#07142b}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.progress{background:#fff;border:1px solid #d8e1ec;border-radius:14px;padding:12px;margin-bottom:14px;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+.progress-bar{height:8px;background:#dbe3ee;border-radius:999px;overflow:hidden;margin-bottom:10px}
+.progress-fill{height:100%;width:20%;background:#07142b;border-radius:999px;transition:width .2s ease}
+.progress-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:11px;font-weight:800;color:#64748b;text-align:center}
+.progress-step.active{color:#07142b}
+.progress-step.done{color:#166534}
+.manual-field{display:none}
+@media(max-width:700px){.two,.nav{grid-template-columns:1fr}.progress-steps{font-size:10px}}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="hero">
-      <h1>Get Cash for Your Car</h1>
-      <p>Enter your VIN and vehicle details. We’ll review your car and contact you with an offer.</p>
-    </div>
+<div class="container">
 
-    <div class="grid">
-      <div class="card">
-        <div class="steps">
-          <div class="step-pill active" data-pill="1">1. Vehicle</div>
-          <div class="step-pill" data-pill="2">2. Condition</div>
-          <div class="step-pill" data-pill="3">3. Contact</div>
-          <div class="step-pill" data-pill="4">4. Confirm</div>
-        </div>
-
-        <form id="cvcfOfferForm">
-          <div class="form-step active" data-step="1">
-            <h2>Vehicle Information</h2>
-
-            <label for="vin">VIN</label>
-            <div class="decode-row">
-              <input id="vin" name="vin" maxlength="17" placeholder="Enter 17-digit VIN" />
-              <button type="button" class="secondary" id="decodeBtn">Decode VIN</button>
-            </div>
-            <div id="vinMsg" class="msg"></div>
-
-            <div class="two">
-              <div>
-                <label for="year">Year</label>
-                <input id="year" name="year" placeholder="Year" />
-              </div>
-
-              <div>
-                <label for="make">Make</label>
-                <input id="make" name="make" placeholder="Make" />
-              </div>
-            </div>
-
-            <div class="two">
-              <div>
-                <label for="model">Model</label>
-                <input id="model" name="model" placeholder="Model" />
-              </div>
-
-              <div>
-                <label for="trim">Trim</label>
-                <input id="trim" name="trim" placeholder="Trim" />
-              </div>
-            </div>
-
-            <div class="two">
-              <div>
-                <label for="body_type">Body Type</label>
-                <input id="body_type" name="body_type" placeholder="Sedan, SUV, Truck, etc." />
-              </div>
-
-              <div>
-                <label for="drivetrain">Drivetrain</label>
-                <input id="drivetrain" name="drivetrain" placeholder="FWD, RWD, AWD, 4WD" />
-              </div>
-            </div>
-
-            <div class="two">
-              <div>
-                <label for="fuel_type">Fuel Type</label>
-                <input id="fuel_type" name="fuel_type" placeholder="Gas, Hybrid, EV, Diesel" />
-              </div>
-
-              <div>
-                <label for="transmission">Transmission</label>
-                <input id="transmission" name="transmission" placeholder="Automatic, Manual, CVT" />
-              </div>
-            </div>
-
-            <label for="engine">Engine</label>
-            <input id="engine" name="engine" placeholder="Engine details" />
-
-            <label for="mileage">Mileage</label>
-            <input id="mileage" name="mileage" placeholder="Example: 125000" />
-
-            <div class="btns">
-              <span></span>
-              <button type="button" class="primary" onclick="nextStep()">Next</button>
-            </div>
-          </div>
-
-          <div class="form-step" data-step="2">
-            <h2>Vehicle Condition</h2>
-
-            <label for="runs_drives">Does it run and drive?</label>
-            <select id="runs_drives" name="runs_drives">
-              <option value="">Select</option>
-              <option>Yes</option>
-              <option>No</option>
-              <option>Starts but does not drive</option>
-              <option>Unknown</option>
-            </select>
-
-            <label for="title_status">Title Status</label>
-            <select id="title_status" name="title_status">
-              <option value="">Select</option>
-              <option>Clean Title</option>
-              <option>Salvage Title</option>
-              <option>No Title</option>
-              <option>Lien on Title</option>
-            </select>
-
-            <div class="two">
-              <div>
-                <label for="has_key">Has Key?</label>
-                <select id="has_key" name="has_key">
-                  <option value="">Select</option>
-                  <option>Yes</option>
-                  <option>No</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="has_all_tires">Has All 4 Tires?</label>
-                <select id="has_all_tires" name="has_all_tires">
-                  <option value="">Select</option>
-                  <option>Yes</option>
-                  <option>No</option>
-                </select>
-              </div>
-            </div>
-
-            <label for="condition">Overall Condition</label>
-            <select id="condition" name="condition">
-              <option value="">Select</option>
-              <option>Excellent</option>
-              <option>Good</option>
-              <option>Fair</option>
-              <option>Poor</option>
-              <option>Wrecked</option>
-              <option>Non-running</option>
-            </select>
-
-            <label for="description">Damage / Notes</label>
-            <textarea id="description" name="description" placeholder="Tell us about mechanical issues, damage, missing parts, etc."></textarea>
-
-            <div class="btns">
-              <button type="button" class="secondary" onclick="prevStep()">Back</button>
-              <button type="button" class="primary" onclick="nextStep()">Next</button>
-            </div>
-          </div>
-
-          <div class="form-step" data-step="3">
-            <h2>Contact & Pickup Information</h2>
-
-            <div class="two">
-              <div>
-                <label for="first_name">First Name</label>
-                <input id="first_name" name="first_name" required />
-              </div>
-
-              <div>
-                <label for="last_name">Last Name</label>
-                <input id="last_name" name="last_name" required />
-              </div>
-            </div>
-
-            <div class="two">
-              <div>
-                <label for="phone">Phone</label>
-                <input id="phone" name="phone" required />
-              </div>
-
-              <div>
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" />
-              </div>
-            </div>
-
-            <label for="zip">ZIP Code</label>
-            <input id="zip" name="zip" required />
-
-            <label for="pickup_address">Pickup Address</label>
-            <input id="pickup_address" name="pickup_address" placeholder="Optional until offer is accepted" />
-
-            <div class="two">
-              <div>
-                <label for="preferred_day">Preferred Pickup Day</label>
-                <select id="preferred_day" name="preferred_day">
-                  <option value="">Select</option>
-                  <option>Monday</option>
-                  <option>Tuesday</option>
-                  <option>Wednesday</option>
-                  <option>Thursday</option>
-                  <option>Friday</option>
-                  <option>Saturday</option>
-                  <option>Sunday</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="preferred_window">Preferred Pickup Window</label>
-                <select id="preferred_window" name="preferred_window">
-                  <option value="">Select</option>
-                  <option>8–12</option>
-                  <option>12–4</option>
-                  <option>4–8</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="btns">
-              <button type="button" class="secondary" onclick="prevStep()">Back</button>
-              <button type="button" class="primary" onclick="nextStep()">Next</button>
-            </div>
-          </div>
-
-          <div class="form-step" data-step="4">
-            <h2>Confirm & Submit</h2>
-
-            <div class="note">
-              Please confirm your information is correct. After submitting, we’ll review your vehicle and contact you with an offer.
-            </div>
-
-            <div id="confirmBox" class="note"></div>
-
-            <div class="btns">
-              <button type="button" class="secondary" onclick="prevStep()">Back</button>
-              <button type="submit" class="primary" id="submitBtn">Submit Offer Request</button>
-            </div>
-
-            <div id="submitMsg" class="msg"></div>
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3>How It Works</h3>
-        <div class="note">
-          <strong>1. Enter VIN</strong><br>
-          VIN can complete most vehicle information automatically.
-        </div>
-        <div class="note">
-          <strong>2. Describe Condition</strong><br>
-          Tell us if it runs, has a title, has keys, or has damage.
-        </div>
-        <div class="note">
-          <strong>3. Get an Offer</strong><br>
-          We review your vehicle and send you an offer.
-        </div>
-        <div class="note">
-          <strong>4. Pickup</strong><br>
-          If accepted, pickup is scheduled for one of the available windows.
-        </div>
-      </div>
+  <div class="progress">
+    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+    <div class="progress-steps">
+      <div class="progress-step active" data-progress="1">Vehicle</div>
+      <div class="progress-step" data-progress="2">Condition</div>
+      <div class="progress-step" data-progress="3">Title</div>
+      <div class="progress-step" data-progress="4">Location</div>
+      <div class="progress-step" data-progress="5">Seller</div>
     </div>
   </div>
 
-  <script>
-    /* =========================
-       SUPABASE CONFIG
-       REPLACE THESE TWO VALUES
-    ========================= */
-    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  <form id="form">
 
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <div class="card step active" data-step="1">
+      <h3>Vehicle</h3>
 
-    /* =========================
-       THANK YOU PAGE
-    ========================= */
-    const THANK_YOU_URL = "/offer-response/";
+      <input id="vin" placeholder="VIN (recommended)" maxlength="17" />
+      <button type="button" id="decode">Decode VIN</button>
+      <div id="vinMsg" class="small"></div>
 
-    /* =========================
-       STEPS
-    ========================= */
-    let currentStep = 1;
+      <div class="two">
+        <input id="year" placeholder="Year (required)" />
+        <input id="make" placeholder="Make (required)" />
+      </div>
 
-    function showStep(step) {
-      currentStep = step;
+      <div class="two">
+        <input id="model" placeholder="Model (required)" />
+        <select id="trim">
+          <option value="">Choose trim</option>
+          <option value="__manual">Other</option>
+        </select>
+      </div>
 
-      document.querySelectorAll(".form-step").forEach(el => {
-        el.classList.remove("active");
-      });
+      <input id="manualTrim" class="manual-field" placeholder="Enter trim manually" />
+      <div id="trimHint" class="small"></div>
 
-      document.querySelector(`[data-step="${step}"]`).classList.add("active");
+      <div class="two">
+        <input id="body" placeholder="Body Type (optional)" />
+        <input id="drivetrain" placeholder="Drivetrain (optional)" />
+      </div>
 
-      document.querySelectorAll(".step-pill").forEach(el => {
-        el.classList.remove("active");
-      });
+      <div class="two">
+        <input id="fuel" placeholder="Fuel Type (optional)" />
+        <input id="engineInfo" placeholder="Engine (optional)" />
+      </div>
 
-      document.querySelector(`[data-pill="${step}"]`).classList.add("active");
+      <div class="two">
+        <input id="transmissionInfo" placeholder="Transmission (optional)" />
+        <select id="color">
+          <option value="">Choose color</option>
+          <option>White</option>
+          <option>Black</option>
+          <option>Silver</option>
+          <option>Gray</option>
+          <option>Blue</option>
+          <option>Red</option>
+          <option>Green</option>
+          <option>Brown</option>
+          <option>Gold</option>
+          <option>Tan</option>
+          <option>Orange</option>
+          <option>Yellow</option>
+          <option value="__manual">Other</option>
+        </select>
+      </div>
 
-      if (step === 4) {
-        renderConfirmBox();
+      <input id="manualColor" class="manual-field" placeholder="Enter color manually" />
+      <input id="miles" placeholder="Mileage (required)" inputmode="numeric" />
+
+      <div class="small">VIN can auto-complete most fields. If trim or color is not decoded, choose or enter it manually.</div>
+    </div>
+
+    <div class="card step" data-step="2">
+      <h3>Condition</h3>
+
+      <label>Runs and drives?</label>
+      <select id="runs"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Key?</label>
+      <select id="key"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Good tires?</label>
+      <select id="tires"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Engine OK?</label>
+      <select id="engine"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Transmission OK?</label>
+      <select id="trans"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Blown airbags?</label>
+      <select id="airbags"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Catalytic converter?</label>
+      <select id="cat"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Body damage?</label>
+      <select id="bodyDamage"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Parts / panels missing?</label>
+      <select id="partsMissing"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+    </div>
+
+    <div class="card step" data-step="3">
+      <h3>Title</h3>
+
+      <select id="title">
+        <option>Clean Title</option>
+        <option>No Title</option>
+        <option>Salvage</option>
+        <option>Lien</option>
+      </select>
+
+      <select id="owner">
+        <option>In My Name</option>
+        <option>Not In My Name</option>
+      </select>
+    </div>
+
+    <div class="card step" data-step="4">
+      <h3>Location</h3>
+      <input id="zip" placeholder="ZIP (required)" inputmode="numeric" maxlength="5" />
+      <input id="address" placeholder="Pickup address optional until accepted" />
+      <div class="small">Address is optional now. Pickup scheduling happens only after offer acceptance.</div>
+    </div>
+
+    <div class="card step" data-step="5">
+      <h3>Seller</h3>
+
+      <div class="two">
+        <input id="firstName" placeholder="First Name" />
+        <input id="lastName" placeholder="Last Name" />
+      </div>
+
+      <input id="phone" placeholder="Phone" inputmode="tel" />
+      <input id="email" placeholder="Email" type="email" />
+
+      <div class="small">Most offers are sent within 5–15 minutes.</div>
+    </div>
+
+    <div class="nav">
+      <button type="button" id="back" class="secondary">Back</button>
+      <button type="button" id="next">Next</button>
+    </div>
+
+  </form>
+
+  <div id="successCard" class="card" style="display:none;text-align:center;">
+    <h3>Thank you!</h3>
+    <p>Your request has been received.</p>
+    <p class="small">Redirecting…</p>
+  </div>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const THANK_YOU_URL = "/thank-you.html";
+
+const els = {
+  form: $('form'),
+  vin: $('vin'),
+  decode: $('decode'),
+  vinMsg: $('vinMsg'),
+  year: $('year'),
+  make: $('make'),
+  model: $('model'),
+  trim: $('trim'),
+  manualTrim: $('manualTrim'),
+  trimHint: $('trimHint'),
+  body: $('body'),
+  drivetrain: $('drivetrain'),
+  fuel: $('fuel'),
+  engineInfo: $('engineInfo'),
+  transmissionInfo: $('transmissionInfo'),
+  color: $('color'),
+  manualColor: $('manualColor'),
+  miles: $('miles'),
+  runs: $('runs'),
+  key: $('key'),
+  tires: $('tires'),
+  engine: $('engine'),
+  trans: $('trans'),
+  airbags: $('airbags'),
+  cat: $('cat'),
+  bodyDamage: $('bodyDamage'),
+  partsMissing: $('partsMissing'),
+  title: $('title'),
+  owner: $('owner'),
+  zip: $('zip'),
+  address: $('address'),
+  firstName: $('firstName'),
+  lastName: $('lastName'),
+  phone: $('phone'),
+  email: $('email'),
+  back: $('back'),
+  next: $('next'),
+  progressFill: $('progressFill')
+};
+
+let step = 1;
+let isSubmitting = false;
+
+const steps = document.querySelectorAll('.step');
+const progressSteps = document.querySelectorAll('.progress-step');
+
+function show(){
+  steps.forEach(s => s.classList.remove('active'));
+  document.querySelector('[data-step="' + step + '"]').classList.add('active');
+
+  els.progressFill.style.width = (step * 20) + '%';
+
+  progressSteps.forEach(item => {
+    const n = Number(item.dataset.progress);
+    item.classList.toggle('active', n === step);
+    item.classList.toggle('done', n < step);
+  });
+
+  els.next.textContent = step === 5 ? 'Submit' : 'Next';
+  els.back.style.visibility = step === 1 ? 'hidden' : 'visible';
+}
+
+els.next.onclick = () => {
+  if(isSubmitting) return;
+
+  if(step < 5){
+    step++;
+    show();
+  } else {
+    els.form.requestSubmit();
+  }
+};
+
+els.back.onclick = () => {
+  if(isSubmitting) return;
+
+  if(step > 1){
+    step--;
+    show();
+  }
+};
+
+const db = supabase.createClient(
+  "https://psxqggcmfkmhkrsganuv.supabase.co",
+  "sb_publishable_J9Z4Bx_hqt26gjC_zUEGfg_L8t4VF9A"
+);
+
+function getTrimSuggestions(makeName, modelName){
+  const mk = (makeName || '').toUpperCase();
+  const md = (modelName || '').toUpperCase();
+
+  if(mk === 'TOYOTA' && md.includes('CAMRY')) return ['LE','SE','XLE','XSE','Hybrid LE','Hybrid SE','Hybrid XLE','Hybrid XSE'];
+  if(mk === 'TOYOTA' && md.includes('COROLLA')) return ['L','LE','SE','XLE','XSE','Hybrid LE'];
+  if(mk === 'TOYOTA' && md.includes('PRIUS')) return ['Two','Two Eco','Three','Three Touring','Four','Four Touring','Five','LE','XLE','Limited'];
+
+  if(mk === 'HONDA' && md.includes('ACCORD')) return ['LX','Sport','EX','EX-L','Touring','Hybrid','Hybrid Sport','Hybrid EX-L','Hybrid Touring'];
+  if(mk === 'HONDA' && md.includes('CIVIC')) return ['LX','Sport','EX','EX-L','Touring','Si'];
+
+  if(mk === 'NISSAN' && md.includes('ALTIMA')) return ['S','SV','SR','SL','Platinum'];
+  if(mk === 'NISSAN' && md.includes('SENTRA')) return ['S','SV','SR'];
+
+  if(mk === 'FORD' && md.includes('F-150')) return ['XL','XLT','Lariat','King Ranch','Platinum','Limited','Raptor'];
+
+  if(mk === 'CHEVROLET' && md.includes('SILVERADO')) return ['WT','Custom','LT','RST','LTZ','High Country'];
+
+  if(mk === 'TESLA' && md.includes('MODEL 3')) return ['Standard Range','Standard Range Plus','Long Range','Performance'];
+  if(mk === 'TESLA' && md.includes('MODEL Y')) return ['Long Range','Performance'];
+
+  if(mk === 'LEXUS') return ['Base','Premium','Luxury','F Sport'];
+  if(mk === 'BMW') return ['Base','Sport','Luxury','M Sport','xDrive'];
+
+  return [];
+}
+
+function setTrimSuggestions(list){
+  const unique = [...new Set(list.filter(Boolean))];
+
+  els.trim.innerHTML =
+    '<option value="">Choose trim</option>' +
+    unique.map((t, i) => '<option value="' + t + '" ' + (i === 0 ? 'selected' : '') + '>' + t + '</option>').join('') +
+    '<option value="__manual">Other</option>';
+
+  if(unique.length){
+    els.trim.value = unique[0];
+    els.trimHint.textContent = 'Trim auto-selected. Change if needed.';
+  } else {
+    els.trimHint.textContent = 'Enter trim manually if not available.';
+  }
+}
+
+function splitTrimOptions(value){
+  if(!value) return [];
+  return value
+    .split('/')
+    .map(v => v.trim())
+    .filter(v => v && !v.includes('*') && v.length < 30);
+}
+
+function cleanBodyType(value){
+  const v = (value || '').trim();
+  const lower = v.toLowerCase();
+
+  if(lower.includes('sedan') || lower.includes('saloon')) return 'Sedan';
+  if(lower.includes('hatchback') || lower.includes('liftback') || lower.includes('notchback')) return 'Hatchback';
+  if(lower.includes('sport utility') || lower.includes('suv')) return 'SUV';
+  if(lower.includes('pickup')) return 'Truck';
+  if(lower.includes('van')) return 'Van';
+  if(lower.includes('coupe')) return 'Coupe';
+  if(lower.includes('convertible')) return 'Convertible';
+  if(lower.includes('wagon')) return 'Wagon';
+
+  return v;
+}
+
+function cleanEngineInfo(r){
+  const parts = [];
+
+  if(r.EngineModel && !r.EngineModel.includes('/')) parts.push(r.EngineModel);
+  if(r.DisplacementL) parts.push(r.DisplacementL + 'L');
+  if(r.EngineCylinders) parts.push(r.EngineCylinders + ' cyl');
+
+  return parts.join(' ');
+}
+
+function normalizeColor(value){
+  const v = (value || '').trim();
+  if(!v || v.length > 20) return '';
+
+  const lower = v.toLowerCase();
+
+  if(lower.includes('white')) return 'White';
+  if(lower.includes('black')) return 'Black';
+  if(lower.includes('silver')) return 'Silver';
+  if(lower.includes('gray') || lower.includes('grey')) return 'Gray';
+  if(lower.includes('blue')) return 'Blue';
+  if(lower.includes('red')) return 'Red';
+  if(lower.includes('green')) return 'Green';
+  if(lower.includes('brown')) return 'Brown';
+  if(lower.includes('gold')) return 'Gold';
+  if(lower.includes('tan') || lower.includes('beige')) return 'Tan';
+  if(lower.includes('orange')) return 'Orange';
+  if(lower.includes('yellow')) return 'Yellow';
+
+  return v.charAt(0).toUpperCase() + v.slice(1);
+}
+
+function ensureColorOption(colorName){
+  if(!colorName) return;
+
+  const exists = Array.from(els.color.options).some(o => o.value === colorName || o.textContent === colorName);
+
+  if(!exists){
+    const opt = document.createElement('option');
+    opt.value = colorName;
+    opt.textContent = colorName;
+    els.color.insertBefore(opt, els.color.querySelector('option[value="__manual"]'));
+  }
+}
+
+function formatMileageInput(){
+  const raw = els.miles.value.replace(/\D/g,'');
+  els.miles.value = raw ? Number(raw).toLocaleString() : '';
+}
+
+function formatPhoneInput(){
+  const d = els.phone.value.replace(/\D/g,'').slice(0,10);
+
+  if(d.length > 6){
+    els.phone.value = '(' + d.slice(0,3) + ') ' + d.slice(3,6) + '-' + d.slice(6);
+  } else if(d.length > 3){
+    els.phone.value = '(' + d.slice(0,3) + ') ' + d.slice(3);
+  } else {
+    els.phone.value = d;
+  }
+}
+
+els.miles.addEventListener('input', formatMileageInput);
+els.phone.addEventListener('input', formatPhoneInput);
+
+els.zip.addEventListener('input', () => {
+  els.zip.value = els.zip.value.replace(/\D/g,'').slice(0,5);
+});
+
+els.trim.addEventListener('change', () => {
+  els.manualTrim.style.display = els.trim.value === '__manual' ? 'block' : 'none';
+  if(els.trim.value !== '__manual') els.manualTrim.value = '';
+});
+
+els.color.addEventListener('change', () => {
+  els.manualColor.style.display = els.color.value === '__manual' ? 'block' : 'none';
+  if(els.color.value !== '__manual') els.manualColor.value = '';
+});
+
+function validateRequiredFields(){
+  if(!els.year.value.trim()){alert('Year is required.'); step = 1; show(); return false;}
+  if(!els.make.value.trim()){alert('Make is required.'); step = 1; show(); return false;}
+  if(!els.model.value.trim()){alert('Model is required.'); step = 1; show(); return false;}
+  if(!els.miles.value.trim()){alert('Mileage is required.'); step = 1; show(); return false;}
+
+  if(els.trim.value === '__manual' && !els.manualTrim.value.trim()){alert('Enter trim or choose one from the list.'); step = 1; show(); return false;}
+  if(els.color.value === '__manual' && !els.manualColor.value.trim()){alert('Enter color or choose one from the list.'); step = 1; show(); return false;}
+
+  const conditionFields = [
+    {el:els.runs,label:'Runs and drives'},
+    {el:els.key,label:'Key'},
+    {el:els.tires,label:'Good tires'},
+    {el:els.engine,label:'Engine OK'},
+    {el:els.trans,label:'Transmission OK'},
+    {el:els.airbags,label:'Blown airbags'},
+    {el:els.cat,label:'Catalytic converter'},
+    {el:els.bodyDamage,label:'Body damage'},
+    {el:els.partsMissing,label:'Parts / panels missing'}
+  ];
+
+  for(const item of conditionFields){
+    if(!item.el.value){
+      alert('Please answer: ' + item.label);
+      step = 2;
+      show();
+      return false;
+    }
+  }
+
+  if(!els.zip.value.trim()){alert('ZIP code is required.'); step = 4; show(); return false;}
+  if(els.zip.value.replace(/\D/g,'').length !== 5){alert('Enter a valid 5-digit ZIP code.'); step = 4; show(); return false;}
+
+  if(!els.firstName.value.trim()){alert('First name is required.'); step = 5; show(); return false;}
+  if(!els.lastName.value.trim()){alert('Last name is required.'); step = 5; show(); return false;}
+
+  if(els.phone.value.replace(/\D/g,'').length !== 10){alert('Enter a valid 10-digit phone number.'); step = 5; show(); return false;}
+
+  if(!els.email.value.trim()){alert('Email is required.'); step = 5; show(); return false;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.email.value.trim())){alert('Enter a valid email address.'); step = 5; show(); return false;}
+
+  return true;
+}
+
+let vinDecodeTimer = null;
+let lastDecodedVin = '';
+let vinIsDecoding = false;
+
+async function decodeVIN(silent=false){
+  const v = els.vin.value.trim().toUpperCase();
+  els.vin.value = v;
+
+  if(v.length !== 17){
+    if(!silent) alert('Enter full VIN');
+    return;
+  }
+
+  if(vinIsDecoding || v === lastDecodedVin) return;
+
+  vinIsDecoding = true;
+
+  try{
+    els.vinMsg.textContent = 'Decoding VIN...';
+    els.vinMsg.className = 'small warn';
+
+    const res = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/' + encodeURIComponent(v) + '?format=json');
+    const d = await res.json();
+    const r = d.Results && d.Results[0] ? d.Results[0] : {};
+
+    els.year.value = r.ModelYear || '';
+    els.make.value = r.Make || '';
+    els.model.value = r.Model || '';
+    els.body.value = cleanBodyType(r.BodyClass);
+
+    let rawDrive = r.DriveType || r.DriveTypePrimary || '';
+    const rawDriveLower = rawDrive.toLowerCase();
+    const modelLower = (r.Model || '').toLowerCase();
+    const bodyLower = (r.BodyClass || '').toLowerCase();
+
+    if(rawDriveLower.includes('4wd') || rawDriveLower.includes('4x4')) rawDrive = '4WD';
+    else if(rawDriveLower.includes('awd')) rawDrive = 'AWD';
+    else if(rawDriveLower.includes('fwd')) rawDrive = 'FWD';
+    else if(rawDriveLower.includes('rwd')) rawDrive = 'RWD';
+    else if(rawDriveLower.includes('4x2')) rawDrive = (modelLower.includes('prius') || bodyLower.includes('sedan') || bodyLower.includes('hatchback') || bodyLower.includes('liftback')) ? 'FWD' : 'RWD';
+
+    if(!rawDrive){
+      if(
+        bodyLower.includes('sedan') ||
+        bodyLower.includes('hatchback') ||
+        modelLower.includes('accord') ||
+        modelLower.includes('civic') ||
+        modelLower.includes('camry') ||
+        modelLower.includes('corolla') ||
+        modelLower.includes('prius') ||
+        modelLower.includes('altima') ||
+        modelLower.includes('sentra')
+      ){
+        rawDrive = 'FWD';
       }
     }
 
-    function nextStep() {
-      if (currentStep < 4) showStep(currentStep + 1);
+    els.drivetrain.value = rawDrive;
+    els.fuel.value = r.FuelTypePrimary || r.FuelTypeSecondary || '';
+    els.engineInfo.value = cleanEngineInfo(r);
+
+    if(r.FuelTypePrimary && r.FuelTypePrimary.toLowerCase().includes('electric')){
+      els.transmissionInfo.value = 'Single Speed';
+    } else {
+      const trans = r.TransmissionStyle || '';
+      const speeds = r.TransmissionSpeeds ? r.TransmissionSpeeds + ' speed' : '';
+      els.transmissionInfo.value = (trans + ' ' + speeds).trim() || 'Automatic';
     }
 
-    function prevStep() {
-      if (currentStep > 1) showStep(currentStep - 1);
+    const vinColor = normalizeColor(r.ExteriorColor || r.Color || r.VehicleColor || '');
+    if(vinColor){
+      ensureColorOption(vinColor);
+      els.color.value = vinColor;
+      els.manualColor.style.display = 'none';
+      els.manualColor.value = '';
     }
 
-    /* =========================
-       VIN DECODE
-    ========================= */
-    const vinInput = document.getElementById("vin");
-    const vinMsg = document.getElementById("vinMsg");
-    const decodeBtn = document.getElementById("decodeBtn");
+    const rawTrim = r.Trim || r.Trim2 || r.Series || r.Series2 || '';
+    const apiTrimOptions = splitTrimOptions(rawTrim);
+    const suggestions = getTrimSuggestions(r.Make, r.Model);
+    const finalTrimOptions = apiTrimOptions.length ? apiTrimOptions : suggestions;
 
-    async function decodeVin() {
-      const vin = vinInput.value.trim().toUpperCase();
+    setTrimSuggestions(finalTrimOptions);
 
-      vinInput.value = vin;
+    els.manualTrim.style.display = 'none';
+    els.manualTrim.value = '';
 
-      if (vin.length !== 17) {
-        vinMsg.textContent = "VIN must be 17 characters.";
-        vinMsg.className = "msg error";
-        return;
-      }
-
-      vinMsg.textContent = "Decoding VIN...";
-      vinMsg.className = "msg";
-
-      try {
-        const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
-        const json = await res.json();
-        const data = json.Results && json.Results[0] ? json.Results[0] : {};
-
-        document.getElementById("year").value = data.ModelYear || "";
-        document.getElementById("make").value = data.Make || "";
-        document.getElementById("model").value = data.Model || "";
-        document.getElementById("trim").value = data.Trim || "";
-        document.getElementById("body_type").value = data.BodyClass || "";
-        document.getElementById("drivetrain").value = data.DriveType || "";
-        document.getElementById("fuel_type").value = data.FuelTypePrimary || "";
-        document.getElementById("engine").value =
-          data.EngineModel ||
-          data.EngineConfiguration ||
-          data.DisplacementL ||
-          "";
-        document.getElementById("transmission").value = data.TransmissionStyle || "";
-
-        vinMsg.textContent = "VIN decoded successfully.";
-        vinMsg.className = "msg success";
-
-      } catch (err) {
-        console.error("VIN decode error:", err);
-        vinMsg.textContent = "VIN decode failed. You can enter details manually.";
-        vinMsg.className = "msg error";
-      }
+    if(finalTrimOptions.length){
+      els.trim.value = finalTrimOptions[0];
+    } else if(rawTrim && rawTrim.length < 30 && !rawTrim.includes('*')){
+      els.trim.value = rawTrim.trim();
+    } else {
+      els.trim.value = '';
     }
 
-    decodeBtn.addEventListener("click", decodeVin);
+    lastDecodedVin = v;
+    els.vinMsg.textContent = 'VIN decoded. Review fields and complete anything missing.';
+    els.vinMsg.className = 'small ok';
 
-    vinInput.addEventListener("input", function () {
-      const vin = vinInput.value.trim().toUpperCase();
-      vinInput.value = vin;
+  } catch(err){
+    if(!silent) alert('VIN decode failed. You can enter vehicle details manually.');
+    els.vinMsg.textContent = 'VIN decode failed. You can enter vehicle details manually.';
+    els.vinMsg.className = 'small warn';
+    console.error(err);
+  } finally {
+    vinIsDecoding = false;
+  }
+}
 
-      if (vin.length === 17) {
-        decodeVin();
-      }
-    });
+els.decode.onclick = () => decodeVIN(false);
 
-    /* =========================
-       FORM DATA
-    ========================= */
-    function val(id) {
-      return document.getElementById(id)?.value?.trim() || null;
+els.vin.addEventListener('input', () => {
+  els.vin.value = els.vin.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,17);
+
+  if(vinDecodeTimer) clearTimeout(vinDecodeTimer);
+
+  if(els.vin.value.length === 17){
+    els.vinMsg.textContent = 'VIN complete — decoding…';
+    els.vinMsg.className = 'small warn';
+    vinDecodeTimer = setTimeout(() => decodeVIN(true), 450);
+  } else {
+    lastDecodedVin = '';
+    els.vinMsg.textContent = '';
+  }
+});
+
+els.form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if(isSubmitting) return;
+  if(!validateRequiredFields()) return;
+
+  isSubmitting = true;
+  els.next.disabled = true;
+  els.back.disabled = true;
+  els.decode.disabled = true;
+  els.next.textContent = 'Submitting...';
+
+  const sellerFullName = (els.firstName.value.trim() + ' ' + els.lastName.value.trim()).trim();
+  const finalTrim = els.trim.value === '__manual' ? els.manualTrim.value.trim() : els.trim.value;
+  const finalColor = els.color.value === '__manual' ? els.manualColor.value.trim() : els.color.value;
+
+  const lead = {
+    vin: els.vin.value.trim() || null,
+    year: els.year.value.trim() || null,
+    make: els.make.value.trim() || null,
+    model: els.model.value.trim() || null,
+    trim: finalTrim || null,
+    body: els.body.value.trim() || null,
+    drive: els.drivetrain.value.trim() || null,
+    fuel: els.fuel.value.trim() || null,
+    engine: els.engineInfo.value.trim() || null,
+    trans: els.transmissionInfo.value.trim() || null,
+    color: finalColor || null,
+    miles: els.miles.value.trim() || null,
+    seller: sellerFullName || null,
+    phone: els.phone.value.trim() || null,
+    email: els.email.value.trim() || null,
+    zip: els.zip.value.trim() || null,
+    address: els.address.value.trim() || null,
+    title: els.title.value || null,
+    condition: [
+      'Runs and drives: ' + els.runs.value,
+      'Key: ' + els.key.value,
+      'Good tires: ' + els.tires.value,
+      'Engine OK: ' + els.engine.value,
+      'Transmission OK: ' + els.trans.value,
+      'Blown airbags: ' + els.airbags.value,
+      'Catalytic converter: ' + els.cat.value,
+      'Body damage: ' + els.bodyDamage.value,
+      'Parts / panels missing: ' + els.partsMissing.value,
+      'Owner: ' + els.owner.value
+    ]
+  };
+
+  try{
+    const { data, error } = await db
+      .from('leads')
+      .insert([lead])
+      .select();
+
+    console.log('CVCF lead insert result:', data, error);
+
+    if(error){
+      alert('Error saving lead: ' + error.message);
+      console.error(error);
+
+      isSubmitting = false;
+      els.next.disabled = false;
+      els.back.disabled = false;
+      els.decode.disabled = false;
+      els.next.textContent = 'Submit';
+      return;
     }
 
-    function collectFormData() {
-      return {
-        vin: val("vin"),
-        year: val("year"),
-        make: val("make"),
-        model: val("model"),
-        trim: val("trim"),
-        body_type: val("body_type"),
-        drivetrain: val("drivetrain"),
-        fuel_type: val("fuel_type"),
-        engine: val("engine"),
-        transmission: val("transmission"),
-        mileage: val("mileage"),
+    els.form.style.display = 'none';
+    document.getElementById('successCard').style.display = 'block';
 
-        runs_drives: val("runs_drives"),
-        title_status: val("title_status"),
-        has_key: val("has_key"),
-        has_all_tires: val("has_all_tires"),
-        condition: val("condition"),
-        description: val("description"),
+    setTimeout(() => {
+      window.location.replace(THANK_YOU_URL);
+    }, 500);
 
-        first_name: val("first_name"),
-        last_name: val("last_name"),
-        phone: val("phone"),
-        email: val("email"),
-        zip: val("zip"),
-        pickup_address: val("pickup_address"),
-        preferred_day: val("preferred_day"),
-        preferred_window: val("preferred_window"),
+  } catch(err){
+    alert('Error submitting form. Please try again.');
+    console.error(err);
 
-        status: "New Lead",
-        created_at: new Date().toISOString()
-      };
-    }
+    isSubmitting = false;
+    els.next.disabled = false;
+    els.back.disabled = false;
+    els.decode.disabled = false;
+    els.next.textContent = 'Submit';
+  }
+});
 
-    function renderConfirmBox() {
-      const d = collectFormData();
-
-      document.getElementById("confirmBox").innerHTML = `
-        <strong>Vehicle:</strong> ${d.year || ""} ${d.make || ""} ${d.model || ""} ${d.trim || ""}<br>
-        <strong>VIN:</strong> ${d.vin || "Not provided"}<br>
-        <strong>Mileage:</strong> ${d.mileage || "Not provided"}<br>
-        <strong>Condition:</strong> ${d.condition || "Not provided"}<br>
-        <strong>Name:</strong> ${d.first_name || ""} ${d.last_name || ""}<br>
-        <strong>Phone:</strong> ${d.phone || ""}<br>
-        <strong>Email:</strong> ${d.email || ""}<br>
-        <strong>ZIP:</strong> ${d.zip || ""}
-      `;
-    }
-
-    /* =========================
-       SUBMIT TO SUPABASE + REDIRECT
-    ========================= */
-    document.getElementById("cvcfOfferForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-
-      const submitBtn = document.getElementById("submitBtn");
-      const submitMsg = document.getElementById("submitMsg");
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
-      submitMsg.textContent = "";
-
-      try {
-        const payload = collectFormData();
-
-        const { error } = await supabaseClient
-          .from("leads")
-          .insert([payload]);
-
-        if (error) {
-          console.error("Supabase insert error:", error);
-          submitMsg.textContent = "Submission failed. Please check Supabase columns or permissions.";
-          submitMsg.className = "msg error";
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Submit Offer Request";
-          return;
-        }
-
-        window.location.href = THANK_YOU_URL;
-
-      } catch (err) {
-        console.error("Unexpected submit error:", err);
-        submitMsg.textContent = "Something went wrong. Please try again.";
-        submitMsg.className = "msg error";
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Offer Request";
-      }
-    });
-  </script>
+show();
+</script>
 </body>
 </html>
