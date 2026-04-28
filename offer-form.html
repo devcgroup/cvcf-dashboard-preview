@@ -13,7 +13,6 @@ input,select{width:100%;padding:11px;margin-top:8px;margin-bottom:12px;border:1p
 label{display:block;font-weight:700;color:#07142b;margin-top:6px}
 button{padding:12px;background:#07142b;color:#fff;border:none;border-radius:8px;width:100%;font-weight:bold;cursor:pointer}
 button.secondary{background:#f8fafc;color:#07142b;border:1px solid #cbd5e1}
-button:disabled{opacity:.65;cursor:not-allowed}
 .step{display:none}.step.active{display:block}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .small{font-size:12px;color:#64748b;line-height:1.4}
@@ -193,8 +192,6 @@ h3{margin-top:0;color:#07142b}
 <script>
 const $ = (id) => document.getElementById(id);
 
-const THANK_YOU_URL = "/thank-you.html";
-
 const els = {
   form: $('form'),
   vin: $('vin'),
@@ -237,8 +234,6 @@ const els = {
 };
 
 let step = 1;
-let isSubmitting = false;
-
 const steps = document.querySelectorAll('.step');
 const progressSteps = document.querySelectorAll('.progress-step');
 
@@ -255,12 +250,9 @@ function show(){
   });
 
   els.next.textContent = step === 5 ? 'Submit' : 'Next';
-  els.back.style.visibility = step === 1 ? 'hidden' : 'visible';
 }
 
 els.next.onclick = () => {
-  if(isSubmitting) return;
-
   if(step < 5){
     step++;
     show();
@@ -270,8 +262,6 @@ els.next.onclick = () => {
 };
 
 els.back.onclick = () => {
-  if(isSubmitting) return;
-
   if(step > 1){
     step--;
     show();
@@ -414,7 +404,6 @@ function formatPhoneInput(){
 
 els.miles.addEventListener('input', formatMileageInput);
 els.phone.addEventListener('input', formatPhoneInput);
-
 els.zip.addEventListener('input', () => {
   els.zip.value = els.zip.value.replace(/\D/g,'').slice(0,5);
 });
@@ -434,6 +423,17 @@ function validateRequiredFields(){
   if(!els.make.value.trim()){alert('Make is required.'); step = 1; show(); return false;}
   if(!els.model.value.trim()){alert('Model is required.'); step = 1; show(); return false;}
   if(!els.miles.value.trim()){alert('Mileage is required.'); step = 1; show(); return false;}
+
+  if(!els.zip.value.trim()){alert('ZIP code is required.'); step = 4; show(); return false;}
+  if(els.zip.value.replace(/\D/g,'').length !== 5){alert('Enter a valid 5-digit ZIP code.'); step = 4; show(); return false;}
+
+  if(!els.firstName.value.trim()){alert('First name is required.'); step = 5; show(); return false;}
+  if(!els.lastName.value.trim()){alert('Last name is required.'); step = 5; show(); return false;}
+
+  if(els.phone.value.replace(/\D/g,'').length !== 10){alert('Enter a valid 10-digit phone number.'); step = 5; show(); return false;}
+
+  if(!els.email.value.trim()){alert('Email is required.'); step = 5; show(); return false;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.email.value.trim())){alert('Enter a valid email address.'); step = 5; show(); return false;}
 
   if(els.trim.value === '__manual' && !els.manualTrim.value.trim()){alert('Enter trim or choose one from the list.'); step = 1; show(); return false;}
   if(els.color.value === '__manual' && !els.manualColor.value.trim()){alert('Enter color or choose one from the list.'); step = 1; show(); return false;}
@@ -458,17 +458,6 @@ function validateRequiredFields(){
       return false;
     }
   }
-
-  if(!els.zip.value.trim()){alert('ZIP code is required.'); step = 4; show(); return false;}
-  if(els.zip.value.replace(/\D/g,'').length !== 5){alert('Enter a valid 5-digit ZIP code.'); step = 4; show(); return false;}
-
-  if(!els.firstName.value.trim()){alert('First name is required.'); step = 5; show(); return false;}
-  if(!els.lastName.value.trim()){alert('Last name is required.'); step = 5; show(); return false;}
-
-  if(els.phone.value.replace(/\D/g,'').length !== 10){alert('Enter a valid 10-digit phone number.'); step = 5; show(); return false;}
-
-  if(!els.email.value.trim()){alert('Email is required.'); step = 5; show(); return false;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.email.value.trim())){alert('Enter a valid email address.'); step = 5; show(); return false;}
 
   return true;
 }
@@ -531,6 +520,7 @@ async function decodeVIN(silent=false){
     }
 
     els.drivetrain.value = rawDrive;
+
     els.fuel.value = r.FuelTypePrimary || r.FuelTypeSecondary || '';
     els.engineInfo.value = cleanEngineInfo(r);
 
@@ -602,37 +592,30 @@ els.vin.addEventListener('input', () => {
 els.form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  if(isSubmitting) return;
   if(!validateRequiredFields()) return;
-
-  isSubmitting = true;
-  els.next.disabled = true;
-  els.back.disabled = true;
-  els.decode.disabled = true;
-  els.next.textContent = 'Submitting...';
 
   const sellerFullName = (els.firstName.value.trim() + ' ' + els.lastName.value.trim()).trim();
   const finalTrim = els.trim.value === '__manual' ? els.manualTrim.value.trim() : els.trim.value;
   const finalColor = els.color.value === '__manual' ? els.manualColor.value.trim() : els.color.value;
 
   const lead = {
-    vin: els.vin.value.trim() || null,
-    year: els.year.value.trim() || null,
-    make: els.make.value.trim() || null,
-    model: els.model.value.trim() || null,
+    vin: els.vin.value || null,
+    year: els.year.value || null,
+    make: els.make.value || null,
+    model: els.model.value || null,
     trim: finalTrim || null,
-    body: els.body.value.trim() || null,
-    drive: els.drivetrain.value.trim() || null,
-    fuel: els.fuel.value.trim() || null,
-    engine: els.engineInfo.value.trim() || null,
-    trans: els.transmissionInfo.value.trim() || null,
+    body: els.body.value || null,
+    drive: els.drivetrain.value || null,
+    fuel: els.fuel.value || null,
+    engine: els.engineInfo.value || null,
+    trans: els.transmissionInfo.value || null,
     color: finalColor || null,
-    miles: els.miles.value.trim() || null,
+    miles: els.miles.value || null,
     seller: sellerFullName || null,
-    phone: els.phone.value.trim() || null,
-    email: els.email.value.trim() || null,
-    zip: els.zip.value.trim() || null,
-    address: els.address.value.trim() || null,
+    phone: els.phone.value || null,
+    email: els.email.value || null,
+    zip: els.zip.value || null,
+    address: els.address.value || null,
     title: els.title.value || null,
     condition: [
       'Runs and drives: ' + els.runs.value,
@@ -643,48 +626,24 @@ els.form.addEventListener('submit', async (e) => {
       'Blown airbags: ' + els.airbags.value,
       'Catalytic converter: ' + els.cat.value,
       'Body damage: ' + els.bodyDamage.value,
-      'Parts / panels missing: ' + els.partsMissing.value,
-      'Owner: ' + els.owner.value
+      'Parts / panels missing: ' + els.partsMissing.value
     ]
   };
 
-  try{
-    const { data, error } = await db
-      .from('leads')
-      .insert([lead])
-      .select();
+  const { error } = await db.from('leads').insert([lead]);
 
-    console.log('CVCF lead insert result:', data, error);
-
-    if(error){
-      alert('Error saving lead: ' + error.message);
-      console.error(error);
-
-      isSubmitting = false;
-      els.next.disabled = false;
-      els.back.disabled = false;
-      els.decode.disabled = false;
-      els.next.textContent = 'Submit';
-      return;
-    }
-
-    els.form.style.display = 'none';
-    document.getElementById('successCard').style.display = 'block';
-
-    setTimeout(() => {
-      window.location.replace(THANK_YOU_URL);
-    }, 500);
-
-  } catch(err){
-    alert('Error submitting form. Please try again.');
-    console.error(err);
-
-    isSubmitting = false;
-    els.next.disabled = false;
-    els.back.disabled = false;
-    els.decode.disabled = false;
-    els.next.textContent = 'Submit';
+  if(error){
+    alert('Error saving lead: ' + error.message);
+    console.error(error);
+    return;
   }
+
+  els.form.style.display = 'none';
+  document.getElementById('successCard').style.display = 'block';
+
+  setTimeout(() => {
+    window.location.href = 'thank-you.html';
+  }, 900);
 });
 
 show();
