@@ -630,7 +630,9 @@ els.form.addEventListener('submit', async (e) => {
     ]
   };
 
-  const { error } = await db.from('leads').insert([lead]);
+  const { data, error } = await db.from('leads').insert([lead]).select();
+
+  console.log('INSERT RESULT:', data, error);
 
   if(error){
     alert('Error saving lead: ' + error.message);
@@ -642,8 +644,8 @@ els.form.addEventListener('submit', async (e) => {
   document.getElementById('successCard').style.display = 'block';
 
   setTimeout(() => {
-    window.location.href = 'thank-you.html';
-  }, 900);
+    window.location.replace('/thank-you.html');
+  }, 500);
 });
 
 show();
