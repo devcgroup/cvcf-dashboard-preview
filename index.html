@@ -30,7 +30,7 @@ body{margin:0;font-family:Inter,Arial,sans-serif;background:#f1f5f9;color:#0f172
 input,select,textarea{border:1px solid #cbd5e1;border-radius:12px;padding:10px;font:inherit;background:white}
 input{min-width:340px;flex:1}
 textarea{width:100%;min-height:80px}
-.edit-input{min-width:0;width:100%;flex:0;padding:8px}
+.edit-input{min-width:0;width:100%;flex:1;padding:8px}
 .filters{display:flex;gap:8px;flex-wrap:wrap}
 .filters button{border:0;border-radius:999px;padding:9px 13px;background:#e2e8f0;font-weight:800;cursor:pointer}
 .filters button.active{background:#07142b;color:white}
@@ -54,7 +54,11 @@ textarea{width:100%;min-height:80px}
 .note{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px;margin:10px 0;font-size:14px}
 .note h4{margin:0 0 8px}
 .condition{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.condition div{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;display:flex;justify-content:space-between;gap:10px}
+.condition .condition-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;display:grid;gap:8px}
+.condition-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.condition-name{font-size:12px;font-weight:900;color:#334155}
+.condition-answer{font-size:14px;font-weight:900;color:#0f172a}
+.condition-edit{width:100%;min-width:0;flex:1}
 table{width:100%;border-collapse:collapse;background:white;border-radius:18px;overflow:hidden}
 th,td{padding:14px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:14px}
 th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
@@ -267,6 +271,54 @@ function escText(value){
     .replaceAll(">","&gt;");
 }
 
+function formatLeadId(rawId){
+  const raw = String(rawId ?? "");
+  const numeric = raw.replace(/\D/g, "");
+
+  if(numeric){
+    return "CV-" + numeric.slice(-6).padStart(6, "0");
+  }
+
+  let hash = 0;
+  for(let i=0;i<raw.length;i++){
+    hash = ((hash * 31) + raw.charCodeAt(i)) % 1000000;
+  }
+  return "CV-" + String(hash).padStart(6, "0");
+}
+
+function hasRealAddress(address){
+  const a = String(address || "").trim();
+  if(!a) return false;
+  if(a.length < 8) return false;
+  if(["n/a","na","none","no address","unknown","—","-"].includes(a.toLowerCase())) return false;
+  return true;
+}
+
+function conditionTone(value){
+  const v = String(value || "").toLowerCase();
+  if(v.includes("yes") || v.includes("ok") || v.includes("present") || v.includes("clean")) return "green";
+  if(v.includes("no") || v.includes("not sure") || v.includes("missing") || v.includes("damage") || v.includes("blown")) return "yellow";
+  return "slate";
+}
+
+function renderConditionItem(c){
+  const text = String(c || "").trim();
+  const parts = text.split(":");
+  const label = (parts[0] || "Condition").trim();
+  const value = (parts.length > 1 ? parts.slice(1).join(":").trim() : text) || "Not answered";
+  const tone = conditionTone(value);
+
+  return `
+    <div class="condition-item">
+      <div class="condition-top">
+        <span class="condition-name">${escText(label)}</span>
+        ${badge(escText(value), tone)}
+      </div>
+      <input class="edit-input condition-edit" value="${escAttr(text)}">
+    </div>
+  `;
+}
+
 
 function normalizeCondition(value){
   if(Array.isArray(value)) return value.filter(Boolean);
@@ -289,7 +341,7 @@ function mapLeadFromDb(l){
 
   return {
     db_id: l.id,
-    id: "CV-" + l.id,
+    id: formatLeadId(l.id),
     created: l.created_at || new Date().toISOString(),
     status: safeText(l.status, "New Lead"),
     communication: safeText(l.communication, "Not contacted"),
@@ -320,8 +372,8 @@ function mapLeadFromDb(l){
     window: pickupDate ? `${pickupDate} • ${pickupWindow}` : pickupWindow,
     instructions: safeText(l.pickup_notes, ""),
 
-    buyer: safeText(l.buyer_name, "") || "—",
-    tow: safeText(l.tow_driver_name, "") || "—",
+    buyer: safeText(l.buyer, "") || safeText(l.buyer_name, "") || "—",
+    tow: safeText(l.tow_driver, "") || safeText(l.tow_driver_name, "") || "—",
     route: safeText(l.route, "Yard"),
 
     title: safeText(l.title, ""),
@@ -369,20 +421,17 @@ function dbPayloadFromLead(l){
     pickup_address: l.address || null,
     pickup_notes: l.instructions || null,
 
-    buyer_name: l.buyer === "—" ? null : l.buyer,
-    tow_driver_name: l.tow === "—" ? null : l.tow,
-    route: l.route || "Yard",
+    buyer: l.buyer === "—" ? null : l.buyer,
+    tow_driver: l.tow === "—" ? null : l.tow,
 
     title: l.title || null,
-    ownership: l.ownership || null,
     vehicle_description: l.vehicleDescription || null,
     condition: l.condition || [],
 
     customer_notes: l.customerNotes || null,
     buyer_notes: l.buyerNotes || null,
     towing_notes: l.towingNotes || null,
-    admin_notes: l.adminNotes || null,
-    audit: l.audit || []
+    admin_notes: l.adminNotes || null
   };
 }
 
@@ -413,7 +462,7 @@ async function updateLeadDb(lead, extraPayload={}){
     return false;
   }
 
-  const payload = Object.assign({}, dbPayloadFromLead(lead), extraPayload);
+  const payload = Object.keys(extraPayload).length ? extraPayload : dbPayloadFromLead(lead);
 
   const { data, error } = await db
     .from("leads")
@@ -543,7 +592,7 @@ function filteredLeads(){
   const limit = Number(document.getElementById("limit").value);
   const list = sortedLeads().filter(l=>{
     const statusOk = activeFilter==="All" || l.status===activeFilter;
-    const hay = [l.id,l.vin,(l.vin || "").slice(-6),l.seller,l.year,l.make,l.model,l.phone,l.email,l.zip].join(" ").toLowerCase();
+    const hay = [l.id,l.db_id,l.vin,(l.vin || "").slice(-6),l.seller,l.year,l.make,l.model,l.phone,l.email,l.zip].join(" ").toLowerCase();
     return statusOk && (!q || hay.includes(q));
   });
   return list.slice(0, limit);
@@ -571,7 +620,7 @@ function renderLeadList(){
         <div onclick="event.stopPropagation()">
           ${
             l.status === "New Lead"
-              ? `<div class="compact-label">Make Offer</div><div class="inline-offer"><input id="offer-${l.id}" type="number" placeholder="$" /><button class="btn green" onclick="makeOffer('${l.id}')">Send</button></div>`
+              ? `<div class="compact-label">Make Offer</div><div class="inline-offer"><input id="offer-${l.id}" type="number" min="1" step="1" placeholder="$" oninput="this.value = this.value.replace(/[^0-9]/g, '')" /><button class="btn green" onclick="makeOffer('${l.id}')">Send</button></div>`
               : l.status === "Accepted"
                 ? `<div class="compact-label">Buyer Assignment</div><select onchange="assignBuyer('${l.id}', this.value)"><option>${l.buyer === "—" ? "Select buyer" : l.buyer}</option><option>Fresno Auto Wholesale</option><option>Valley Budget Autos</option><option>Central Valley Buyer Group</option></select>`
                 : `<div class="compact-label">Buyer Assignment</div><div class="compact-value muted">Available after accepted</div>`
@@ -586,9 +635,9 @@ function renderLeadList(){
 
 async function makeOffer(id){
   const input = document.getElementById("offer-" + id);
-  const amount = Number(input.value);
+  const amount = Number(String(input.value || "").replace(/[^0-9]/g, ""));
   const lead = leads.find(l=>l.id===id);
-  if(!lead || !amount || amount <= 0) return alert("Enter a valid offer amount.");
+  if(!lead || !Number.isFinite(amount) || amount <= 0) return alert("Enter a positive offer amount.");
 
   lead.offer = amount;
   lead.status = "Offer Sent";
@@ -613,13 +662,14 @@ async function assignBuyer(id, value){
   lead.buyer = value;
   lead.audit.unshift("Buyer assigned: " + value);
 
-  const saved = await updateLeadDb(lead, { buyer_name: value });
+  const saved = await updateLeadDb(lead, { buyer: value });
   if(saved) renderLeadList();
 }
 
 async function updatePickupSchedule(id){
   const lead = leads.find(l=>l.id===id);
   if(!lead) return;
+  if(lead.status !== "Accepted") return alert("Pickup scheduling is only available after the offer is accepted.");
 
   const date = document.getElementById("pickup-date").value;
   const win = document.getElementById("pickup-window").value;
@@ -685,7 +735,6 @@ async function saveVehicle(id){
     trans: l.trans || null,
     color: l.color || null,
     title: l.title || null,
-    ownership: l.ownership || null,
     vehicle_description: l.vehicleDescription || null,
     condition: l.condition || []
   });
@@ -742,22 +791,31 @@ function renderLeadDetail(){
           <div class="kv"><b>Communication</b><input class="edit-input" id="cust-communication" value="${escAttr(l.communication)}"></div>
           <button class="btn dark" onclick="saveCustomer('${l.id}')">Save Customer Profile</button>
 
-          <div class="note">
-            <h4>Pickup Appointment</h4>
-            <p class="muted">Use actual date instead of today/tomorrow. Available windows: 8–12, 12–4, 4–8.</p>
-            <div class="schedule-controls">
-              <input id="pickup-date" type="date" value="${l.pickupDate || ""}" />
-              <select id="pickup-window">
-                ${["8–12","12–4","4–8","Not selected","Pending acceptance","Awaiting acceptance","Declined"].map(w=>`<option ${l.pickupWindow===w?'selected':''}>${w}</option>`).join("")}
-              </select>
-              <button class="btn dark" onclick="updatePickupSchedule('${l.id}')">Update</button>
+          ${l.status === "Accepted" ? `
+            <div class="note">
+              <h4>Pickup Appointment</h4>
+              <p class="muted">Use actual date instead of today/tomorrow. Available windows: 8–12, 12–4, 4–8.</p>
+              <div class="schedule-controls">
+                <input id="pickup-date" type="date" value="${l.pickupDate || ""}" />
+                <select id="pickup-window">
+                  ${["8–12","12–4","4–8","Not selected"].map(w=>`<option ${l.pickupWindow===w?'selected':''}>${w}</option>`).join("")}
+                </select>
+                <button class="btn dark" onclick="updatePickupSchedule('${l.id}')">Update</button>
+              </div>
             </div>
-          </div>
+          ` : `
+            <div class="note">
+              <h4>Pickup Appointment</h4>
+              <p class="muted">Pickup scheduling becomes available after the customer accepts the offer.</p>
+            </div>
+          `}
 
-          <div class="map-actions">
-            <a class="btn light" target="_blank" href="${mapsUrl(l.address)}">Open Pickup Address in Google Maps</a>
-          </div>
-          <div class="map-box"><iframe loading="lazy" src="${mapEmbed(l.address)}"></iframe></div>
+          ${hasRealAddress(l.address) ? `
+            <div class="map-actions">
+              <a class="btn light" target="_blank" href="${mapsUrl(l.address)}">Open Pickup Address in Google Maps</a>
+            </div>
+            <div class="map-box"><iframe loading="lazy" src="${mapEmbed(l.address)}"></iframe></div>
+          ` : ``}
         </div>
 
         <div class="panel">
@@ -780,7 +838,7 @@ function renderLeadDetail(){
 
           <h4 style="margin-bottom:8px">Condition</h4>
           <div class="condition">
-            ${l.condition.map((c,i)=>`<div><input class="edit-input condition-edit" value="${escAttr(c)}">${i===0||i===1||i===3||i===4||i===5?badge("Review","yellow"):badge("OK","green")}</div>`).join("")}
+            ${l.condition.map(c=>renderConditionItem(c)).join("")}
           </div>
           <div class="actions-row"><button class="btn dark" onclick="saveVehicle('${l.id}')">Save Vehicle Profile</button></div>
         </div>
