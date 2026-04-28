@@ -1,129 +1,157 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Thank You — Central Valley Cash for Cars</title>
-
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Arial, Helvetica, sans-serif;
-  background:#eef2f6;
-  color:#102033;
-}
-
-.container{
-  max-width:900px;
-  margin:60px auto;
-  padding:20px;
-}
-
-.card{
-  background:white;
-  border:1px solid #d8e1ec;
-  border-radius:20px;
-  padding:30px;
-  text-align:center;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-
-h1{
-  margin:0 0 10px;
-  color:#07142b;
-  font-size:32px;
-}
-
-p{
-  color:#526174;
-  font-size:16px;
-  margin:0 0 20px;
-}
-
-.steps{
-  text-align:left;
-  margin:20px auto;
-  max-width:500px;
-}
-
-.step{
-  background:#f8fafc;
-  border:1px solid #d8e1ec;
-  border-radius:12px;
-  padding:14px;
-  margin-bottom:10px;
-  font-weight:600;
-}
-
-.buttons{
-  margin-top:25px;
-  display:flex;
-  gap:12px;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-
-.btn{
-  padding:12px 18px;
-  border-radius:12px;
-  font-weight:800;
-  text-decoration:none;
-  display:inline-block;
-}
-
-.btn-dark{
-  background:#07142b;
-  color:white;
-}
-
-.btn-green{
-  background:#16a34a;
-  color:white;
-}
-
-.phone{
-  margin-top:25px;
-  font-weight:700;
-}
-
-.phone a{
-  color:#16a34a;
-  text-decoration:none;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank You — Central Valley Cash for Cars</title>
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#eef2f6;
+      color:#102033;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+    }
+    .wrap{width:100%;max-width:760px}
+    .card{
+      background:#fff;
+      border:1px solid #d8e1ec;
+      border-radius:18px;
+      box-shadow:0 8px 28px rgba(15,23,42,.08);
+      padding:34px;
+      text-align:center;
+    }
+    .check{
+      width:70px;height:70px;border-radius:999px;
+      background:#07142b;color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      font-size:38px;font-weight:800;margin:0 auto 18px;
+    }
+    h1{
+      margin:0 0 10px;
+      font-size:34px;
+      color:#07142b;
+      letter-spacing:-.03em;
+    }
+    .lead{
+      margin:0 auto 22px;
+      color:#475569;
+      font-size:17px;
+      line-height:1.55;
+      max-width:560px;
+    }
+    .status-box{
+      background:#f8fafc;
+      border:1px solid #dbe3ee;
+      border-radius:14px;
+      padding:18px;
+      margin:22px 0;
+      text-align:left;
+    }
+    .status-title{
+      font-weight:800;
+      color:#07142b;
+      margin-bottom:10px;
+      font-size:15px;
+    }
+    .steps{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:14px;
+    }
+    .step{
+      background:#fff;
+      border:1px solid #d8e1ec;
+      border-radius:12px;
+      padding:14px;
+    }
+    .num{
+      width:28px;height:28px;border-radius:999px;
+      background:#07142b;color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:800;margin-bottom:9px;font-size:13px;
+    }
+    .step strong{
+      display:block;
+      font-size:14px;
+      color:#07142b;
+      margin-bottom:5px;
+    }
+    .step span{
+      display:block;
+      font-size:12px;
+      color:#64748b;
+      line-height:1.4;
+    }
+    .note{
+      color:#64748b;
+      font-size:13px;
+      line-height:1.5;
+      margin:18px auto 0;
+      max-width:560px;
+    }
+    .phone{
+      display:inline-block;
+      margin-top:18px;
+      color:#07142b;
+      font-weight:800;
+      text-decoration:none;
+    }
+    @media(max-width:700px){
+      .card{padding:26px 18px}
+      h1{font-size:28px}
+      .steps{grid-template-columns:1fr}
+    }
+  </style>
 </head>
-
 <body>
+  <main class="wrap">
+    <section class="card">
+      <div class="check">✓</div>
+      <h1>Thank you!</h1>
 
-<div class="container">
-  <div class="card">
+      <p class="lead">
+        Your vehicle information was received. Central Valley Cash for Cars will review your request and contact you with the next step.
+        Once you accept the offer, a pickup day and time can be scheduled right away.
+      </p>
 
-    <h1>Thank You — We Got Your Request</h1>
+      <div class="status-box">
+        <div class="status-title">What happens next?</div>
 
-    <p>
-      Your vehicle information has been submitted successfully.
-      A team member will review it shortly.
-    </p>
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <strong>We review your vehicle</strong>
+            <span>VIN, mileage, title, location, and condition are checked.</span>
+          </div>
 
-    <div class="steps">
-      <div class="step">1. We review your vehicle details</div>
-      <div class="step">2. We send you a cash offer</div>
-      <div class="step">3. If accepted, you choose pickup date & time</div>
-    </div>
+          <div class="step">
+            <div class="num">2</div>
+            <strong>You receive an offer</strong>
+            <span>Most offers are sent within 5–15 minutes during business hours.</span>
+          </div>
 
-    <div class="buttons">
-      <a href="/" class="btn btn-dark">Back to Home</a>
-      <a href="/offer-form.html" class="btn btn-green">Submit Another Vehicle</a>
-    </div>
+          <div class="step">
+            <div class="num">3</div>
+            <strong>Pickup is scheduled</strong>
+            <span>After you accept the offer, you can schedule a pickup day and time. Same-day pickup may be available.</span>
+          </div>
+        </div>
+      </div>
 
-    <div class="phone">
-      Need help? Call or text:
-      <a href="tel:+15595551234">(559) 555-1234</a>
-    </div>
+      <p class="note">
+        Keep your phone nearby. If we need any missing details, we may call or text before sending the final offer.
+        Free towing and vehicle removal may be available, including same-day pickup when scheduling allows.
+      </p>
 
-  </div>
-</div>
-
+      <a class="phone" href="tel:+15595551234">Call Central Valley Cash for Cars</a>
+    </section>
+  </main>
 </body>
 </html>
