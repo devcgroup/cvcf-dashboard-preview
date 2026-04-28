@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your Cash Offer | Central Valley Cash for Cars</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * { box-sizing: border-box; }
 
@@ -71,11 +73,13 @@
       border-radius: 10px;
       min-height: 42px;
       font-size: 14px;
+      gap: 12px;
     }
 
     .row span:last-child {
       font-weight: 700;
       text-align: right;
+      overflow-wrap: anywhere;
     }
 
     .info-box {
@@ -105,6 +109,11 @@
     .no {
       background: #fee2e2;
       color: #991b1b;
+    }
+
+    .neutral {
+      background: #e5e7eb;
+      color: #374151;
     }
 
     .actions {
@@ -150,6 +159,7 @@
       border-radius: 12px;
       font-weight: 700;
       display: none;
+      line-height: 1.45;
     }
 
     .notice.show {
@@ -166,6 +176,12 @@
       background: #fef2f2;
       color: #991b1b;
       border: 1px solid #fecaca;
+    }
+
+    .notice.info {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
     }
 
     .step-card {
@@ -208,6 +224,10 @@
       display: none;
       padding: 0;
       overflow: hidden;
+    }
+
+    .congrats-card.show {
+      display: block;
     }
 
     .congrats-hero {
@@ -277,6 +297,7 @@
       font-weight: 900;
       color: #111827;
       font-size: 15px;
+      overflow-wrap: anywhere;
     }
 
     .email-confirm {
@@ -306,6 +327,11 @@
       padding: 12px 18px;
     }
 
+    .loading {
+      color: #6b7280;
+      font-weight: 700;
+    }
+
     @media (max-width: 700px) {
       .grid,
       .summary-grid {
@@ -323,41 +349,45 @@
   <div class="page">
     <div class="card" id="offerPage">
       <h2>Your Offer</h2>
-      <div class="offer-amount" id="amount"></div>
-      <div id="vehicle"></div>
+      <div class="offer-amount" id="amount">Loading...</div>
+      <div id="vehicle" class="loading">Loading vehicle...</div>
+
+      <div class="notice info show" id="loadNotice">
+        Loading your real offer details...
+      </div>
 
       <div class="info-box">
         <h3>Vehicle Information</h3>
         <div class="grid">
-          <div class="row">Car ID <span id="carId"></span></div>
-          <div class="row">VIN <span id="vin"></span></div>
-          <div class="row">Mileage <span id="miles"></span></div>
-          <div class="row">Title <span id="title"></span></div>
-          <div class="row">Drivetrain <span id="drive"></span></div>
-          <div class="row">Fuel <span id="fuel"></span></div>
-          <div class="row">Transmission <span id="transType"></span></div>
+          <div class="row">Car ID <span id="carId">—</span></div>
+          <div class="row">VIN <span id="vin">—</span></div>
+          <div class="row">Mileage <span id="miles">—</span></div>
+          <div class="row">Title <span id="title">—</span></div>
+          <div class="row">Drivetrain <span id="drive">—</span></div>
+          <div class="row">Fuel <span id="fuel">—</span></div>
+          <div class="row">Transmission <span id="transType">—</span></div>
         </div>
       </div>
 
       <div class="info-box">
         <h3>Condition</h3>
         <div class="grid">
-          <div class="row">Runs & Drives <span id="runs"></span></div>
-          <div class="row">Engine OK <span id="engine"></span></div>
-          <div class="row">Transmission OK <span id="trans"></span></div>
-          <div class="row">Good Tires <span id="tires"></span></div>
-          <div class="row">Has Key <span id="key"></span></div>
-          <div class="row">Blown Airbags <span id="airbags"></span></div>
-          <div class="row">Catalytic Converter <span id="cat"></span></div>
-          <div class="row">Parts Missing <span id="parts"></span></div>
-          <div class="row">Body Damage <span id="body"></span></div>
-          <div class="row">Interior Damage <span id="interior"></span></div>
+          <div class="row">Runs & Drives <span id="runs">—</span></div>
+          <div class="row">Engine OK <span id="engine">—</span></div>
+          <div class="row">Transmission OK <span id="trans">—</span></div>
+          <div class="row">Good Tires <span id="tires">—</span></div>
+          <div class="row">Has Key <span id="key">—</span></div>
+          <div class="row">Blown Airbags <span id="airbags">—</span></div>
+          <div class="row">Catalytic Converter <span id="cat">—</span></div>
+          <div class="row">Parts Missing <span id="parts">—</span></div>
+          <div class="row">Body Damage <span id="bodyDamage">—</span></div>
+          <div class="row">Interior Damage <span id="interior">—</span></div>
         </div>
       </div>
 
       <div class="actions">
-        <button class="accept" id="acceptBtn" type="button">Accept</button>
-        <button class="decline" id="declineBtn" type="button">Decline</button>
+        <button class="accept" id="acceptBtn" type="button" disabled>Accept</button>
+        <button class="decline" id="declineBtn" type="button" disabled>Decline</button>
       </div>
 
       <div class="notice success" id="acceptNotice">
@@ -416,57 +446,57 @@
         <div id="congratsSummary" class="summary-grid"></div>
 
         <div class="email-confirm">
-          Confirmation email will be sent to the seller and admin with the accepted offer, pickup date, pickup window, and vehicle details.
+          Confirmation details are saved. Admin will see your accepted offer, pickup date, pickup window, address, and vehicle details.
         </div>
 
         <div class="next-actions">
           <button class="continue" id="continueProfileBtn" type="button">Continue to Seller Profile</button>
-          <a class="secondary-link" href="seller-profile.html">You can complete this later</a>
+          <a class="secondary-link" id="laterLink" href="seller-profile.html">You can complete this later</a>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    const lead = {
-      id: 1,
-      car_id: "CV-123456",
-      offer_amount: 850,
-      seller_name: "John Seller",
-      seller_phone: "559-555-1234",
-      seller_email: "seller@example.com",
-      year: "2012",
-      make: "Toyota",
-      model: "Camry",
-      vin: "4T1BF1FK5CU123456",
-      mileage: 162345,
-      title_status: "Clean Title",
-      drivetrain: "FWD",
-      fuel_type: "Gasoline",
-      transmission: "Automatic",
-      runs_drives: true,
-      engine_ok: true,
-      transmission_ok: true,
-      good_tires: true,
-      has_key: false,
-      blown_airbags: true,
-      catalytic_converter: true,
-      parts_missing: true,
-      body_damage: true,
-      interior_damage: false,
-      status: "offer_sent"
-    };
+    const SUPABASE_URL = "https://psxqggcmfkmhkrsagnuv.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw";
 
-    function yesNo(value, damageField) {
-      const isYes = value === true;
-      const good = damageField ? !isYes : isYes;
-      const label = isYes ? "Yes" : "No";
-      return '<span class="pill ' + (good ? 'yes' : 'no') + '">' + label + '</span>';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let lead = null;
+
+    const params = new URLSearchParams(window.location.search);
+    const leadId = params.get("id");
+
+    function safe(value, fallback = "—") {
+      if (value === null || value === undefined || value === "") return fallback;
+      return String(value);
+    }
+
+    function money(value) {
+      return "$" + Number(value || 0).toLocaleString();
+    }
+
+    function numberText(value) {
+      const cleaned = String(value || "").replace(/[^\d]/g, "");
+      return cleaned ? Number(cleaned).toLocaleString() : "—";
+    }
+
+    function formatCarId(rawId) {
+      const raw = String(rawId || "");
+      const numeric = raw.replace(/\D/g, "");
+      if (numeric) return "CV-" + numeric.slice(-6).padStart(6, "0");
+
+      let hash = 0;
+      for (let i = 0; i < raw.length; i++) {
+        hash = ((hash * 31) + raw.charCodeAt(i)) % 1000000;
+      }
+      return "CV-" + String(hash).padStart(6, "0");
     }
 
     function setText(id, value) {
       const el = document.getElementById(id);
-      if (el) el.textContent = value || "—";
+      if (el) el.textContent = safe(value);
     }
 
     function setHTML(id, value) {
@@ -474,108 +504,328 @@
       if (el) el.innerHTML = value;
     }
 
-    function renderOffer() {
-      setText("amount", "$" + lead.offer_amount.toLocaleString());
-      setText("vehicle", lead.year + " " + lead.make + " " + lead.model);
-      setText("carId", lead.car_id);
-      setText("vin", lead.vin);
-      setText("miles", lead.mileage.toLocaleString() + " mi");
-      setText("title", lead.title_status);
-      setText("drive", lead.drivetrain);
-      setText("fuel", lead.fuel_type);
-      setText("transType", lead.transmission);
+    function normalizeText(value) {
+      return String(value || "").trim().toLowerCase();
+    }
 
-      setHTML("runs", yesNo(lead.runs_drives, false));
-      setHTML("engine", yesNo(lead.engine_ok, false));
-      setHTML("trans", yesNo(lead.transmission_ok, false));
-      setHTML("tires", yesNo(lead.good_tires, false));
-      setHTML("key", yesNo(lead.has_key, false));
-      setHTML("airbags", yesNo(lead.blown_airbags, true));
-      setHTML("cat", yesNo(lead.catalytic_converter, false));
-      setHTML("parts", yesNo(lead.parts_missing, true));
-      setHTML("body", yesNo(lead.body_damage, true));
-      setHTML("interior", yesNo(lead.interior_damage, true));
+    function boolFromText(value) {
+      const v = normalizeText(value);
+      if (!v) return null;
+
+      if (["yes", "y", "true", "good", "ok", "okay", "runs", "running", "present", "clean", "has", "available"].includes(v)) {
+        return true;
+      }
+
+      if (["no", "n", "false", "bad", "missing", "none", "not sure", "unknown", "damaged"].includes(v)) {
+        return false;
+      }
+
+      if (v.includes("yes")) return true;
+      if (v.includes("no")) return false;
+      if (v.includes("missing")) return false;
+      if (v.includes("damage")) return false;
+      if (v.includes("blown")) return false;
+
+      return null;
+    }
+
+    function pill(label, good) {
+      if (good === null) {
+        return '<span class="pill neutral">' + safe(label, "—") + '</span>';
+      }
+
+      return '<span class="pill ' + (good ? 'yes' : 'no') + '">' + label + '</span>';
+    }
+
+    function yesNo(value, damageField = false) {
+      const b = typeof value === "boolean" ? value : boolFromText(value);
+
+      if (b === null) return pill("—", null);
+
+      const label = b ? "Yes" : "No";
+      const good = damageField ? !b : b;
+
+      return pill(label, good);
+    }
+
+    function conditionArray() {
+      if (!lead || !lead.condition) return [];
+
+      if (Array.isArray(lead.condition)) return lead.condition;
+
+      if (typeof lead.condition === "string") {
+        try {
+          const parsed = JSON.parse(lead.condition);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) {}
+
+        return lead.condition.split("\n").map(v => v.trim()).filter(Boolean);
+      }
+
+      return [];
+    }
+
+    function conditionValue(keys) {
+      const arr = conditionArray();
+
+      for (const item of arr) {
+        const text = String(item || "");
+        const lower = text.toLowerCase();
+
+        for (const key of keys) {
+          if (lower.includes(key.toLowerCase())) {
+            const parts = text.split(":");
+            if (parts.length > 1) return parts.slice(1).join(":").trim();
+            return text;
+          }
+        }
+      }
+
+      return "";
+    }
+
+    function getLeadField(primary, fallbacks = []) {
+      if (!lead) return "";
+
+      const keys = [primary].concat(fallbacks);
+
+      for (const key of keys) {
+        if (lead[key] !== null && lead[key] !== undefined && lead[key] !== "") {
+          return lead[key];
+        }
+      }
+
+      return "";
+    }
+
+    function renderOffer() {
+      if (!lead) return;
+
+      const vehicle = [lead.year, lead.make, lead.model, lead.trim].filter(Boolean).join(" ") || "Vehicle";
+
+      setText("amount", money(lead.offer_amount));
+      setText("vehicle", vehicle);
+      setText("carId", formatCarId(lead.id));
+      setText("vin", lead.vin);
+      setText("miles", numberText(getLeadField("miles", ["mileage"])) + (numberText(getLeadField("miles", ["mileage"])) !== "—" ? " mi" : ""));
+      setText("title", getLeadField("title", ["title_status"]));
+      setText("drive", getLeadField("drive", ["drivetrain"]));
+      setText("fuel", getLeadField("fuel", ["fuel_type"]));
+      setText("transType", getLeadField("trans", ["transmission"]));
+
+      setHTML("runs", yesNo(getLeadField("runs_drives") || conditionValue(["runs", "runs & drives", "run"])));
+      setHTML("engine", yesNo(getLeadField("engine_ok") || conditionValue(["engine"])));
+      setHTML("trans", yesNo(getLeadField("transmission_ok") || conditionValue(["transmission"])));
+      setHTML("tires", yesNo(getLeadField("good_tires") || conditionValue(["tires", "tire"])));
+      setHTML("key", yesNo(getLeadField("has_key") || conditionValue(["key"])));
+      setHTML("airbags", yesNo(getLeadField("blown_airbags") || conditionValue(["airbags", "airbag"]), true));
+      setHTML("cat", yesNo(getLeadField("catalytic_converter") || conditionValue(["catalytic", "converter", "cat"])));
+      setHTML("parts", yesNo(getLeadField("parts_missing") || conditionValue(["parts missing", "missing parts"]), true));
+      setHTML("bodyDamage", yesNo(getLeadField("body_damage") || conditionValue(["body damage", "body"]), true));
+      setHTML("interior", yesNo(getLeadField("interior_damage") || conditionValue(["interior"]), true));
+
+      document.getElementById("pickupDate").value = safe(lead.pickup_date, "");
+      document.getElementById("pickupWindow").value = safe(lead.pickup_window, "");
+      document.getElementById("pickupAddress").value = safe(lead.pickup_address || lead.address, "");
+      document.getElementById("pickupNotes").value = safe(lead.pickup_notes, "");
+
+      const sellerLink = "seller-profile.html?id=" + encodeURIComponent(lead.id);
+      document.getElementById("laterLink").href = sellerLink;
+
+      document.getElementById("loadNotice").classList.remove("show");
+      document.getElementById("acceptBtn").disabled = false;
+      document.getElementById("declineBtn").disabled = false;
+
+      const status = String(lead.status || "").toLowerCase();
+
+      if (status === "accepted" || status === "pickup_scheduled") {
+        document.getElementById("acceptNotice").classList.add("show");
+        document.getElementById("scheduleStep").classList.add("show");
+        document.getElementById("acceptBtn").disabled = true;
+        document.getElementById("declineBtn").disabled = true;
+      }
+
+      if (status === "declined") {
+        document.getElementById("declineNotice").classList.add("show");
+        document.getElementById("acceptBtn").disabled = true;
+        document.getElementById("declineBtn").disabled = true;
+      }
     }
 
     function hideNotices() {
       document.getElementById("acceptNotice").classList.remove("show");
       document.getElementById("declineNotice").classList.remove("show");
+      document.getElementById("loadNotice").classList.remove("show");
     }
 
-    function handleAccept() {
-      lead.status = "accepted";
+    async function loadLead() {
+      if (!leadId) {
+        document.getElementById("amount").textContent = "Missing Offer Link";
+        document.getElementById("vehicle").textContent = "No lead ID was found in the URL.";
+        document.getElementById("loadNotice").textContent = "This page needs a link like offer-response.html?id=LEAD_ID.";
+        return;
+      }
+
+      const { data, error } = await db
+        .from("leads")
+        .select("*")
+        .eq("id", leadId)
+        .single();
+
+      if (error) {
+        console.error(error);
+        document.getElementById("amount").textContent = "Offer Not Found";
+        document.getElementById("vehicle").textContent = "We could not load this offer.";
+        document.getElementById("loadNotice").textContent = "Error loading offer: " + error.message;
+        return;
+      }
+
+      lead = data;
+      renderOffer();
+    }
+
+    async function handleAccept() {
+      if (!lead) return;
+
       hideNotices();
+
+      document.getElementById("acceptBtn").disabled = true;
+      document.getElementById("declineBtn").disabled = true;
+
+      const { data, error } = await db
+        .from("leads")
+        .update({
+          status: "Accepted",
+          offer_accepted_at: new Date().toISOString()
+        })
+        .eq("id", lead.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+        alert("Error accepting offer: " + error.message);
+        document.getElementById("acceptBtn").disabled = false;
+        document.getElementById("declineBtn").disabled = false;
+        return;
+      }
+
+      lead = data;
 
       document.getElementById("acceptNotice").classList.add("show");
       document.getElementById("scheduleStep").classList.add("show");
-      document.getElementById("acceptBtn").disabled = true;
-      document.getElementById("declineBtn").disabled = true;
-
-      document.getElementById("scheduleStep").scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
     }
 
-    function handleDecline() {
-      lead.status = "declined";
+    async function handleDecline() {
+      if (!lead) return;
+
+      const confirmDecline = confirm("Are you sure you want to decline this offer?");
+      if (!confirmDecline) return;
+
       hideNotices();
 
-      document.getElementById("declineNotice").classList.add("show");
-      document.getElementById("scheduleStep").classList.remove("show");
       document.getElementById("acceptBtn").disabled = true;
       document.getElementById("declineBtn").disabled = true;
+
+      const { data, error } = await db
+        .from("leads")
+        .update({
+          status: "Declined",
+          offer_declined_at: new Date().toISOString()
+        })
+        .eq("id", lead.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+        alert("Error declining offer: " + error.message);
+        document.getElementById("acceptBtn").disabled = false;
+        document.getElementById("declineBtn").disabled = false;
+        return;
+      }
+
+      lead = data;
+      document.getElementById("declineNotice").classList.add("show");
     }
 
-    function handleScheduleSave() {
+    function renderCongrats() {
+      const vehicle = [lead.year, lead.make, lead.model, lead.trim].filter(Boolean).join(" ") || "Vehicle";
+
+      document.getElementById("congratsSummary").innerHTML =
+        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + formatCarId(lead.id) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + safe(vehicle) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Accepted Offer</span><span class="summary-value">' + money(lead.offer_amount) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Pickup Date</span><span class="summary-value">' + safe(lead.pickup_date) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Pickup Window</span><span class="summary-value">' + safe(lead.pickup_window) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Pickup Address</span><span class="summary-value">' + safe(lead.pickup_address || lead.address) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Seller</span><span class="summary-value">' + safe(lead.seller) + '</span></div>';
+    }
+
+    async function saveSchedule() {
+      if (!lead) return;
+
       const pickupDate = document.getElementById("pickupDate").value;
       const pickupWindow = document.getElementById("pickupWindow").value;
       const pickupAddress = document.getElementById("pickupAddress").value.trim();
       const pickupNotes = document.getElementById("pickupNotes").value.trim();
 
-      if (!pickupDate || !pickupWindow || !pickupAddress) {
-        alert("Please enter pickup date, pickup window, and pickup address.");
+      if (!pickupDate) {
+        alert("Please select a pickup date.");
         return;
       }
 
-      lead.status = "pickup_scheduled";
-      lead.pickup_date = pickupDate;
-      lead.pickup_window = pickupWindow;
-      lead.pickup_address = pickupAddress;
-      lead.pickup_notes = pickupNotes;
-      lead.address_verified = true;
+      if (!pickupWindow) {
+        alert("Please select a pickup window.");
+        return;
+      }
 
-      localStorage.setItem("cvcf_lead", JSON.stringify(lead));
+      if (!pickupAddress) {
+        alert("Please enter the pickup address.");
+        return;
+      }
 
-      document.getElementById("congratsSummary").innerHTML =
-        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + lead.car_id + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + lead.vin + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + lead.year + ' ' + lead.make + ' ' + lead.model + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Accepted Offer</span><span class="summary-value">$' + lead.offer_amount.toLocaleString() + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Pickup Date</span><span class="summary-value">' + pickupDate + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Pickup Window</span><span class="summary-value">' + pickupWindow + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Pickup Address</span><span class="summary-value">' + pickupAddress + '<br><span style="color:#047857;">Verified for demo</span></span></div>' +
-        '<div class="summary-item"><span class="summary-label">Seller</span><span class="summary-value">' + lead.seller_name + '<br>' + lead.seller_phone + '<br>' + lead.seller_email + '</span></div>';
+      const { data, error } = await db
+        .from("leads")
+        .update({
+          status: "pickup_scheduled",
+          pickup_date: pickupDate,
+          pickup_window: pickupWindow,
+          pickup_address: pickupAddress,
+          address: pickupAddress,
+          pickup_notes: pickupNotes,
+          pickup_scheduled_at: new Date().toISOString()
+        })
+        .eq("id", lead.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+        alert("Error saving pickup schedule: " + error.message);
+        return;
+      }
+
+      lead = data;
+
+      renderCongrats();
 
       document.getElementById("offerPage").style.display = "none";
-      document.getElementById("congratsPage").style.display = "block";
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      document.getElementById("congratsPage").classList.add("show");
     }
 
-    function goToSellerProfile() {
-      localStorage.setItem("cvcf_lead", JSON.stringify(lead));
-      window.location.href = "seller-profile.html";
+    function continueToProfile() {
+      if (!lead) return;
+      window.location.href = "seller-profile.html?id=" + encodeURIComponent(lead.id);
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      renderOffer();
+    document.getElementById("acceptBtn").addEventListener("click", handleAccept);
+    document.getElementById("declineBtn").addEventListener("click", handleDecline);
+    document.getElementById("saveScheduleBtn").addEventListener("click", saveSchedule);
+    document.getElementById("continueProfileBtn").addEventListener("click", continueToProfile);
 
-      document.getElementById("acceptBtn").addEventListener("click", handleAccept);
-      document.getElementById("declineBtn").addEventListener("click", handleDecline);
-      document.getElementById("saveScheduleBtn").addEventListener("click", handleScheduleSave);
-      document.getElementById("continueProfileBtn").addEventListener("click", goToSellerProfile);
-    });
+    loadLead();
   </script>
 </body>
 </html>
