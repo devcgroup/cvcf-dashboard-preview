@@ -1,1 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seller Profile</title>
 
+<style>
+body { font-family: Arial; background:#f3f4f6; margin:0; }
+.page { max-width:900px; margin:auto; padding:40px 20px; }
+.card { background:#fff; padding:30px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+
+input, textarea { width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd; }
+
+button { padding:12px 18px; border:none; border-radius:8px; background:#111; color:#fff; font-weight:bold; }
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+<div class="card">
+
+<h2>Seller Profile</h2>
+
+<label>Name</label>
+<input id="name" value="John Seller">
+
+<label>Phone</label>
+<input id="phone" value="559-555-1234">
+
+<label>Email</label>
+<input id="email" value="seller@example.com">
+
+<h3>Pickup Info</h3>
+<div id="pickupInfo"></div>
+
+<h3>Uploads</h3>
+<input type="file" multiple>
+<input type="file">
+<input type="file">
+
+<h3>Notes</h3>
+<textarea placeholder="Instructions..."></textarea>
+
+<br>
+<button onclick="save()">Save Profile</button>
+
+</div>
+</div>
+
+<script>
+const pickup = JSON.parse(localStorage.getItem("pickup") || "{}");
+
+document.getElementById("pickupInfo").innerHTML =
+"<b>Date:</b> "+(pickup.date || "-")+"<br>"+
+"<b>Time:</b> "+(pickup.time || "-")+"<br>"+
+"<b>Address:</b> "+(pickup.address || "-");
+
+function save(){
+alert("Profile saved");
+}
+</script>
+
+</body>
+</html>
