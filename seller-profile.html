@@ -1,67 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seller Profile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Profile | Central Valley Cash for Cars</title>
 
-<style>
-body { font-family: Arial; background:#f3f4f6; margin:0; }
-.page { max-width:900px; margin:auto; padding:40px 20px; }
-.card { background:#fff; padding:30px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+  <style>
+    * { box-sizing: border-box; }
 
-input, textarea { width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
 
-button { padding:12px 18px; border:none; border-radius:8px; background:#111; color:#fff; font-weight:bold; }
+    .page {
+      max-width: 1000px;
+      margin: auto;
+      padding: 40px 20px;
+    }
 
-</style>
+    .card {
+      background: #fff;
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      font-weight: 600;
+      margin-bottom: 24px;
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 24px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .summary-item {
+      background: #f9fafb;
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .summary-label,
+    label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+
+    .summary-value {
+      font-weight: 900;
+      color: #111827;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+      margin-bottom: 14px;
+    }
+
+    input[readonly] {
+      background: #f9fafb;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .upload-box {
+      background: #f9fafb;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .primary {
+      background: #111827;
+      color: #fff;
+    }
+
+    .green {
+      background: #047857;
+      color: #fff;
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .success {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .closed-card {
+      display: none;
+      text-align: center;
+      padding: 56px 28px;
+    }
+
+    .closed-card.show {
+      display: block;
+    }
+
+    .checkmark {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #047857;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="page">
+    <div class="card" id="sellerProfilePage">
+      <h1>Seller Profile</h1>
+      <div class="subtitle">
+        Your seller information is pre-filled from the original offer form and pickup appointment. Review it, upload documents, and add any final instructions.
+      </div>
 
-<div class="page">
-<div class="card">
+      <h3>Deal Summary</h3>
+      <div class="summary-grid" id="dealSummary"></div>
+    </div>
 
-<h2>Seller Profile</h2>
+    <div class="card editable-card">
+      <h2>Seller Information</h2>
+      <div class="grid">
+        <div>
+          <label for="sellerName">Full Name</label>
+          <input id="sellerName" />
+        </div>
+        <div>
+          <label for="sellerPhone">Phone</label>
+          <input id="sellerPhone" />
+        </div>
+        <div>
+          <label for="sellerEmail">Email</label>
+          <input id="sellerEmail" />
+        </div>
+      </div>
+    </div>
 
-<label>Name</label>
-<input id="name" value="John Seller">
+    <div class="card editable-card">
+      <h2>Buyer / Pickup Information</h2>
 
-<label>Phone</label>
-<input id="phone" value="559-555-1234">
+      <div class="grid">
+        <div>
+          <label for="buyerName">Assigned Buyer</label>
+          <input id="buyerName" readonly />
+        </div>
+        <div>
+          <label for="buyerPhone">Buyer Phone</label>
+          <input id="buyerPhone" readonly />
+        </div>
+        <div>
+          <label for="pickupDate">Pickup Date</label>
+          <input id="pickupDate" readonly />
+        </div>
+        <div>
+          <label for="pickupWindow">Pickup Window</label>
+          <input id="pickupWindow" readonly />
+        </div>
+      </div>
 
-<label>Email</label>
-<input id="email" value="seller@example.com">
+      <label for="pickupAddress">Pickup Address</label>
+      <input id="pickupAddress" readonly />
 
-<h3>Pickup Info</h3>
-<div id="pickupInfo"></div>
+      <label for="pickupInstructions">Pickup Instructions</label>
+      <textarea id="pickupInstructions" placeholder="Gate code, key location, where the car is parked, special access notes, etc."></textarea>
+    </div>
 
-<h3>Uploads</h3>
-<input type="file" multiple>
-<input type="file">
-<input type="file">
+    <div class="card editable-card">
+      <h2>Uploads</h2>
 
-<h3>Notes</h3>
-<textarea placeholder="Instructions..."></textarea>
+      <div class="grid">
+        <div class="upload-box">
+          <label for="carPhotos">Pictures of Car</label>
+          <input id="carPhotos" type="file" multiple accept="image/*" />
+        </div>
 
-<br>
-<button onclick="save()">Save Profile</button>
+        <div class="upload-box">
+          <label for="driverLicense">Driver License</label>
+          <input id="driverLicense" type="file" accept="image/*,.pdf" />
+        </div>
 
-</div>
-</div>
+        <div class="upload-box">
+          <label for="titleUpload">Title</label>
+          <input id="titleUpload" type="file" accept="image/*,.pdf" />
+        </div>
 
-<script>
-const pickup = JSON.parse(localStorage.getItem("pickup") || "{}");
+        <div class="upload-box">
+          <label for="extraDocs">Other Documents</label>
+          <input id="extraDocs" type="file" multiple accept="image/*,.pdf" />
+        </div>
+      </div>
+    </div>
 
-document.getElementById("pickupInfo").innerHTML =
-"<b>Date:</b> "+(pickup.date || "-")+"<br>"+
-"<b>Time:</b> "+(pickup.time || "-")+"<br>"+
-"<b>Address:</b> "+(pickup.address || "-");
+    <div class="card editable-card">
+      <h2>Pickup Reschedule</h2>
+      <p style="color:#6b7280; margin-top:-6px;">
+        You may request a pickup reschedule up to 24 hours before your scheduled pickup time.
+      </p>
 
-function save(){
-alert("Profile saved");
-}
-</script>
+      <div class="grid">
+        <div>
+          <label for="rescheduleDate">New Pickup Date</label>
+          <input id="rescheduleDate" type="date" />
+        </div>
 
+        <div>
+          <label for="rescheduleWindow">New Pickup Window</label>
+          <select id="rescheduleWindow">
+            <option value="">Select time window</option>
+            <option value="8-12">8 AM – 12 PM</option>
+            <option value="12-4">12 PM – 4 PM</option>
+            <option value="4-8">4 PM – 8 PM</option>
+          </select>
+        </div>
+      </div>
+
+      <textarea id="rescheduleReason" placeholder="Reason for reschedule request"></textarea>
+    </div>
+
+    <div class="card editable-card">
+      <h2>Paperwork Instructions</h2>
+      <textarea id="paperworkInstructions" placeholder="Example: title is signed, lien release available, duplicate title needed, seller name differs from registration, etc."></textarea>
+
+      <div class="actions">
+        <button class="green" id="saveProfileBtn" type="button">Save Seller Profile</button>
+        <button class="primary" id="finishBtn" type="button">Finish</button>
+        <button class="primary" id="demoCompleteBtn" type="button">Demo: Buyer Complete</button>
+      </div>
+
+      <div class="notice success" id="saveNotice">
+        Seller profile saved. Admin now has your seller details, pickup instructions, reschedule request, and upload summary.
+      </div>
+    </div>
+
+    <div class="card closed-card" id="closedPage">
+      <div class="checkmark">✓</div>
+      <div class="status-pill">Transaction Complete</div>
+
+      <h2>Your Vehicle Has Been Picked Up</h2>
+
+      <p style="color:#374151; font-size:17px; line-height:1.5; max-width:620px; margin:0 auto 20px;">
+        Your vehicle has been picked up and payment has been made.
+      </p>
+
+      <div class="summary-grid" id="closedSummary" style="margin-top:22px;"></div>
+
+      <p style="margin-top:26px; color:#6b7280; font-weight:600; max-width:640px; margin-left:auto; margin-right:auto;">
+        We appreciate your business and welcome any future vehicles or customer referrals.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const fallbackLead = {
+      id: 1,
+      car_id: "CV-123456",
+      offer_amount: 850,
+      year: "2012",
+      make: "Toyota",
+      model: "Camry",
+      vin: "4T1BF1FK5CU123456",
+      mileage: 162345,
+      seller_name: "John Seller",
+      seller_phone: "559-555-1234",
+      seller_email: "seller@example.com",
+      pickup_date: "2026-04-01",
+      pickup_window: "8-12",
+      pickup_address: "1234 Demo Street, Fresno, CA 93722",
+      pickup_notes: "Car is parked in driveway. Key under front floor mat.",
+      buyer_name: "Central Valley Buyer Demo",
+      buyer_phone: "559-555-9000",
+      status: "pickup_scheduled",
+      payment_status: "pending",
+      check_number: ""
+    };
+
+    function getLead() {
+      try {
+        const saved = localStorage.getItem("cvcf_lead");
+        return saved ? Object.assign({}, fallbackLead, JSON.parse(saved)) : fallbackLead;
+      } catch (error) {
+        return fallbackLead;
+      }
+    }
+
+    let lead = getLead();
+
+    function safe(value, fallback) {
+      return value || fallback || "—";
+    }
+
+    function money(value) {
+      return "$" + Number(value || 0).toLocaleString();
+    }
+
+    function setValue(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.value = safe(value, "");
+    }
+
+    function isClosedStatus() {
+      const closedStatuses = ["completed", "complete", "closed", "in_inventory", "sold", "paid"];
+      return closedStatuses.includes(String(lead.status || "").toLowerCase());
+    }
+
+    function hideEditableCards() {
+      document.querySelectorAll(".editable-card").forEach(function(card) {
+        card.style.display = "none";
+      });
+      document.getElementById("sellerProfilePage").style.display = "none";
+    }
+
+    function renderClosedPage() {
+      hideEditableCards();
+
+      document.getElementById("closedPage").classList.add("show");
+
+      document.getElementById("closedSummary").innerHTML =
+        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(lead.car_id) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + safe(lead.year) + ' ' + safe(lead.make) + ' ' + safe(lead.model) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Payment Status</span><span class="summary-value">Paid</span></div>' +
+        (lead.check_number ? '<div class="summary-item"><span class="summary-label">Check Number</span><span class="summary-value">#' + lead.check_number + '</span></div>' : '');
+    }
+
+    function renderSummary() {
+      const vehicle = safe(lead.year) + " " + safe(lead.make) + " " + safe(lead.model);
+      const mileage = Number(lead.mileage || 0).toLocaleString() + " mi";
+
+      document.getElementById("dealSummary").innerHTML =
+        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(lead.car_id) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + vehicle + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Accepted Offer</span><span class="summary-value">' + money(lead.offer_amount) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Pickup</span><span class="summary-value">' + safe(lead.pickup_date) + '<br>' + safe(lead.pickup_window) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Mileage</span><span class="summary-value">' + mileage + '</span></div>';
+    }
+
+    function renderProfile() {
+      if (isClosedStatus()) {
+        renderClosedPage();
+        return;
+      }
+
+      renderSummary();
+
+      setValue("sellerName", lead.seller_name);
+      setValue("sellerPhone", lead.seller_phone);
+      setValue("sellerEmail", lead.seller_email);
+
+      setValue("buyerName", safe(lead.buyer_name, "Not assigned yet"));
+      setValue("buyerPhone", lead.buyer_phone);
+      setValue("pickupDate", lead.pickup_date);
+      setValue("pickupWindow", lead.pickup_window);
+      setValue("pickupAddress", lead.pickup_address);
+      setValue("pickupInstructions", lead.pickup_notes);
+    }
+
+    function saveProfile() {
+      const updatedLead = Object.assign({}, lead, {
+        seller_name: document.getElementById("sellerName").value.trim(),
+        seller_phone: document.getElementById("sellerPhone").value.trim(),
+        seller_email: document.getElementById("sellerEmail").value.trim(),
+        pickup_notes: document.getElementById("pickupInstructions").value.trim(),
+        paperwork_instructions: document.getElementById("paperworkInstructions").value.trim(),
+        reschedule_request: {
+          requested_date: document.getElementById("rescheduleDate").value,
+          requested_window: document.getElementById("rescheduleWindow").value,
+          reason: document.getElementById("rescheduleReason").value.trim(),
+          rule: "Allowed up to 24 hours before scheduled pickup"
+        },
+        upload_summary: {
+          carPhotos: document.getElementById("carPhotos").files.length,
+          driverLicense: document.getElementById("driverLicense").files.length,
+          titleUpload: document.getElementById("titleUpload").files.length,
+          extraDocs: document.getElementById("extraDocs").files.length
+        }
+      });
+
+      lead = updatedLead;
+      localStorage.setItem("cvcf_lead", JSON.stringify(updatedLead));
+
+      document.getElementById("saveNotice").classList.add("show");
+    }
+
+    function finishProfile() {
+      saveProfile();
+      alert("Seller profile completed.");
+    }
+
+    function demoBuyerComplete() {
+      const checkNumber = prompt("Optional check number for P&L records:", lead.check_number || "4748");
+
+      if (checkNumber !== null) {
+        lead.check_number = checkNumber.trim();
+      }
+
+      lead.status = "completed";
+      lead.payment_status = "paid";
+
+      localStorage.setItem("cvcf_lead", JSON.stringify(lead));
+      renderClosedPage();
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      renderProfile();
+
+      document.getElementById("saveProfileBtn").addEventListener("click", saveProfile);
+      document.getElementById("finishBtn").addEventListener("click", finishProfile);
+      document.getElementById("demoCompleteBtn").addEventListener("click", demoBuyerComplete);
+    });
+  </script>
 </body>
 </html>
