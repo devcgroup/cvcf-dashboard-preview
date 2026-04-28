@@ -5,6 +5,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CVCF Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,Arial,sans-serif;background:#f1f5f9;color:#0f172a}
@@ -233,58 +234,206 @@ th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
 </main>
 
 <script>
-const leads = [
-  {
-    id:"CV-10290",created:"2026-04-23T14:15:00",status:"New Lead",communication:"Not contacted",priority:"Standard",offer:0,vin:"5YJ3E1EA7MF123456",
-    year:"2021",make:"Tesla",model:"Model 3",trim:"Standard Range Plus",fuel:"Electric",body:"Sedan",drive:"RWD",trans:"Single speed",color:"White",miles:"91,200",
-    seller:"Sarah Kim",phone:"(559) 555-1010",email:"sarah@example.com",address:"1120 Willow Ave, Clovis, CA 93612",city:"Clovis",
-    pickupDate:"",pickupWindow:"Not selected",window:"Not scheduled",instructions:"Vehicle in driveway.",buyer:"—",tow:"—",route:"Yard",
-    title:"Clean Title",ownership:"Owned",vehicleDescription:"Clean white Tesla Model 3. Customer says vehicle is complete and in driveway.",
-    condition:["Starts and drives","Tires OK","Engine/trans intact","Exterior OK","Interior OK","Catalytic converter N/A","Airbags not deployed","No flood/fire"],
-    customerNotes:"Customer wants pickup this week if offer is accepted.",buyerNotes:"",towingNotes:"",adminNotes:"",
-    audit:["Lead created","VIN decoded and vehicle fields populated"]
-  },
-  {
-    id:"CV-10289",created:"2026-04-23T13:35:00",status:"Quote Pending",communication:"Quote pending 30m alert sent",priority:"Emergency",offer:1200,vin:"1FTRW08L21KD99887",
-    year:"2001",make:"Ford",model:"F-150",trim:"XLT",fuel:"Gasoline",body:"Truck",drive:"RWD",trans:"Automatic",color:"White",miles:"247,340",
-    seller:"Anthony Perez",phone:"(559) 555-2218",email:"aperez@example.com",address:"820 S Winery Ave, Fresno, CA 93727",city:"Fresno",
-    pickupDate:"",pickupWindow:"Awaiting acceptance",window:"Awaiting quote response",instructions:"Truck is on street, keys with cousin next door.",buyer:"—",tow:"Rapid Recovery",route:"Yard",
-    title:"Clean Title",ownership:"Owned",vehicleDescription:"Older F-150, street parked. Possible emergency tow due to city notice.",
-    condition:["Does not start/drive","Tires poor","Engine/trans intact","Exterior damage","Interior damage","Catalytic converter missing","Airbags not deployed","No flood/fire"],
-    customerNotes:"Customer says city left notice on vehicle.",buyerNotes:"",towingNotes:"Possible emergency tow. Street parked.",adminNotes:"Missing-doc override used by Admin.",
-    audit:["Lead created","VIN decoded","Missing-doc override used by Admin","Emergency tow priority flagged"]
-  },
-  {
-    id:"CV-10288",created:"2026-04-23T12:10:00",status:"Accepted",communication:"Accepted by customer • SMS confirmed",priority:"Same Day",offer:800,vin:"1HGCM82633A112345",
-    year:"2012",make:"Honda",model:"Accord",trim:"EX-L",fuel:"Gasoline",body:"Sedan",drive:"FWD",trans:"Automatic",color:"Silver",miles:"184,200",
-    seller:"Maria Hernandez",phone:"(559) 555-1102",email:"mariah@example.com",address:"1458 E Olive Ave, Fresno, CA 93728",city:"Fresno",
-    pickupDate:"2026-04-28",pickupWindow:"12–4",window:"2026-04-28 • 12–4",instructions:"Back alley access behind duplex.",buyer:"Fresno Auto Wholesale",tow:"Valley Tow Team",route:"Yard",
-    title:"Clean Title",ownership:"Owned",vehicleDescription:"Silver Accord EX-L, non-runner with flat front tire. Back alley pickup behind duplex.",
-    condition:["Does not start/drive","Flat front tire","Engine/trans intact","Exterior damage","Interior OK","Catalytic converter present","Airbags not deployed","No flood/fire"],
-    customerNotes:"Back gate code is 5521. Customer available after noon.",buyerNotes:"Needs jump to crank. Front driver door sticks shut.",towingNotes:"Key under left rear floor mat. Tight alley access.",adminNotes:"",
-    audit:["Lead created","VIN decoded","Offer sent by SMS + Email","Customer accepted offer","Customer selected pickup: 2026-04-28 • 12–4","Buyer assigned","Tow driver pre-assigned"]
-  },
-  {
-    id:"CV-10287",created:"2026-04-23T09:05:00",status:"Offer Sent",communication:"Offer sent by SMS • 6h alert pending",priority:"Standard",offer:450,vin:"2T1BR32E54C778899",
-    year:"2004",make:"Toyota",model:"Corolla",trim:"LE",fuel:"Gasoline",body:"Sedan",drive:"FWD",trans:"Automatic",color:"Blue",miles:"221,500",
-    seller:"Jose Ramirez",phone:"(559) 555-1414",email:"jramirez@example.com",address:"3377 N Temperance Ave, Clovis, CA 93619",city:"Clovis",
-    pickupDate:"",pickupWindow:"Pending acceptance",window:"Pending customer response",instructions:"Car parked on side yard behind gate.",buyer:"—",tow:"—",route:"Yard",
-    title:"Salvage",ownership:"Owned",vehicleDescription:"Blue Corolla salvage title. Parked behind side gate, non-runner for six months.",
-    condition:["Does not start/drive","Tires OK","Engine/trans intact","Exterior OK","Interior OK","Catalytic converter present","Airbags not deployed","No flood/fire"],
-    customerNotes:"Customer said vehicle has not started in six months.",buyerNotes:"",towingNotes:"",adminNotes:"",
-    audit:["Lead created","VIN decoded and vehicle fields populated","Offer sent by SMS"]
-  },
-  {
-    id:"CV-10286",created:"2026-04-22T16:20:00",status:"Declined",communication:"Customer declined by SMS",priority:"Standard",offer:350,vin:"3N1AB7AP8HY241112",
-    year:"2017",make:"Nissan",model:"Sentra",trim:"SV",fuel:"Gasoline",body:"Sedan",drive:"FWD",trans:"CVT",color:"Gray",miles:"167,900",
-    seller:"Kevin Lee",phone:"(559) 555-7711",email:"kevin@example.com",address:"4700 E Ashlan Ave, Fresno, CA 93726",city:"Fresno",
-    pickupDate:"",pickupWindow:"Declined",window:"Declined",instructions:"N/A",buyer:"—",tow:"—",route:"Yard",
-    title:"Clean Title",ownership:"Owned",vehicleDescription:"Gray Sentra, customer declined current offer.",
-    condition:["Starts and drives","Tires OK","Engine/trans intact","Exterior OK","Interior OK","Catalytic converter present","Airbags not deployed","No flood/fire"],
-    customerNotes:"Declined because another buyer offered more.",buyerNotes:"",towingNotes:"",adminNotes:"Keep for future follow-up.",
-    audit:["Lead created","Offer sent","Customer declined"]
+const SUPABASE_URL = "https://psxqggcmfkmhkrsagnuv.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw";
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let leads = [];
+let selectedLead = null;
+let activeFilter = "All";
+
+function safeText(value, fallback=""){
+  return value === null || value === undefined || value === "" ? fallback : String(value);
+}
+
+function moneyNumber(value){
+  const n = Number(value || 0);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function escAttr(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+function escText(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+
+function normalizeCondition(value){
+  if(Array.isArray(value)) return value.filter(Boolean);
+  if(typeof value === "string" && value.trim()){
+    try{
+      const parsed = JSON.parse(value);
+      if(Array.isArray(parsed)) return parsed.filter(Boolean);
+    }catch(e){}
+    return value.split("\n").map(v=>v.trim()).filter(Boolean);
   }
-];
+  return [];
+}
+
+function mapLeadFromDb(l){
+  const condition = normalizeCondition(l.condition);
+  const pickupWindow = safeText(l.pickup_window, l.status === "Accepted" ? "Not selected" : "Pending acceptance");
+  const pickupDate = safeText(l.pickup_date, "");
+  const address = safeText(l.pickup_address, "") || safeText(l.address, "");
+  const displayVehicle = [l.year,l.make,l.model].filter(Boolean).join(" ") || "Unknown Vehicle";
+
+  return {
+    db_id: l.id,
+    id: "CV-" + l.id,
+    created: l.created_at || new Date().toISOString(),
+    status: safeText(l.status, "New Lead"),
+    communication: safeText(l.communication, "Not contacted"),
+    priority: safeText(l.priority, "Standard"),
+    offer: moneyNumber(l.offer_amount),
+
+    vin: safeText(l.vin, ""),
+    year: safeText(l.year, ""),
+    make: safeText(l.make, ""),
+    model: safeText(l.model, ""),
+    trim: safeText(l.trim, ""),
+    fuel: safeText(l.fuel, ""),
+    body: safeText(l.body, ""),
+    drive: safeText(l.drive, ""),
+    trans: safeText(l.trans, ""),
+    color: safeText(l.color, ""),
+    miles: safeText(l.miles, ""),
+
+    seller: safeText(l.seller, ""),
+    phone: safeText(l.phone, ""),
+    email: safeText(l.email, ""),
+    zip: safeText(l.zip, ""),
+    address: address,
+    city: safeText(l.city, "") || safeText(l.zip, ""),
+
+    pickupDate: pickupDate,
+    pickupWindow: pickupWindow,
+    window: pickupDate ? `${pickupDate} • ${pickupWindow}` : pickupWindow,
+    instructions: safeText(l.pickup_notes, ""),
+
+    buyer: safeText(l.buyer_name, "") || "—",
+    tow: safeText(l.tow_driver_name, "") || "—",
+    route: safeText(l.route, "Yard"),
+
+    title: safeText(l.title, ""),
+    ownership: safeText(l.ownership, "Owned"),
+    vehicleDescription: safeText(l.vehicle_description, "") || displayVehicle,
+
+    condition: condition.length ? condition : ["No condition answers saved yet"],
+
+    customerNotes: safeText(l.customer_notes, ""),
+    buyerNotes: safeText(l.buyer_notes, ""),
+    towingNotes: safeText(l.towing_notes, ""),
+    adminNotes: safeText(l.admin_notes, ""),
+
+    audit: normalizeCondition(l.audit).length ? normalizeCondition(l.audit) : ["Lead created from offer form"]
+  };
+}
+
+function dbPayloadFromLead(l){
+  return {
+    status: l.status || "New Lead",
+    communication: l.communication || null,
+    priority: l.priority || "Standard",
+    offer_amount: l.offer || null,
+
+    vin: l.vin || null,
+    year: l.year || null,
+    make: l.make || null,
+    model: l.model || null,
+    trim: l.trim || null,
+    fuel: l.fuel || null,
+    body: l.body || null,
+    drive: l.drive || null,
+    trans: l.trans || null,
+    color: l.color || null,
+    miles: l.miles || null,
+
+    seller: l.seller || null,
+    phone: l.phone || null,
+    email: l.email || null,
+    address: l.address || null,
+    zip: l.zip || null,
+
+    pickup_date: l.pickupDate || null,
+    pickup_window: l.pickupWindow || null,
+    pickup_address: l.address || null,
+    pickup_notes: l.instructions || null,
+
+    buyer_name: l.buyer === "—" ? null : l.buyer,
+    tow_driver_name: l.tow === "—" ? null : l.tow,
+    route: l.route || "Yard",
+
+    title: l.title || null,
+    ownership: l.ownership || null,
+    vehicle_description: l.vehicleDescription || null,
+    condition: l.condition || [],
+
+    customer_notes: l.customerNotes || null,
+    buyer_notes: l.buyerNotes || null,
+    towing_notes: l.towingNotes || null,
+    admin_notes: l.adminNotes || null,
+    audit: l.audit || []
+  };
+}
+
+async function loadLeads(){
+  const { data, error } = await db
+    .from("leads")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    console.error("Supabase load error:", error);
+    document.getElementById("leadList").innerHTML = `<div class="card">Could not load leads: ${error.message}</div>`;
+    return;
+  }
+
+  leads = (data || []).map(mapLeadFromDb);
+
+  if(leads.length){
+    selectedLead = leads[0];
+  }
+
+  renderLeadList();
+}
+
+async function updateLeadDb(lead, extraPayload={}){
+  if(!lead || !lead.db_id){
+    alert("No database lead selected.");
+    return false;
+  }
+
+  const payload = Object.assign({}, dbPayloadFromLead(lead), extraPayload);
+
+  const { data, error } = await db
+    .from("leads")
+    .update(payload)
+    .eq("id", lead.db_id)
+    .select()
+    .single();
+
+  if(error){
+    console.error("Supabase save error:", error);
+    alert("Error saving lead: " + error.message);
+    return false;
+  }
+
+  const updated = mapLeadFromDb(data);
+  const idx = leads.findIndex(x => x.db_id === updated.db_id);
+  if(idx >= 0) leads[idx] = updated;
+  selectedLead = updated;
+  return true;
+}
 
 const inventory = [
   {
@@ -370,8 +519,6 @@ const audit = [
   "CV-10287 offer sent by SMS"
 ];
 
-let selectedLead = leads[0];
-let activeFilter = "All";
 
 function badge(text, tone="slate"){ return `<span class="badge ${tone}">${text}</span>`; }
 function priorityBadge(p){
@@ -396,7 +543,7 @@ function filteredLeads(){
   const limit = Number(document.getElementById("limit").value);
   const list = sortedLeads().filter(l=>{
     const statusOk = activeFilter==="All" || l.status===activeFilter;
-    const hay = [l.id,l.vin,l.vin.slice(-6),l.seller,l.year,l.make,l.model].join(" ").toLowerCase();
+    const hay = [l.id,l.vin,(l.vin || "").slice(-6),l.seller,l.year,l.make,l.model,l.phone,l.email,l.zip].join(" ").toLowerCase();
     return statusOk && (!q || hay.includes(q));
   });
   return list.slice(0, limit);
@@ -406,17 +553,20 @@ function renderLeadList(){
   const list = filteredLeads();
   document.getElementById("resultCount").innerText = `${list.length} shown`;
   document.getElementById("listTitle").innerText = activeFilter==="All" ? "All Transactions" : activeFilter + " Transactions";
-  if(!list.find(l=>l.id===selectedLead.id) && list.length){ selectedLead = list[0]; }
+
+  if(!selectedLead && list.length){ selectedLead = list[0]; }
+  if(selectedLead && !list.find(l=>l.id===selectedLead.id) && list.length){ selectedLead = list[0]; }
+  if(!list.length){ selectedLead = null; }
 
   document.getElementById("leadList").innerHTML = list.map(l=>`
-    <div class="card lead-card ${selectedLead.id===l.id?'active':''}" onclick="selectLead('${l.id}')">
+    <div class="card lead-card ${selectedLead && selectedLead.id===l.id?'active':''}" onclick="selectLead('${l.id}')">
       <div class="lead-row">
         <div>
           <div class="title">${l.year} ${l.make} ${l.model}</div>
-          <div class="muted tiny">${l.id} • VIN ${l.vin} • Last 6 ${l.vin.slice(-6)}</div>
+          <div class="muted tiny">${l.id} • VIN ${l.vin || "—"} • Last 6 ${(l.vin || "").slice(-6) || "—"}</div>
         </div>
-        <div><div class="compact-label">Seller / City</div><div class="compact-value">${l.seller} • ${l.city}</div></div>
-        <div><div class="compact-label">Offer / Communication</div><div class="compact-value">${l.offer ? "$"+l.offer.toLocaleString() : "Not sent"} • ${l.communication}</div></div>
+        <div><div class="compact-label">Seller / City</div><div class="compact-value">${l.seller || "—"} • ${l.city || "—"}</div></div>
+        <div><div class="compact-label">Offer / Communication</div><div class="compact-value">${l.offer ? "$"+l.offer.toLocaleString() : "Not sent"} • ${l.communication || "Not contacted"}</div></div>
         <div>${badge(l.status,statusTone(l.status))}${priorityBadge(l.priority)}</div>
         <div onclick="event.stopPropagation()">
           ${
@@ -434,69 +584,145 @@ function renderLeadList(){
   renderLeadDetail();
 }
 
-function makeOffer(id){
+async function makeOffer(id){
   const input = document.getElementById("offer-" + id);
   const amount = Number(input.value);
   const lead = leads.find(l=>l.id===id);
   if(!lead || !amount || amount <= 0) return alert("Enter a valid offer amount.");
+
   lead.offer = amount;
   lead.status = "Offer Sent";
   lead.communication = "Offer sent by SMS + Email";
   lead.audit.unshift("Offer sent: $" + amount.toLocaleString());
-  selectedLead = lead;
-  renderLeadList();
+
+  const saved = await updateLeadDb(lead, {
+    offer_amount: amount,
+    status: "Offer Sent",
+    communication: "Offer sent by SMS + Email",
+    offer_sent_at: new Date().toISOString()
+  });
+
+  if(saved) renderLeadList();
 }
 
-function assignBuyer(id, value){
+async function assignBuyer(id, value){
   const lead = leads.find(l=>l.id===id);
   if(!lead || value==="Select buyer") return;
   if(lead.status !== "Accepted") return alert("Buyer assignment is only available after the customer accepts.");
+
   lead.buyer = value;
   lead.audit.unshift("Buyer assigned: " + value);
-  selectedLead = lead;
-  renderLeadList();
+
+  const saved = await updateLeadDb(lead, { buyer_name: value });
+  if(saved) renderLeadList();
 }
 
-function updatePickupSchedule(id){
+async function updatePickupSchedule(id){
   const lead = leads.find(l=>l.id===id);
   if(!lead) return;
+
   const date = document.getElementById("pickup-date").value;
   const win = document.getElementById("pickup-window").value;
+
   lead.pickupDate = date;
   lead.pickupWindow = win;
   lead.window = date ? `${date} • ${win}` : `No date selected • ${win}`;
   lead.audit.unshift("Admin updated pickup appointment: " + lead.window);
-  selectedLead = lead;
-  renderLeadList();
+
+  const saved = await updateLeadDb(lead, {
+    pickup_date: date || null,
+    pickup_window: win || null
+  });
+
+  if(saved) renderLeadList();
 }
 
-function saveCustomer(id){
+async function saveCustomer(id){
   const l = leads.find(x=>x.id===id);
   if(!l) return;
+
   ["seller","phone","email","address","instructions","communication"].forEach(k=>{
     const el = document.getElementById("cust-"+k);
     if(el) l[k]=el.value;
   });
+
   l.audit.unshift("Admin updated customer profile");
-  selectedLead = l;
-  renderLeadList();
+
+  const saved = await updateLeadDb(l, {
+    seller: l.seller || null,
+    phone: l.phone || null,
+    email: l.email || null,
+    address: l.address || null,
+    pickup_address: l.address || null,
+    pickup_notes: l.instructions || null,
+    communication: l.communication || null
+  });
+
+  if(saved) renderLeadList();
 }
 
-function saveVehicle(id){
+async function saveVehicle(id){
   const l = leads.find(x=>x.id===id);
   if(!l) return;
+
   ["miles","year","make","model","trim","fuel","body","drive","trans","color","title","ownership","vehicleDescription"].forEach(k=>{
     const el = document.getElementById("veh-"+k);
     if(el) l[k]=el.value;
   });
+
   l.condition = Array.from(document.querySelectorAll(".condition-edit")).map(el=>el.value).filter(Boolean);
   l.audit.unshift("Admin updated vehicle profile, condition, or description");
-  selectedLead = l;
-  renderLeadList();
+
+  const saved = await updateLeadDb(l, {
+    miles: l.miles || null,
+    year: l.year || null,
+    make: l.make || null,
+    model: l.model || null,
+    trim: l.trim || null,
+    fuel: l.fuel || null,
+    body: l.body || null,
+    drive: l.drive || null,
+    trans: l.trans || null,
+    color: l.color || null,
+    title: l.title || null,
+    ownership: l.ownership || null,
+    vehicle_description: l.vehicleDescription || null,
+    condition: l.condition || []
+  });
+
+  if(saved) renderLeadList();
+}
+
+
+async function saveNotes(id){
+  const l = leads.find(x=>x.id===id);
+  if(!l) return;
+
+  ["customerNotes","buyerNotes","towingNotes","adminNotes"].forEach(k=>{
+    const el = document.getElementById("note-"+k);
+    if(el) l[k]=el.value;
+  });
+
+  l.audit.unshift("Admin updated notes");
+
+  const saved = await updateLeadDb(l, {
+    customer_notes: l.customerNotes || null,
+    buyer_notes: l.buyerNotes || null,
+    towing_notes: l.towingNotes || null,
+    admin_notes: l.adminNotes || null
+  });
+
+  if(saved) renderLeadList();
 }
 
 function renderLeadDetail(){
   const l = selectedLead;
+
+  if(!l){
+    document.getElementById("leadDetail").innerHTML = `<div class="panel"><h2 class="section-title">Opened Car Profile</h2><p class="muted">No lead selected.</p></div>`;
+    return;
+  }
+
   document.getElementById("leadDetail").innerHTML = `
     <div class="panel">
       <div class="row">
@@ -506,14 +732,14 @@ function renderLeadDetail(){
       <div class="grid detail-grid">
         <div class="panel">
           <h3>Customer Profile</h3>
-          <div class="kv"><b>Seller</b><input class="edit-input" id="cust-seller" value="${l.seller}"></div>
-          <div class="kv"><b>Phone</b><input class="edit-input" id="cust-phone" value="${l.phone}"></div>
-          <div class="kv"><b>Email</b><input class="edit-input" id="cust-email" value="${l.email}"></div>
-          <div class="kv"><b>Pickup Address</b><input class="edit-input" id="cust-address" value="${l.address}"></div>
+          <div class="kv"><b>Seller</b><input class="edit-input" id="cust-seller" value="${escAttr(l.seller)}"></div>
+          <div class="kv"><b>Phone</b><input class="edit-input" id="cust-phone" value="${escAttr(l.phone)}"></div>
+          <div class="kv"><b>Email</b><input class="edit-input" id="cust-email" value="${escAttr(l.email)}"></div>
+          <div class="kv"><b>Pickup Address</b><input class="edit-input" id="cust-address" value="${escAttr(l.address)}"></div>
           ${kv("Customer Selected",`${l.pickupDate || "No date selected"} • ${l.pickupWindow}`)}
           ${kv("Current Pickup",l.window)}
-          <div class="kv"><b>Instructions</b><input class="edit-input" id="cust-instructions" value="${l.instructions}"></div>
-          <div class="kv"><b>Communication</b><input class="edit-input" id="cust-communication" value="${l.communication}"></div>
+          <div class="kv"><b>Instructions</b><input class="edit-input" id="cust-instructions" value="${escAttr(l.instructions)}"></div>
+          <div class="kv"><b>Communication</b><input class="edit-input" id="cust-communication" value="${escAttr(l.communication)}"></div>
           <button class="btn dark" onclick="saveCustomer('${l.id}')">Save Customer Profile</button>
 
           <div class="note">
@@ -537,24 +763,24 @@ function renderLeadDetail(){
         <div class="panel">
           <h3>Vehicle Profile + Condition</h3>
           ${kv("VIN",l.vin)}
-          <div class="kv"><b>Mileage</b><input class="edit-input" id="veh-miles" value="${l.miles}"></div>
-          <div class="kv"><b>Year</b><input class="edit-input" id="veh-year" value="${l.year}"></div>
-          <div class="kv"><b>Make</b><input class="edit-input" id="veh-make" value="${l.make}"></div>
-          <div class="kv"><b>Model</b><input class="edit-input" id="veh-model" value="${l.model}"></div>
-          <div class="kv"><b>Trim</b><input class="edit-input" id="veh-trim" value="${l.trim}"></div>
-          <div class="kv"><b>Fuel</b><input class="edit-input" id="veh-fuel" value="${l.fuel}"></div>
-          <div class="kv"><b>Body</b><input class="edit-input" id="veh-body" value="${l.body}"></div>
-          <div class="kv"><b>Drivetrain</b><input class="edit-input" id="veh-drive" value="${l.drive}"></div>
-          <div class="kv"><b>Transmission</b><input class="edit-input" id="veh-trans" value="${l.trans}"></div>
-          <div class="kv"><b>Color</b><input class="edit-input" id="veh-color" value="${l.color}"></div>
-          <div class="kv"><b>Title</b><input class="edit-input" id="veh-title" value="${l.title}"></div>
-          <div class="kv"><b>Ownership</b><input class="edit-input" id="veh-ownership" value="${l.ownership}"></div>
+          <div class="kv"><b>Mileage</b><input class="edit-input" id="veh-miles" value="${escAttr(l.miles)}"></div>
+          <div class="kv"><b>Year</b><input class="edit-input" id="veh-year" value="${escAttr(l.year)}"></div>
+          <div class="kv"><b>Make</b><input class="edit-input" id="veh-make" value="${escAttr(l.make)}"></div>
+          <div class="kv"><b>Model</b><input class="edit-input" id="veh-model" value="${escAttr(l.model)}"></div>
+          <div class="kv"><b>Trim</b><input class="edit-input" id="veh-trim" value="${escAttr(l.trim)}"></div>
+          <div class="kv"><b>Fuel</b><input class="edit-input" id="veh-fuel" value="${escAttr(l.fuel)}"></div>
+          <div class="kv"><b>Body</b><input class="edit-input" id="veh-body" value="${escAttr(l.body)}"></div>
+          <div class="kv"><b>Drivetrain</b><input class="edit-input" id="veh-drive" value="${escAttr(l.drive)}"></div>
+          <div class="kv"><b>Transmission</b><input class="edit-input" id="veh-trans" value="${escAttr(l.trans)}"></div>
+          <div class="kv"><b>Color</b><input class="edit-input" id="veh-color" value="${escAttr(l.color)}"></div>
+          <div class="kv"><b>Title</b><input class="edit-input" id="veh-title" value="${escAttr(l.title)}"></div>
+          <div class="kv"><b>Ownership</b><input class="edit-input" id="veh-ownership" value="${escAttr(l.ownership)}"></div>
           <h4>Description</h4>
-          <textarea id="veh-vehicleDescription">${l.vehicleDescription || ""}</textarea>
+          <textarea id="veh-vehicleDescription">${escText(l.vehicleDescription || "")}</textarea>
 
           <h4 style="margin-bottom:8px">Condition</h4>
           <div class="condition">
-            ${l.condition.map((c,i)=>`<div><input class="edit-input condition-edit" value="${c}">${i===0||i===1||i===3||i===4||i===5?badge("Review","yellow"):badge("OK","green")}</div>`).join("")}
+            ${l.condition.map((c,i)=>`<div><input class="edit-input condition-edit" value="${escAttr(c)}">${i===0||i===1||i===3||i===4||i===5?badge("Review","yellow"):badge("OK","green")}</div>`).join("")}
           </div>
           <div class="actions-row"><button class="btn dark" onclick="saveVehicle('${l.id}')">Save Vehicle Profile</button></div>
         </div>
@@ -562,11 +788,12 @@ function renderLeadDetail(){
         <div class="panel" style="grid-column:1/-1">
           <h3>Notes</h3>
           <div class="grid four">
-            <div class="note"><h4>Customer Notes</h4><textarea>${l.customerNotes || ""}</textarea></div>
-            <div class="note"><h4>Buyer Notes</h4><textarea>${l.buyerNotes || ""}</textarea></div>
-            <div class="note"><h4>Towing Notes</h4><textarea>${l.towingNotes || ""}</textarea></div>
-            <div class="note"><h4>Admin Notes</h4><textarea>${l.adminNotes || ""}</textarea></div>
+            <div class="note"><h4>Customer Notes</h4><textarea id="note-customerNotes">${escText(l.customerNotes || "")}</textarea></div>
+            <div class="note"><h4>Buyer Notes</h4><textarea id="note-buyerNotes">${escText(l.buyerNotes || "")}</textarea></div>
+            <div class="note"><h4>Towing Notes</h4><textarea id="note-towingNotes">${escText(l.towingNotes || "")}</textarea></div>
+            <div class="note"><h4>Admin Notes</h4><textarea id="note-adminNotes">${escText(l.adminNotes || "")}</textarea></div>
           </div>
+          <div class="actions-row"><button class="btn dark" onclick="saveNotes('${l.id}')">Save Notes</button></div>
         </div>
 
         <div class="panel" style="grid-column:1/-1">
@@ -952,7 +1179,7 @@ document.getElementById("limit").addEventListener("change",renderLeadList);
 document.getElementById("inventorySearch").addEventListener("input",renderInventory);
 document.getElementById("inventoryLimit").addEventListener("change",renderInventory);
 
-renderLeadList();
+loadLeads();
 renderInventory();
 renderBuyers();
 renderTow();
