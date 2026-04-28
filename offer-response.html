@@ -1,129 +1,581 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Offer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cash Offer | Central Valley Cash for Cars</title>
 
-<style>
-body { font-family: Arial; background:#f3f4f6; margin:0; }
-.page { max-width:900px; margin:auto; padding:40px 20px; }
-.card { background:#fff; padding:30px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+  <style>
+    * { box-sizing: border-box; }
 
-.offer { font-size:50px; color:#047857; font-weight:900; }
-.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.row { display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; border-radius:8px; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
 
-button { padding:12px 18px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
-.accept { background:#047857; color:#fff; }
-.decline { background:#fee2e2; color:#991b1b; }
-.continue { background:#111; color:#fff; }
+    .page {
+      max-width: 920px;
+      margin: auto;
+      padding: 48px 20px;
+    }
 
-.step { display:none; margin-top:20px; }
-.show { display:block; }
+    .card {
+      background: #fff;
+      padding: 32px;
+      border-radius: 18px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
 
-.success { background:#ecfdf5; padding:12px; border-radius:10px; margin-top:10px; }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+    }
 
-</style>
+    h3 {
+      margin: 22px 0 12px;
+      font-size: 20px;
+    }
+
+    .offer-amount {
+      font-size: 56px;
+      color: #047857;
+      font-weight: 900;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    #vehicle {
+      color: #6b7280;
+      margin-bottom: 24px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px 24px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border: 1px solid #edf2f7;
+      padding: 12px 14px;
+      border-radius: 10px;
+      min-height: 42px;
+      font-size: 14px;
+    }
+
+    .row span:last-child {
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .info-box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 22px;
+    }
+
+    .info-box h3 {
+      margin-top: 0;
+    }
+
+    .pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .yes {
+      background: #dcfce7;
+      color: #065f46;
+    }
+
+    .no {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .actions {
+      margin-top: 28px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 13px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: .02em;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .accept {
+      background: #047857;
+      color: #fff;
+    }
+
+    .decline {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .continue {
+      background: #111827;
+      color: #fff;
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .notice.success {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .notice.danger {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .step-card {
+      margin-top: 18px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      display: none;
+    }
+
+    .step-card.show {
+      display: block;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+      margin-bottom: 14px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .congrats-card {
+      display: none;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .congrats-hero {
+      background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 60%);
+      padding: 42px 34px 28px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .checkmark {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #047857;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 900;
+      margin-bottom: 16px;
+    }
+
+    .congrats-title {
+      font-size: 34px;
+      margin: 0 0 8px;
+      letter-spacing: -0.03em;
+    }
+
+    .congrats-subtitle {
+      color: #374151;
+      font-size: 17px;
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    .congrats-body {
+      padding: 32px 36px 36px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .summary-item {
+      background: #f9fafb;
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: left;
+    }
+
+    .summary-label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      font-weight: 900;
+      color: #111827;
+      font-size: 15px;
+    }
+
+    .email-confirm {
+      margin-top: 18px;
+      padding: 16px;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      border-radius: 12px;
+      font-weight: 800;
+      text-align: left;
+      line-height: 1.45;
+    }
+
+    .next-actions {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .secondary-link {
+      color: #6b7280;
+      font-weight: 800;
+      text-decoration: none;
+      padding: 12px 18px;
+    }
+
+    @media (max-width: 700px) {
+      .grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .offer-amount {
+        font-size: 42px;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="page">
+    <div class="card" id="offerPage">
+      <h2>Your Offer</h2>
+      <div class="offer-amount" id="amount"></div>
+      <div id="vehicle"></div>
 
-<div class="page">
+      <div class="info-box">
+        <h3>Vehicle Information</h3>
+        <div class="grid">
+          <div class="row">Car ID <span id="carId"></span></div>
+          <div class="row">VIN <span id="vin"></span></div>
+          <div class="row">Mileage <span id="miles"></span></div>
+          <div class="row">Title <span id="title"></span></div>
+          <div class="row">Drivetrain <span id="drive"></span></div>
+          <div class="row">Fuel <span id="fuel"></span></div>
+          <div class="row">Transmission <span id="transType"></span></div>
+        </div>
+      </div>
 
-<div class="card" id="offerPage">
-<h2>Your Offer</h2>
-<div class="offer">$850</div>
-<p>2012 Toyota Camry</p>
+      <div class="info-box">
+        <h3>Condition</h3>
+        <div class="grid">
+          <div class="row">Runs & Drives <span id="runs"></span></div>
+          <div class="row">Engine OK <span id="engine"></span></div>
+          <div class="row">Transmission OK <span id="trans"></span></div>
+          <div class="row">Good Tires <span id="tires"></span></div>
+          <div class="row">Has Key <span id="key"></span></div>
+          <div class="row">Blown Airbags <span id="airbags"></span></div>
+          <div class="row">Catalytic Converter <span id="cat"></span></div>
+          <div class="row">Parts Missing <span id="parts"></span></div>
+          <div class="row">Body Damage <span id="body"></span></div>
+          <div class="row">Interior Damage <span id="interior"></span></div>
+        </div>
+      </div>
 
-<div class="grid">
-<div class="row">VIN <span>4T1BF1FK5CU123456</span></div>
-<div class="row">Mileage <span>162,345</span></div>
-</div>
+      <div class="actions">
+        <button class="accept" id="acceptBtn" type="button">Accept</button>
+        <button class="decline" id="declineBtn" type="button">Decline</button>
+      </div>
 
-<h3>Condition</h3>
-<div class="grid">
-<div class="row">Runs <span>Yes</span></div>
-<div class="row">Engine <span>Yes</span></div>
-<div class="row">Key <span>No</span></div>
-<div class="row">Damage <span>Yes</span></div>
-</div>
+      <div class="notice success" id="acceptNotice">
+        Offer accepted. Please schedule your pickup below.
+      </div>
 
-<br>
+      <div class="notice danger" id="declineNotice">
+        Offer declined.
+      </div>
 
-<button class="accept" onclick="accept()">Accept</button>
-<button class="decline" onclick="decline()">Decline</button>
+      <div class="step-card" id="scheduleStep">
+        <h3>Schedule Pickup</h3>
+        <p style="color:#6b7280; margin-top:-6px;">
+          Choose a pickup date, time window, and confirm where the vehicle is located.
+        </p>
 
-<div id="acceptedMsg" class="success" style="display:none;">
-Offer accepted. Schedule pickup below.
-</div>
+        <div class="grid">
+          <div>
+            <label for="pickupDate">Pickup Date</label>
+            <input id="pickupDate" type="date" />
+          </div>
+          <div>
+            <label for="pickupWindow">Pickup Window</label>
+            <select id="pickupWindow">
+              <option value="">Select time window</option>
+              <option value="8-12">8 AM – 12 PM</option>
+              <option value="12-4">12 PM – 4 PM</option>
+              <option value="4-8">4 PM – 8 PM</option>
+            </select>
+          </div>
+        </div>
 
-<div id="schedule" class="step">
-<h3>Schedule Pickup</h3>
+        <label for="pickupAddress">Pickup Address</label>
+        <input id="pickupAddress" placeholder="Street address, city, state, ZIP" />
 
-<input id="date" type="date"><br><br>
+        <label for="pickupNotes">Pickup Instructions</label>
+        <textarea id="pickupNotes" placeholder="Gate code, key location, where the car is parked, special access notes, etc."></textarea>
 
-<select id="time">
-<option value="">Select time</option>
-<option>8-12</option>
-<option>12-4</option>
-<option>4-8</option>
-</select><br><br>
+        <div class="actions">
+          <button class="continue" id="saveScheduleBtn" type="button">Save Pickup & Continue</button>
+        </div>
+      </div>
+    </div>
 
-<input id="address" placeholder="Pickup address"><br><br>
+    <div class="card congrats-card" id="congratsPage">
+      <div class="congrats-hero">
+        <div class="checkmark">✓</div>
+        <h2 class="congrats-title">Congratulations on Your Offer!</h2>
+        <p class="congrats-subtitle">
+          Your offer has been accepted and your pickup appointment is scheduled.
+        </p>
+      </div>
 
-<button class="continue" onclick="saveSchedule()">Save Pickup</button>
-</div>
+      <div class="congrats-body">
+        <h3 style="margin-top:0;">Pickup Confirmation</h3>
+        <div id="congratsSummary" class="summary-grid"></div>
 
-</div>
+        <div class="email-confirm">
+          Confirmation email will be sent to the seller and admin with the accepted offer, pickup date, pickup window, and vehicle details.
+        </div>
 
-<div class="card step" id="congrats">
-<h2>✅ Congratulations</h2>
-<p>Your pickup has been scheduled.</p>
+        <div class="next-actions">
+          <button class="continue" id="continueProfileBtn" type="button">Continue to Seller Profile</button>
+          <a class="secondary-link" href="seller-profile.html">You can complete this later</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div id="summary"></div>
+  <script>
+    const lead = {
+      id: 1,
+      car_id: "CV-123456",
+      offer_amount: 850,
+      seller_name: "John Seller",
+      seller_phone: "559-555-1234",
+      seller_email: "seller@example.com",
+      year: "2012",
+      make: "Toyota",
+      model: "Camry",
+      vin: "4T1BF1FK5CU123456",
+      mileage: 162345,
+      title_status: "Clean Title",
+      drivetrain: "FWD",
+      fuel_type: "Gasoline",
+      transmission: "Automatic",
+      runs_drives: true,
+      engine_ok: true,
+      transmission_ok: true,
+      good_tires: true,
+      has_key: false,
+      blown_airbags: true,
+      catalytic_converter: true,
+      parts_missing: true,
+      body_damage: true,
+      interior_damage: false,
+      status: "offer_sent"
+    };
 
-<br>
-<button class="continue" onclick="goProfile()">Continue to Seller Profile</button>
-</div>
+    function yesNo(value, damageField) {
+      const isYes = value === true;
+      const good = damageField ? !isYes : isYes;
+      const label = isYes ? "Yes" : "No";
+      return '<span class="pill ' + (good ? 'yes' : 'no') + '">' + label + '</span>';
+    }
 
-</div>
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value || "—";
+    }
 
-<script>
-function accept(){
-document.getElementById("acceptedMsg").style.display="block";
-document.getElementById("schedule").classList.add("show");
-}
+    function setHTML(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = value;
+    }
 
-function decline(){
-alert("Offer declined");
-}
+    function renderOffer() {
+      setText("amount", "$" + lead.offer_amount.toLocaleString());
+      setText("vehicle", lead.year + " " + lead.make + " " + lead.model);
+      setText("carId", lead.car_id);
+      setText("vin", lead.vin);
+      setText("miles", lead.mileage.toLocaleString() + " mi");
+      setText("title", lead.title_status);
+      setText("drive", lead.drivetrain);
+      setText("fuel", lead.fuel_type);
+      setText("transType", lead.transmission);
 
-function saveSchedule(){
-const date = document.getElementById("date").value;
-const time = document.getElementById("time").value;
-const address = document.getElementById("address").value;
+      setHTML("runs", yesNo(lead.runs_drives, false));
+      setHTML("engine", yesNo(lead.engine_ok, false));
+      setHTML("trans", yesNo(lead.transmission_ok, false));
+      setHTML("tires", yesNo(lead.good_tires, false));
+      setHTML("key", yesNo(lead.has_key, false));
+      setHTML("airbags", yesNo(lead.blown_airbags, true));
+      setHTML("cat", yesNo(lead.catalytic_converter, false));
+      setHTML("parts", yesNo(lead.parts_missing, true));
+      setHTML("body", yesNo(lead.body_damage, true));
+      setHTML("interior", yesNo(lead.interior_damage, true));
+    }
 
-if(!date || !time || !address){
-alert("Fill all fields");
-return;
-}
+    function hideNotices() {
+      document.getElementById("acceptNotice").classList.remove("show");
+      document.getElementById("declineNotice").classList.remove("show");
+    }
 
-localStorage.setItem("pickup", JSON.stringify({date,time,address}));
+    function handleAccept() {
+      lead.status = "accepted";
+      hideNotices();
 
-document.getElementById("offerPage").style.display="none";
-document.getElementById("congrats").classList.add("show");
+      document.getElementById("acceptNotice").classList.add("show");
+      document.getElementById("scheduleStep").classList.add("show");
+      document.getElementById("acceptBtn").disabled = true;
+      document.getElementById("declineBtn").disabled = true;
 
-document.getElementById("summary").innerHTML =
-"<b>Date:</b> "+date+"<br>"+
-"<b>Time:</b> "+time+"<br>"+
-"<b>Address:</b> "+address;
-}
+      document.getElementById("scheduleStep").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
 
-function goProfile(){
-window.location.href = "seller-profile.html";
-}
-</script>
+    function handleDecline() {
+      lead.status = "declined";
+      hideNotices();
 
+      document.getElementById("declineNotice").classList.add("show");
+      document.getElementById("scheduleStep").classList.remove("show");
+      document.getElementById("acceptBtn").disabled = true;
+      document.getElementById("declineBtn").disabled = true;
+    }
+
+    function handleScheduleSave() {
+      const pickupDate = document.getElementById("pickupDate").value;
+      const pickupWindow = document.getElementById("pickupWindow").value;
+      const pickupAddress = document.getElementById("pickupAddress").value.trim();
+      const pickupNotes = document.getElementById("pickupNotes").value.trim();
+
+      if (!pickupDate || !pickupWindow || !pickupAddress) {
+        alert("Please enter pickup date, pickup window, and pickup address.");
+        return;
+      }
+
+      lead.status = "pickup_scheduled";
+      lead.pickup_date = pickupDate;
+      lead.pickup_window = pickupWindow;
+      lead.pickup_address = pickupAddress;
+      lead.pickup_notes = pickupNotes;
+      lead.address_verified = true;
+
+      localStorage.setItem("cvcf_lead", JSON.stringify(lead));
+
+      document.getElementById("congratsSummary").innerHTML =
+        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + lead.car_id + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + lead.vin + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + lead.year + ' ' + lead.make + ' ' + lead.model + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Accepted Offer</span><span class="summary-value">$' + lead.offer_amount.toLocaleString() + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Pickup Date</span><span class="summary-value">' + pickupDate + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Pickup Window</span><span class="summary-value">' + pickupWindow + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Pickup Address</span><span class="summary-value">' + pickupAddress + '<br><span style="color:#047857;">Verified for demo</span></span></div>' +
+        '<div class="summary-item"><span class="summary-label">Seller</span><span class="summary-value">' + lead.seller_name + '<br>' + lead.seller_phone + '<br>' + lead.seller_email + '</span></div>';
+
+      document.getElementById("offerPage").style.display = "none";
+      document.getElementById("congratsPage").style.display = "block";
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function goToSellerProfile() {
+      localStorage.setItem("cvcf_lead", JSON.stringify(lead));
+      window.location.href = "seller-profile.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      renderOffer();
+
+      document.getElementById("acceptBtn").addEventListener("click", handleAccept);
+      document.getElementById("declineBtn").addEventListener("click", handleDecline);
+      document.getElementById("saveScheduleBtn").addEventListener("click", handleScheduleSave);
+      document.getElementById("continueProfileBtn").addEventListener("click", goToSellerProfile);
+    });
+  </script>
 </body>
 </html>
