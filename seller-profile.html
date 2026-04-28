@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Seller Profile | Central Valley Cash for Cars</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * { box-sizing: border-box; }
 
@@ -83,6 +85,7 @@
       color: #111827;
       font-size: 15px;
       line-height: 1.4;
+      overflow-wrap: anywhere;
     }
 
     input, select, textarea {
@@ -129,6 +132,11 @@
       font-size: 14px;
     }
 
+    button:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
     .primary {
       background: #111827;
       color: #fff;
@@ -145,6 +153,7 @@
       border-radius: 12px;
       font-weight: 700;
       display: none;
+      line-height: 1.45;
     }
 
     .notice.show {
@@ -155,6 +164,12 @@
       background: #ecfdf5;
       color: #065f46;
       border: 1px solid #a7f3d0;
+    }
+
+    .error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
     .closed-card {
@@ -213,6 +228,10 @@
 
       <h3>Deal Summary</h3>
       <div class="summary-grid" id="dealSummary"></div>
+
+      <div class="notice" id="loadNotice">
+        Loading seller profile...
+      </div>
     </div>
 
     <div class="card editable-card">
@@ -327,6 +346,8 @@
       <div class="notice success" id="saveNotice">
         Seller profile saved. Admin now has your seller details, pickup instructions, reschedule request, and upload summary.
       </div>
+
+      <div class="notice error" id="errorNotice"></div>
     </div>
 
     <div class="card closed-card" id="closedPage">
@@ -348,51 +369,88 @@
   </div>
 
   <script>
-    const fallbackLead = {
-      id: 1,
-      car_id: "CV-123456",
-      offer_amount: 850,
-      year: "2012",
-      make: "Toyota",
-      model: "Camry",
-      vin: "4T1BF1FK5CU123456",
-      mileage: 162345,
-      seller_name: "John Seller",
-      seller_phone: "559-555-1234",
-      seller_email: "seller@example.com",
-      pickup_date: "2026-04-01",
-      pickup_window: "8-12",
-      pickup_address: "1234 Demo Street, Fresno, CA 93722",
-      pickup_notes: "Car is parked in driveway. Key under front floor mat.",
-      buyer_name: "Central Valley Buyer Demo",
-      buyer_phone: "559-555-9000",
-      status: "pickup_scheduled",
-      payment_status: "pending",
-      check_number: ""
-    };
+    const SUPABASE_URL = "https://psxqggcmfkmhkrsagnuv.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw";
 
-    function getLead() {
-      try {
-        const saved = localStorage.getItem("cvcf_lead");
-        return saved ? Object.assign({}, fallbackLead, JSON.parse(saved)) : fallbackLead;
-      } catch (error) {
-        return fallbackLead;
-      }
-    }
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let lead = getLead();
+    const params = new URLSearchParams(window.location.search);
+    const leadId = params.get("id");
+
+    let lead = null;
 
     function safe(value, fallback) {
       return value || fallback || "—";
+    }
+
+    function clean(value) {
+      return String(value || "").trim();
     }
 
     function money(value) {
       return "$" + Number(value || 0).toLocaleString();
     }
 
+    function getMileage() {
+      const value = lead.mileage || lead.miles || 0;
+      const number = String(value).replace(/[^\d]/g, "");
+      return number ? Number(number).toLocaleString() + " mi" : "—";
+    }
+
+    function getSellerName() {
+      return lead.seller_name || lead.seller || "";
+    }
+
+    function getSellerPhone() {
+      return lead.seller_phone || lead.phone || "";
+    }
+
+    function getSellerEmail() {
+      return lead.seller_email || lead.email || "";
+    }
+
+    function getBuyerName() {
+      return lead.buyer_name || lead.buyer || "Not assigned yet";
+    }
+
+    function getBuyerPhone() {
+      return lead.buyer_phone || "";
+    }
+
+    function formatCarId(rawId) {
+      const raw = String(rawId || "");
+      const numeric = raw.replace(/\D/g, "");
+
+      if (lead.car_id) return lead.car_id;
+
+      if (numeric) {
+        return "CV-" + numeric.slice(-6).padStart(6, "0");
+      }
+
+      let hash = 0;
+      for (let i = 0; i < raw.length; i++) {
+        hash = ((hash * 31) + raw.charCodeAt(i)) % 1000000;
+      }
+
+      return "CV-" + String(hash).padStart(6, "0");
+    }
+
     function setValue(id, value) {
       const el = document.getElementById(id);
-      if (el) el.value = safe(value, "");
+      if (el) el.value = value || "";
+    }
+
+    function setNotice(id, message) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = message;
+      el.classList.add("show");
+    }
+
+    function clearNotice(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("show");
     }
 
     function isClosedStatus() {
@@ -413,7 +471,7 @@
       document.getElementById("closedPage").classList.add("show");
 
       document.getElementById("closedSummary").innerHTML =
-        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(lead.car_id) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(formatCarId(lead.id)) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + safe(lead.year) + ' ' + safe(lead.make) + ' ' + safe(lead.model) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">Payment Status</span><span class="summary-value">Paid</span></div>' +
@@ -422,18 +480,19 @@
 
     function renderSummary() {
       const vehicle = safe(lead.year) + " " + safe(lead.make) + " " + safe(lead.model);
-      const mileage = Number(lead.mileage || 0).toLocaleString() + " mi";
 
       document.getElementById("dealSummary").innerHTML =
-        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(lead.car_id) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(formatCarId(lead.id)) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + vehicle + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">Accepted Offer</span><span class="summary-value">' + money(lead.offer_amount) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">Pickup</span><span class="summary-value">' + safe(lead.pickup_date) + '<br>' + safe(lead.pickup_window) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Mileage</span><span class="summary-value">' + mileage + '</span></div>';
+        '<div class="summary-item"><span class="summary-label">Mileage</span><span class="summary-value">' + getMileage() + '</span></div>';
     }
 
     function renderProfile() {
+      if (!lead) return;
+
       if (isClosedStatus()) {
         renderClosedPage();
         return;
@@ -441,68 +500,154 @@
 
       renderSummary();
 
-      setValue("sellerName", lead.seller_name);
-      setValue("sellerPhone", lead.seller_phone);
-      setValue("sellerEmail", lead.seller_email);
+      setValue("sellerName", getSellerName());
+      setValue("sellerPhone", getSellerPhone());
+      setValue("sellerEmail", getSellerEmail());
 
-      setValue("buyerName", safe(lead.buyer_name, "Not assigned yet"));
-      setValue("buyerPhone", lead.buyer_phone);
+      setValue("buyerName", getBuyerName());
+      setValue("buyerPhone", getBuyerPhone());
       setValue("pickupDate", lead.pickup_date);
       setValue("pickupWindow", lead.pickup_window);
-      setValue("pickupAddress", lead.pickup_address);
+      setValue("pickupAddress", lead.pickup_address || lead.address);
       setValue("pickupInstructions", lead.pickup_notes);
+
+      setValue("paperworkInstructions", lead.paperwork_instructions);
     }
 
-    function saveProfile() {
-      const updatedLead = Object.assign({}, lead, {
-        seller_name: document.getElementById("sellerName").value.trim(),
-        seller_phone: document.getElementById("sellerPhone").value.trim(),
-        seller_email: document.getElementById("sellerEmail").value.trim(),
-        pickup_notes: document.getElementById("pickupInstructions").value.trim(),
-        paperwork_instructions: document.getElementById("paperworkInstructions").value.trim(),
-        reschedule_request: {
-          requested_date: document.getElementById("rescheduleDate").value,
-          requested_window: document.getElementById("rescheduleWindow").value,
-          reason: document.getElementById("rescheduleReason").value.trim(),
-          rule: "Allowed up to 24 hours before scheduled pickup"
-        },
-        upload_summary: {
-          carPhotos: document.getElementById("carPhotos").files.length,
-          driverLicense: document.getElementById("driverLicense").files.length,
-          titleUpload: document.getElementById("titleUpload").files.length,
-          extraDocs: document.getElementById("extraDocs").files.length
-        }
-      });
+    async function loadLead() {
+      clearNotice("errorNotice");
 
-      lead = updatedLead;
-      localStorage.setItem("cvcf_lead", JSON.stringify(updatedLead));
+      if (!leadId) {
+        setNotice("errorNotice", "Missing lead ID. Open this page from a link like seller-profile.html?id=LEAD_ID.");
+        return;
+      }
+
+      const { data, error } = await db
+        .from("leads")
+        .select("*")
+        .eq("id", leadId)
+        .single();
+
+      if (error) {
+        console.error(error);
+        setNotice("errorNotice", "Error loading seller profile: " + error.message);
+        return;
+      }
+
+      lead = data;
+      renderProfile();
+    }
+
+    function buildAdminNotes() {
+      const existing = lead.admin_notes || "";
+
+      const rescheduleDate = clean(document.getElementById("rescheduleDate").value);
+      const rescheduleWindow = clean(document.getElementById("rescheduleWindow").value);
+      const rescheduleReason = clean(document.getElementById("rescheduleReason").value);
+      const paperwork = clean(document.getElementById("paperworkInstructions").value);
+
+      const uploadSummary =
+        "Upload Summary: " +
+        "Car Photos: " + document.getElementById("carPhotos").files.length + ", " +
+        "Driver License: " + document.getElementById("driverLicense").files.length + ", " +
+        "Title Upload: " + document.getElementById("titleUpload").files.length + ", " +
+        "Extra Docs: " + document.getElementById("extraDocs").files.length;
+
+      let added = "\n\nSeller Profile Update - " + new Date().toLocaleString();
+
+      if (paperwork) {
+        added += "\nPaperwork Instructions: " + paperwork;
+      }
+
+      if (rescheduleDate || rescheduleWindow || rescheduleReason) {
+        added += "\nReschedule Request: " +
+          (rescheduleDate || "No date") + " • " +
+          (rescheduleWindow || "No window") + " • " +
+          (rescheduleReason || "No reason");
+      }
+
+      added += "\n" + uploadSummary;
+
+      return (existing + added).trim();
+    }
+
+    async function saveProfile() {
+      if (!lead) return;
+
+      clearNotice("errorNotice");
+      clearNotice("saveNotice");
+
+      const payload = {
+        seller: clean(document.getElementById("sellerName").value),
+        phone: clean(document.getElementById("sellerPhone").value),
+        email: clean(document.getElementById("sellerEmail").value),
+        pickup_notes: clean(document.getElementById("pickupInstructions").value),
+        admin_notes: buildAdminNotes()
+      };
+
+      const { data, error } = await db
+        .from("leads")
+        .update(payload)
+        .eq("id", lead.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+        setNotice("errorNotice", "Error saving seller profile: " + error.message);
+        return false;
+      }
+
+      lead = data;
+      renderProfile();
 
       document.getElementById("saveNotice").classList.add("show");
+      return true;
     }
 
-    function finishProfile() {
-      saveProfile();
+    async function finishProfile() {
+      const saved = await saveProfile();
+      if (!saved) return;
+
       alert("Seller profile completed.");
     }
 
-    function demoBuyerComplete() {
+    async function demoBuyerComplete() {
+      if (!lead) return;
+
       const checkNumber = prompt("Optional check number for P&L records:", lead.check_number || "4748");
 
-      if (checkNumber !== null) {
-        lead.check_number = checkNumber.trim();
+      if (checkNumber === null) return;
+
+      const payload = {
+        status: "completed",
+        payment_status: "paid",
+        check_number: clean(checkNumber),
+        completed_at: new Date().toISOString(),
+        admin_notes: buildAdminNotes() + "\n\nBuyer marked complete. Payment status: paid. Check #: " + clean(checkNumber)
+      };
+
+      const { data, error } = await db
+        .from("leads")
+        .update(payload)
+        .eq("id", lead.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error(error);
+        setNotice("errorNotice", "Error completing transaction: " + error.message);
+        return;
       }
 
-      lead.status = "completed";
-      lead.payment_status = "paid";
-
-      localStorage.setItem("cvcf_lead", JSON.stringify(lead));
+      lead = data;
       renderClosedPage();
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-      renderProfile();
+      loadLead();
 
       document.getElementById("saveProfileBtn").addEventListener("click", saveProfile);
       document.getElementById("finishBtn").addEventListener("click", finishProfile);
