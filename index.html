@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -577,13 +576,46 @@ function priorityBadge(p){
 }
 function statusTone(s){
   if(["Accepted","Sold","Ready for Sale","Inspection Completed"].includes(s)) return "green";
-  if(["Offer Sent","Quote Pending","Delivered","Repair in Process","Being Repaired","Pending","Pending Auction"].includes(s)) return "yellow";
+  if(["Offer Sent","Quote Pending","Delivered","Repair in Process","Being Repaired","Pending","Pending Auction","pickup_scheduled"].includes(s)) return "yellow";
   if(s==="Declined") return "red";
   return "blue";
 }
 function kv(k,v){ return `<div class="kv"><b>${k}</b><span>${v}</span></div>`; }
 function mapsUrl(address){ return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`; }
 function mapEmbed(address){ return `https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`; }
+
+function getOfferLink(lead){
+  const leadKey = lead && lead.db_id ? lead.db_id : "";
+  return `offer-response.html?id=${encodeURIComponent(leadKey)}`;
+}
+
+function fullOfferLink(lead){
+  const path = getOfferLink(lead);
+  const base = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, "/");
+  return new URL(path, base).href;
+}
+
+function copyOfferLinkById(id){
+  const lead = leads.find(l=>l.id===id);
+  if(!lead) return alert("Lead not found.");
+  const link = fullOfferLink(lead);
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(()=>{
+      alert("Offer link copied:\n\n" + link);
+    }).catch(()=>{
+      prompt("Copy this offer link:", link);
+    });
+  }else{
+    prompt("Copy this offer link:", link);
+  }
+}
+
+function openOfferLinkById(id){
+  const lead = leads.find(l=>l.id===id);
+  if(!lead) return alert("Lead not found.");
+  window.open(getOfferLink(lead), "_blank");
+}
 
 function sortedLeads(){ return [...leads].sort((a,b)=>new Date(b.created)-new Date(a.created)); }
 
@@ -621,9 +653,11 @@ function renderLeadList(){
           ${
             l.status === "New Lead"
               ? `<div class="compact-label">Make Offer</div><div class="inline-offer"><input id="offer-${l.id}" type="number" min="1" step="1" placeholder="$" oninput="this.value = this.value.replace(/[^0-9]/g, '')" /><button class="btn green" onclick="makeOffer('${l.id}')">Send</button></div>`
-              : l.status === "Accepted"
-                ? `<div class="compact-label">Buyer Assignment</div><select onchange="assignBuyer('${l.id}', this.value)"><option>${l.buyer === "—" ? "Select buyer" : l.buyer}</option><option>Fresno Auto Wholesale</option><option>Valley Budget Autos</option><option>Central Valley Buyer Group</option></select>`
-                : `<div class="compact-label">Buyer Assignment</div><div class="compact-value muted">Available after accepted</div>`
+              : l.status === "Offer Sent"
+                ? `<div class="compact-label">Offer Link</div><div class="actions-row" style="margin:6px 0 0"><button class="btn light" onclick="copyOfferLinkById('${l.id}')">Copy Link</button><button class="btn dark" onclick="openOfferLinkById('${l.id}')">Open</button></div>`
+                : (l.status === "Accepted" || String(l.status).toLowerCase() === "pickup_scheduled")
+                  ? `<div class="compact-label">Buyer Assignment</div><select onchange="assignBuyer('${l.id}', this.value)"><option>${l.buyer === "—" ? "Select buyer" : l.buyer}</option><option>Fresno Auto Wholesale</option><option>Valley Budget Autos</option><option>Central Valley Buyer Group</option></select>`
+                  : `<div class="compact-label">Buyer Assignment</div><div class="compact-value muted">Available after accepted</div>`
           }
         </div>
       </div>
@@ -651,13 +685,18 @@ async function makeOffer(id){
     offer_sent_at: new Date().toISOString()
   });
 
-  if(saved) renderLeadList();
+  if(saved){
+    const currentLead = leads.find(l=>l.id===id) || lead;
+    const link = fullOfferLink(currentLead);
+    renderLeadList();
+    alert("Offer sent. Send this link to the customer:\n\n" + link);
+  }
 }
 
 async function assignBuyer(id, value){
   const lead = leads.find(l=>l.id===id);
   if(!lead || value==="Select buyer") return;
-  if(lead.status !== "Accepted") return alert("Buyer assignment is only available after the customer accepts.");
+  if(lead.status !== "Accepted" && String(lead.status).toLowerCase() !== "pickup_scheduled") return alert("Buyer assignment is only available after the customer accepts.");
 
   lead.buyer = value;
   lead.audit.unshift("Buyer assigned: " + value);
