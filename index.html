@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -73,9 +74,13 @@ th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
 .workflow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
 .workflow .step{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:10px;text-align:center;font-size:12px;font-weight:900;color:#64748b}
 .workflow .step.active{background:#dcfce7;color:#166534;border-color:#86efac}
+.inventory-row{display:grid;grid-template-columns:1.4fr 1fr .9fr .8fr .9fr;gap:14px;align-items:center}
+.inventory-card{cursor:pointer;padding:14px 18px}
+.inventory-card.active{outline:3px solid #07142b}
+.expense-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media(max-width:1100px){
-  .lead-row{grid-template-columns:1fr}
-  .detail-grid,.three,.four{grid-template-columns:1fr}
+  .lead-row,.inventory-row{grid-template-columns:1fr}
+  .detail-grid,.three,.four,.expense-grid{grid-template-columns:1fr}
   .toolbar input{min-width:100%}
   .schedule-controls{grid-template-columns:1fr}
   .workflow{grid-template-columns:1fr}
@@ -136,14 +141,32 @@ th{color:#64748b;background:#f8fafc;text-transform:uppercase;font-size:12px}
   </section>
 
   <section id="inventory" class="tab hidden">
-    <h2 class="section-title">Inventory / Post-Sale</h2>
-    <p class="muted">After buyer Complete, vehicles move here. Complete = in inventory. Sold = out of inventory/off the books.</p>
-    <div class="grid detail-grid">
-      <div>
-        <div id="inventoryList" class="profile-list"></div>
+    <div class="toolbar">
+      <input id="inventorySearch" placeholder="Search inventory ID, VIN, last 6, vehicle, buyer, or destination" />
+      <div class="filters" id="inventoryFilters">
+        <button class="active" data-filter="Pending">Pending</button>
+        <button data-filter="Inspection Completed">Inspection Completed</button>
+        <button data-filter="Being Repaired">Being Repaired</button>
+        <button data-filter="Pending Auction">Pending Auction</button>
+        <button data-filter="Sold">Sold</button>
       </div>
-      <div id="inventoryDetail"></div>
+      <select id="inventoryLimit">
+        <option value="10" selected>Most recent 10</option>
+        <option value="20">Most recent 20</option>
+        <option value="50">Most recent 50</option>
+      </select>
     </div>
+
+    <div class="row" style="margin-bottom:12px">
+      <div>
+        <h2 class="section-title" id="inventoryTitle">Pending Inventory</h2>
+        <p class="muted" style="margin:0">After buyer Complete, vehicles move here. Complete = in inventory. Sold = out of inventory/off the books.</p>
+      </div>
+      <span class="muted tiny" id="inventoryCount"></span>
+    </div>
+
+    <div id="inventoryList" class="lead-grid"></div>
+    <div style="margin-top:24px" id="inventoryDetail"></div>
   </section>
 
   <section id="buyers" class="tab hidden">
@@ -264,11 +287,50 @@ const leads = [
 ];
 
 const inventory = [
-  {id:"INV-7742",status:"Delivered",vehicle:"2015 Ford Escape",vin:"1FMCU9GX7FUA44567",route:"Yard",dest:"Central Valley Yard - Fresno",purchase:950,towStatus:"Delivered",days:1,buyer:"Fresno Auto Wholesale",workflow:"Delivered",notes:["Needs jump to move around yard.","Passenger rear window broken.","Tow note: steering stiff when loading."]},
-  {id:"INV-7743",status:"Repair in Process",vehicle:"2011 Chevrolet Malibu",vin:"1G1ZC5E19BF232199",route:"Yard",dest:"Central Valley Yard - Clovis",purchase:600,towStatus:"Delivered",days:6,buyer:"Valley Budget Autos",workflow:"Repair in Process",notes:["AC inoperative.","Hood latch bent.","Mechanic note: alternator replacement started."]}
+  {
+    id:"INV-7742",created:"2026-04-24T10:15:00",status:"Pending",vehicle:"2015 Ford Escape",vin:"1FMCU9GX7FUA44567",year:"2015",make:"Ford",model:"Escape",trim:"SE",miles:"163,400",
+    route:"Yard",dest:"Central Valley Yard - Fresno",purchase:950,towStatus:"Delivered",days:1,buyer:"Fresno Auto Wholesale",workflow:"Pending",
+    mechanicNotes:"Needs jump to move around yard. Passenger rear window broken. Steering stiff when loading.",
+    conditionDescription:"Delivered to yard. Pending intake inspection and mechanic review.",
+    expenses:{parts:0,labor:0,tow:145,auction:0,marketing:0,other:0},
+    notes:["Needs jump to move around yard.","Passenger rear window broken.","Tow note: steering stiff when loading."]
+  },
+  {
+    id:"INV-7743",created:"2026-04-23T15:45:00",status:"Being Repaired",vehicle:"2011 Chevrolet Malibu",vin:"1G1ZC5E19BF232199",year:"2011",make:"Chevrolet",model:"Malibu",trim:"LT",miles:"188,900",
+    route:"Yard",dest:"Central Valley Yard - Clovis",purchase:600,towStatus:"Delivered",days:6,buyer:"Valley Budget Autos",workflow:"Being Repaired",
+    mechanicNotes:"Alternator replacement started. Hood latch bent. AC inoperative.",
+    conditionDescription:"Repair in process before resale decision.",
+    expenses:{parts:185,labor:220,tow:135,auction:0,marketing:0,other:25},
+    notes:["AC inoperative.","Hood latch bent.","Mechanic note: alternator replacement started."]
+  },
+  {
+    id:"INV-7744",created:"2026-04-22T09:20:00",status:"Inspection Completed",vehicle:"2013 Toyota Camry",vin:"4T1BF1FK3DU778811",year:"2013",make:"Toyota",model:"Camry",trim:"LE",miles:"201,050",
+    route:"Yard",dest:"Central Valley Yard - Fresno",purchase:1100,towStatus:"Delivered",days:3,buyer:"Fresno Auto Wholesale",workflow:"Inspection Completed",
+    mechanicNotes:"Inspection completed. Runs with jump. Needs battery and detail.",
+    conditionDescription:"Inspection done. Pending repair or auction decision.",
+    expenses:{parts:0,labor:85,tow:120,auction:0,marketing:0,other:0},
+    notes:["Runs with jump.","Needs battery.","Interior detail recommended."]
+  },
+  {
+    id:"INV-7745",created:"2026-04-21T11:30:00",status:"Pending Auction",vehicle:"2010 Honda Civic",vin:"2HGFA1F58AH334455",year:"2010",make:"Honda",model:"Civic",trim:"LX",miles:"229,800",
+    route:"Auction",dest:"Golden State Auction",purchase:700,towStatus:"Delivered",days:5,buyer:"Valley Budget Autos",workflow:"Pending Auction",
+    mechanicNotes:"Not worth repairing. Send to auction.",
+    conditionDescription:"Pending auction drop-off and final auction fee.",
+    expenses:{parts:0,labor:45,tow:150,auction:0,marketing:20,other:0},
+    notes:["High miles.","Auction route selected.","Admin signoff required."]
+  },
+  {
+    id:"INV-7746",created:"2026-04-20T14:00:00",status:"Sold",vehicle:"2012 Nissan Altima",vin:"1N4AL2AP7CN998877",year:"2012",make:"Nissan",model:"Altima",trim:"S",miles:"174,600",
+    route:"Yard",dest:"Central Valley Yard - Fresno",purchase:650,towStatus:"Delivered",days:8,buyer:"Fresno Auto Wholesale",workflow:"Sold",
+    mechanicNotes:"Sold after light repair and detail.",
+    conditionDescription:"Sold and out of inventory.",
+    expenses:{parts:75,labor:140,tow:125,auction:0,marketing:35,other:0},
+    notes:["Sold.","Closed deal.","Ready for P&L finalization."]
+  }
 ];
 
 let selectedInventory = inventory[0];
+let activeInventoryFilter = "Pending";
 
 const buyers = [
   {name:"Fresno Auto Wholesale",type:"Business",phone:"(559) 555-2001",email:"accounting@fresnoauto.com",tax:"EIN: XX-XXXXXXX",assigned:7,schedule:"3 pickups today",address:"1550 N Blackstone Ave, Fresno, CA"},
@@ -318,8 +380,8 @@ function priorityBadge(p){
   return badge("Green • Standard","green");
 }
 function statusTone(s){
-  if(["Accepted","Sold","Ready for Sale"].includes(s)) return "green";
-  if(["Offer Sent","Quote Pending","Delivered","Repair in Process"].includes(s)) return "yellow";
+  if(["Accepted","Sold","Ready for Sale","Inspection Completed"].includes(s)) return "green";
+  if(["Offer Sent","Quote Pending","Delivered","Repair in Process","Being Repaired","Pending","Pending Auction"].includes(s)) return "yellow";
   if(s==="Declined") return "red";
   return "blue";
 }
@@ -521,13 +583,60 @@ function selectLead(id){
   renderLeadList();
 }
 
+function sortedInventory(){
+  return [...inventory].sort((a,b)=>new Date(b.created)-new Date(a.created));
+}
+
+function filteredInventory(){
+  const q = document.getElementById("inventorySearch").value.toLowerCase().trim();
+  const limit = Number(document.getElementById("inventoryLimit").value);
+  const list = sortedInventory().filter(i=>{
+    const statusOk = i.workflow === activeInventoryFilter;
+    const hay = [i.id,i.vin,i.vin.slice(-6),i.vehicle,i.year,i.make,i.model,i.buyer,i.dest,i.route].join(" ").toLowerCase();
+    return statusOk && (!q || hay.includes(q));
+  });
+  return list.slice(0, limit);
+}
+
 function renderInventory(){
-  document.getElementById("inventoryList").innerHTML = inventory.map(u=>`
-    <div class="mini-card ${selectedInventory.id===u.id?'active':''}" onclick="selectInventory('${u.id}')">
-      <div class="row"><div><div class="title">${u.vehicle}</div><div class="muted tiny">${u.id} • VIN ${u.vin} • Last 6 ${u.vin.slice(-6)}</div></div>${badge(u.status,statusTone(u.status))}</div>
-      <div class="muted tiny">Buyer: ${u.buyer} • Destination: ${u.dest}</div>
+  const list = filteredInventory();
+  document.getElementById("inventoryCount").innerText = `${list.length} shown`;
+  document.getElementById("inventoryTitle").innerText = activeInventoryFilter + " Inventory";
+
+  if(!list.find(i=>i.id===selectedInventory.id) && list.length){
+    selectedInventory = list[0];
+  }
+
+  document.getElementById("inventoryList").innerHTML = list.map(i=>`
+    <div class="card inventory-card ${selectedInventory.id===i.id?'active':''}" onclick="selectInventory('${i.id}')">
+      <div class="inventory-row">
+        <div>
+          <div class="title">${i.vehicle}</div>
+          <div class="muted tiny">${i.id} • VIN ${i.vin} • Last 6 ${i.vin.slice(-6)}</div>
+        </div>
+
+        <div>
+          <div class="compact-label">Buyer / Destination</div>
+          <div class="compact-value">${i.buyer} • ${i.dest}</div>
+        </div>
+
+        <div>
+          <div class="compact-label">Purchase / Days</div>
+          <div class="compact-value">$${i.purchase.toLocaleString()} • ${i.days} days</div>
+        </div>
+
+        <div>
+          ${badge(i.workflow,statusTone(i.workflow))}
+        </div>
+
+        <div>
+          <div class="compact-label">Route / Tow</div>
+          <div class="compact-value">${i.route} • ${i.towStatus}</div>
+        </div>
+      </div>
     </div>
-  `).join("");
+  `).join("") || `<div class="card">No matching inventory.</div>`;
+
   renderInventoryDetail();
 }
 
@@ -541,24 +650,129 @@ function updateInventoryWorkflow(id){
   if(!item) return;
   item.workflow = document.getElementById("inv-workflow").value;
   item.status = item.workflow;
+  selectedInventory = item;
+  activeInventoryFilter = item.workflow;
+  document.querySelectorAll("#inventoryFilters button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.filter === activeInventoryFilter);
+  });
+  renderInventory();
+}
+
+function saveInventoryProfile(id){
+  const item = inventory.find(i=>i.id===id);
+  if(!item) return;
+
+  ["vehicle","vin","year","make","model","trim","miles","route","dest","buyer","conditionDescription","mechanicNotes"].forEach(k=>{
+    const el = document.getElementById("inv-"+k);
+    if(el) item[k] = el.value;
+  });
+
+  ["parts","labor","tow","auction","marketing","other"].forEach(k=>{
+    const el = document.getElementById("expense-"+k);
+    if(el) item.expenses[k] = Number(el.value || 0);
+  });
+
+  item.notes = Array.from(document.querySelectorAll(".inventory-note-edit")).map(el=>el.value).filter(Boolean);
+  selectedInventory = item;
   renderInventory();
 }
 
 function renderInventoryDetail(){
-  const u = selectedInventory;
-  const steps = ["Delivered","Being Inspected","Repair in Process","Ready for Sale","Sold"];
+  const i = selectedInventory;
+  if(!i){
+    document.getElementById("inventoryDetail").innerHTML = "";
+    return;
+  }
+
+  const steps = ["Pending","Inspection Completed","Being Repaired","Pending Auction","Sold"];
+  const expenseTotal = Object.values(i.expenses).reduce((sum,val)=>sum + Number(val || 0),0);
+
   document.getElementById("inventoryDetail").innerHTML = `
     <div class="panel">
-      <div class="row"><h3>${u.vehicle}</h3>${badge(u.status,statusTone(u.status))}</div>
-      ${kv("Inventory ID",u.id)}${kv("VIN",u.vin)}${kv("Route",u.route)}${kv("Destination",u.dest)}${kv("Purchase","$"+u.purchase.toLocaleString())}${kv("Buyer",u.buyer)}${kv("Days in Inventory",u.days)}
-      <h4>Inventory Workflow</h4>
-      <div class="workflow">${steps.map(s=>`<div class="step ${s===u.workflow?'active':''}">${s}</div>`).join("")}</div>
-      <div class="schedule-controls">
-        <select id="inv-workflow">${steps.map(s=>`<option ${s===u.workflow?'selected':''}>${s}</option>`).join("")}</select>
-        <button class="btn dark" onclick="updateInventoryWorkflow('${u.id}')">Update Workflow</button>
+      <div class="row">
+        <h2 class="section-title">Opened Inventory Profile</h2>
+        <div>${badge(i.id,"blue")} ${badge(i.workflow,statusTone(i.workflow))} ${badge("Expenses $"+expenseTotal.toLocaleString(),"yellow")}</div>
       </div>
-      <h4>Condition / Repair Notes</h4>
-      ${u.notes.map(n=>`<div class="note">${n}</div>`).join("")}
+
+      <div class="grid detail-grid">
+        <div class="panel">
+          <h3>Inventory Vehicle Profile</h3>
+          <div class="kv"><b>Vehicle</b><input class="edit-input" id="inv-vehicle" value="${i.vehicle}"></div>
+          <div class="kv"><b>VIN</b><input class="edit-input" id="inv-vin" value="${i.vin}"></div>
+          <div class="kv"><b>Year</b><input class="edit-input" id="inv-year" value="${i.year}"></div>
+          <div class="kv"><b>Make</b><input class="edit-input" id="inv-make" value="${i.make}"></div>
+          <div class="kv"><b>Model</b><input class="edit-input" id="inv-model" value="${i.model}"></div>
+          <div class="kv"><b>Trim</b><input class="edit-input" id="inv-trim" value="${i.trim}"></div>
+          <div class="kv"><b>Mileage</b><input class="edit-input" id="inv-miles" value="${i.miles}"></div>
+          <div class="kv"><b>Purchase Price</b><span>$${i.purchase.toLocaleString()}</span></div>
+          <div class="kv"><b>Route</b><input class="edit-input" id="inv-route" value="${i.route}"></div>
+          <div class="kv"><b>Destination</b><input class="edit-input" id="inv-dest" value="${i.dest}"></div>
+          <div class="kv"><b>Assigned Buyer</b><input class="edit-input" id="inv-buyer" value="${i.buyer}"></div>
+          <div class="kv"><b>Days in Inventory</b><span>${i.days}</span></div>
+
+          <h4>Inventory Workflow</h4>
+          <div class="workflow">
+            ${steps.map(s=>`<div class="step ${s===i.workflow?'active':''}">${s}</div>`).join("")}
+          </div>
+          <div class="schedule-controls">
+            <select id="inv-workflow">
+              ${steps.map(s=>`<option ${s===i.workflow?'selected':''}>${s}</option>`).join("")}
+            </select>
+            <button class="btn dark" onclick="updateInventoryWorkflow('${i.id}')">Update Workflow</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Mechanic Notes + Expenses</h3>
+
+          <h4>Mechanic Notes</h4>
+          <textarea id="inv-mechanicNotes">${i.mechanicNotes || ""}</textarea>
+
+          <h4>Condition / Description</h4>
+          <textarea id="inv-conditionDescription">${i.conditionDescription || ""}</textarea>
+
+          <h4>Expenses</h4>
+          <div class="expense-grid">
+            <div>
+              <div class="compact-label">Parts</div>
+              <input class="edit-input" id="expense-parts" type="number" value="${i.expenses.parts || 0}">
+            </div>
+            <div>
+              <div class="compact-label">Labor</div>
+              <input class="edit-input" id="expense-labor" type="number" value="${i.expenses.labor || 0}">
+            </div>
+            <div>
+              <div class="compact-label">Tow</div>
+              <input class="edit-input" id="expense-tow" type="number" value="${i.expenses.tow || 0}">
+            </div>
+            <div>
+              <div class="compact-label">Auction</div>
+              <input class="edit-input" id="expense-auction" type="number" value="${i.expenses.auction || 0}">
+            </div>
+            <div>
+              <div class="compact-label">Marketing</div>
+              <input class="edit-input" id="expense-marketing" type="number" value="${i.expenses.marketing || 0}">
+            </div>
+            <div>
+              <div class="compact-label">Other</div>
+              <input class="edit-input" id="expense-other" type="number" value="${i.expenses.other || 0}">
+            </div>
+            <div>
+              <div class="compact-label">Total</div>
+              <div class="compact-value">$${expenseTotal.toLocaleString()}</div>
+            </div>
+          </div>
+
+          <h4>Inventory Notes</h4>
+          <div class="condition">
+            ${i.notes.map(n=>`<div><input class="edit-input inventory-note-edit" value="${n}">${badge("Note","blue")}</div>`).join("")}
+          </div>
+
+          <div class="actions-row">
+            <button class="btn dark" onclick="saveInventoryProfile('${i.id}')">Save Inventory Profile</button>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -605,7 +819,7 @@ function renderBuyerDetail(){
           <h4>Assigned Cars</h4>
           ${assigned.length ? assigned.map(l=>`<div class="note"><b>${l.id}</b> • ${l.year} ${l.make} ${l.model} • ${l.status} • Pickup ${l.window}</div>`).join("") : `<div class="note">No currently assigned customer cars.</div>`}
           <h4>Closed / Inventory Cars</h4>
-          ${closed.length ? closed.map(i=>`<div class="note"><b>${i.id}</b> • ${i.vehicle} • ${i.status}</div>`).join("") : `<div class="note">No closed inventory cars.</div>`}
+          ${closed.length ? closed.map(i=>`<div class="note"><b>${i.id}</b> • ${i.vehicle} • ${i.workflow}</div>`).join("") : `<div class="note">No closed inventory cars.</div>`}
         </div>
       </div>
     </div>
@@ -724,8 +938,19 @@ document.querySelectorAll("#leadFilters button").forEach(btn=>{
   });
 });
 
+document.querySelectorAll("#inventoryFilters button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("#inventoryFilters button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    activeInventoryFilter = btn.dataset.filter;
+    renderInventory();
+  });
+});
+
 document.getElementById("search").addEventListener("input",renderLeadList);
 document.getElementById("limit").addEventListener("change",renderLeadList);
+document.getElementById("inventorySearch").addEventListener("input",renderInventory);
+document.getElementById("inventoryLimit").addEventListener("change",renderInventory);
 
 renderLeadList();
 renderInventory();
