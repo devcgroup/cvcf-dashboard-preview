@@ -1,1 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Central Valley Cash for Cars — Instant Offer Form</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef2f6;color:#102033}
+a{text-decoration:none;color:inherit}
+#cvoffer{max-width:1180px;margin:0 auto;padding:22px}
+.cv-top{background:#07142b;color:#fff;border-radius:0 0 22px 22px;padding:26px 22px;margin-bottom:22px}
+.cv-top-inner{max-width:1180px;margin:0 auto;display:flex;justify-content:space-between;gap:18px;align-items:center}
+.cv-brand{font-size:24px;font-weight:900;letter-spacing:.2px}
+.cv-phone{background:#16a34a;color:#fff;border-radius:999px;padding:11px 16px;font-weight:900;white-space:nowrap}
+.cv-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:stretch;margin-bottom:18px}
+.cv-hero-left,.cv-hero-right{background:#fff;border:1px solid #d8e1ec;border-radius:20px;padding:22px;box-shadow:0 1px 4px rgba(15,23,42,.07)}
+.cv-hero-left h1{font-size:38px;line-height:1.05;margin:0 0 10px;color:#07142b}
+.cv-hero-left p{font-size:17px;line-height:1.5;margin:0;color:#526174}
+.cv-need{background:#f8fafc;border:1px solid #d8e1ec;border-radius:16px;padding:16px;margin-top:16px}
+.cv-need h3{margin:0 0 8px;color:#07142b}
+.cv-need ul{margin:0;padding-left:20px;color:#526174;line-height:1.65}
+.cv-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.cv-step{background:#fff;border:1px solid #d8e1ec;border-radius:15px;padding:13px 10px;text-align:center;font-weight:900;color:#526174}
+.cv-step.active{background:#07142b;color:#fff;border-color:#07142b}
+.cv-layout{display:grid;grid-template-columns:1.35fr .65fr;gap:20px;align-items:start}
+.cv-card{background:#fff;border:1px solid #d8e1ec;border-radius:20px;padding:22px;box-shadow:0 1px 4px rgba(15,23,42,.07)}
+.cv-card h2,.cv-card h3{margin:0 0 10px;color:#07142b}.cv-muted{color:#637083}.cv-small{font-size:12px}.hidden{display:none!important}
+.cv-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:900;color:#334155;margin:0 0 6px}
+input,select,textarea{width:100%;border:1px solid #c9d5e3;border-radius:12px;padding:12px;font:inherit;background:#fff;color:#102033}
+textarea{min-height:88px;resize:vertical}.vin-line{display:grid;grid-template-columns:1fr auto;gap:10px}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+.btn-dark{background:#07142b;color:#fff}.btn-green{background:#16a34a;color:#fff}.btn-light{background:#f8fafc;color:#334155;border:1px solid #c9d5e3}.btn-red{background:#fee2e2;color:#991b1b}
+.cv-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}.cv-actions .btn{min-width:120px}
+.vin-msg{font-weight:900;margin-top:8px}.ok{color:#166534}.warn{color:#92400e}.bad{color:#991b1b}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice{border:1px solid #c9d5e3;background:#f8fafc;border-radius:12px;padding:12px;text-align:left;font-weight:900;cursor:pointer}.choice.active{background:#07142b;color:white;border-color:#07142b}
+.two-col-box{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#f8fafc;border:1px solid #d8e1ec;border-radius:16px;padding:16px;margin:14px 0}
+.inline-question{background:#fff;border:1px solid #d8e1ec;border-radius:14px;padding:14px}.inline-question b{display:block;margin-bottom:8px;color:#07142b}.radio-row{display:flex;gap:10px;flex-wrap:wrap}.radio-chip{background:#eef2f6;border:1px solid #c9d5e3;border-radius:999px;padding:9px 12px;font-weight:900;cursor:pointer}.radio-chip.active{background:#16a34a;color:#fff;border-color:#16a34a}
+.info-box{background:#f8fafc;border:1px solid #d8e1ec;border-radius:16px;padding:16px;margin-bottom:14px}.info-box h3{margin:0 0 8px}.check{display:flex;gap:10px;margin:10px 0;line-height:1.35}.check span:first-child{width:24px;height:24px;border-radius:999px;background:#dcfce7;color:#166534;font-weight:900;display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px}
+.review{background:#f8fafc;border:1px solid #d8e1ec;border-radius:16px;padding:15px}.review-row{display:grid;grid-template-columns:155px 1fr;gap:10px;margin:8px 0}.review-row b{color:#334155}
+.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:14px;padding:12px;font-weight:800;margin:12px 0}
+@media(max-width:900px){#cvoffer{padding:14px}.cv-top-inner,.cv-hero,.cv-layout,.cv-grid,.two-col-box,.choice-grid,.cv-steps{grid-template-columns:1fr;display:grid}.vin-line{grid-template-columns:1fr}.cv-hero-left h1{font-size:30px}.cv-actions{flex-direction:column}.cv-actions .btn{width:100%}.cv-phone{width:100%;justify-content:center}.cv-top-inner{align-items:start}}
+</style>
+</head>
+<body>
+<header class="cv-top">
+  <div class="cv-top-inner">
+    <div>
+      <div class="cv-brand">Central Valley Cash for Cars</div>
+      <div class="cv-muted" style="color:#cbd5e1;margin-top:5px">Fast local offers • Fresno • Clovis • Central Valley</div>
+    </div>
+    <a class="cv-phone" href="tel:+15595551234">Call / Text (559) 555-1234</a>
+  </div>
+</header>
 
+<div id="cvoffer">
+  <section class="cv-hero">
+    <div class="cv-hero-left">
+      <h1>Get a fast cash offer for your car.</h1>
+      <p>Running, non-running, damaged, high-mileage, salvage, or unwanted vehicles. Start with your VIN and we’ll complete as much vehicle information as possible.</p>
+      <div class="cv-need">
+        <h3>What we need now</h3>
+        <ul>
+          <li>VIN or vehicle year / make / model</li>
+          <li>Mileage and condition</li>
+          <li>ZIP code and contact info</li>
+          <li>Pickup address can be added after you accept the offer</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cv-hero-right">
+      <div class="info-box">
+        <h3>VIN can complete most of the car’s info</h3>
+        <p class="cv-muted">Year, make, model, trim, body, drivetrain, fuel type, engine details, and transmission will auto-fill when cleanly returned.</p>
+      </div>
+      <div class="check"><span>1</span><div><b>Submit Vehicle</b><br><span class="cv-muted">VIN + mileage + condition.</span></div></div>
+      <div class="check"><span>2</span><div><b>Receive Offer</b><br><span class="cv-muted">We review and send a cash offer.</span></div></div>
+      <div class="check"><span>3</span><div><b>Schedule Pickup</b><br><span class="cv-muted">After acceptance, choose pickup window.</span></div></div>
+    </div>
+  </section>
+
+  <div class="cv-steps" id="steps">
+    <div class="cv-step active">1. Vehicle</div>
+    <div class="cv-step">2. Condition</div>
+    <div class="cv-step">3. Contact</div>
+    <div class="cv-step">4. Review</div>
+  </div>
+
+  <div class="cv-layout">
+    <main class="cv-card">
+      <form id="offerForm" method="post" action="/wp-admin/admin-post.php">
+        <input type="hidden" name="action" value="cvcf_submit" />
+
+        <section class="form-step" data-step="1">
+          <h2>Step 1 — Vehicle Information</h2>
+          <p class="cv-muted">Enter the VIN first. Decoded fields stay editable.</p>
+
+          <div class="cv-grid">
+            <div class="full">
+              <label for="vin">VIN</label>
+              <div class="vin-line">
+                <input id="vin" name="vin" maxlength="17" placeholder="17-digit VIN" autocomplete="off" />
+                <button type="button" class="btn btn-dark" id="decodeBtn">Decode VIN</button>
+              </div>
+              <div id="vinMsg" class="vin-msg cv-small"></div>
+            </div>
+            <div><label for="year">Year</label><input id="year" name="year" placeholder="Year" /></div>
+            <div><label for="make">Make</label><input id="make" name="make" placeholder="Make" /></div>
+            <div><label for="model">Model</label><input id="model" name="model" list="modelList" placeholder="Model" /><datalist id="modelList"></datalist></div>
+            <div><label for="trim">Trim</label><input id="trim" name="trim" placeholder="Trim" /></div>
+            <div><label for="miles">Mileage</label><input id="miles" name="miles" placeholder="Example: 145,000" inputmode="numeric" /></div>
+            <div><label for="body">Body Type</label><input id="body" name="body" placeholder="Sedan, SUV, truck" /></div>
+            <div><label for="drive">Drivetrain</label><input id="drive" name="drive" placeholder="FWD, RWD, AWD, 4x4" /></div>
+            <div><label for="fuel">Fuel Type</label><input id="fuel" name="fuel" placeholder="Gas, hybrid, diesel, electric" /></div>
+            <div><label for="engine">Engine</label><input id="engine" name="engine" placeholder="Engine details if decoded" /></div>
+            <div><label for="trans">Transmission</label><input id="trans" name="trans" placeholder="Automatic, manual, CVT" /></div>
+            <div><label for="color">Color</label><input id="color" name="color" placeholder="Vehicle color" /></div>
+          </div>
+        </section>
+
+        <section class="form-step hidden" data-step="2">
+          <h2>Step 2 — Vehicle Condition</h2>
+          <p class="cv-muted">Two-column enclosed condition section. Admin can edit later.</p>
+
+          <div class="two-col-box">
+            <div class="inline-question">
+              <b>Registration current?</b>
+              <div class="radio-row" data-radio="registration">
+                <button type="button" class="radio-chip">Yes</button>
+                <button type="button" class="radio-chip">No</button>
+                <button type="button" class="radio-chip">Not sure</button>
+              </div>
+              <input type="hidden" id="registration" name="registration" />
+            </div>
+            <div class="inline-question">
+              <b>Title status</b>
+              <select id="titleStatus" name="titleStatus">
+                <option>Clean Title</option>
+                <option>No title</option>
+                <option>Salvage Title</option>
+                <option>Lien on Title</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="choice-grid" id="conditionChoices">
+            <button type="button" class="choice">Starts and drives</button>
+            <button type="button" class="choice">Does not start/drive</button>
+            <button type="button" class="choice">Has key</button>
+            <button type="button" class="choice">No key</button>
+            <button type="button" class="choice">All 4 tires</button>
+            <button type="button" class="choice">Missing/flat tire</button>
+            <button type="button" class="choice">Engine/trans intact</button>
+            <button type="button" class="choice">Engine/trans problem</button>
+            <button type="button" class="choice">Catalytic converter present</button>
+            <button type="button" class="choice">Catalytic converter missing</button>
+            <button type="button" class="choice">Airbags not deployed</button>
+            <button type="button" class="choice">Airbags deployed</button>
+            <button type="button" class="choice">No flood/fire</button>
+            <button type="button" class="choice">Flood or fire damage</button>
+            <button type="button" class="choice">Hybrid / EV</button>
+            <button type="button" class="choice">Convertible</button>
+          </div>
+
+          <div class="full" style="margin-top:14px">
+            <label for="vehicleDescription">Vehicle condition / description</label>
+            <textarea id="vehicleDescription" name="vehicleDescription" placeholder="Damage, missing parts, how long parked, title issue, key location, etc."></textarea>
+          </div>
+        </section>
+
+        <section class="form-step hidden" data-step="3">
+          <h2>Step 3 — Contact Information</h2>
+          <p class="cv-muted">ZIP is required for service area. Pickup address is optional until offer is accepted.</p>
+
+          <div class="cv-grid">
+            <div><label for="firstName">First Name</label><input id="firstName" name="firstName" placeholder="First name" /></div>
+            <div><label for="lastName">Last Name</label><input id="lastName" name="lastName" placeholder="Last name" /></div>
+            <div><label for="phone">Phone</label><input id="phone" name="phone" placeholder="(559) 555-1234" inputmode="tel" /></div>
+            <div><label for="email">Email</label><input id="email" name="email" placeholder="you@example.com" type="email" /></div>
+            <div><label for="zip">ZIP Code</label><input id="zip" name="zip" placeholder="93611" inputmode="numeric" /></div>
+            <div><label for="city">City</label><input id="city" name="city" placeholder="Fresno, Clovis, etc." /></div>
+            <div class="full"><label for="address">Pickup Address Optional</label><input id="address" name="address" placeholder="Street address — required after accepting offer" /></div>
+            <div class="full"><label for="customerNotes">Anything else we should know?</label><textarea id="customerNotes" name="customerNotes" placeholder="Best contact time, car location, gate code, towing access, etc."></textarea></div>
+          </div>
+        </section>
+
+        <section class="form-step hidden" data-step="4">
+          <h2>Step 4 — Review & Submit</h2>
+          <p class="cv-muted">Confirm details before sending your offer request.</p>
+          <div id="reviewBox" class="review"></div>
+          <div class="notice">After submission, admin receives the lead and sends an offer. If you accept, you’ll choose a pickup date and time window.</div>
+          <button type="submit" class="btn btn-green" style="width:100%;margin-top:8px">Submit Offer Request</button>
+        </section>
+
+        <div class="cv-actions">
+          <button type="button" class="btn btn-light" id="prevBtn">Back</button>
+          <button type="button" class="btn btn-dark" id="nextBtn">Continue</button>
+        </div>
+      </form>
+    </main>
+
+    <aside>
+      <div class="info-box">
+        <h3>Pickup</h3>
+        <p class="cv-muted">Once an offer is accepted, pickup windows are Monday–Sunday: 8–12, 12–4, or 4–8.</p>
+      </div>
+      <div class="info-box">
+        <h3>Title</h3>
+        <p class="cv-muted">We can review clean title, salvage title, no-title, and lien situations.</p>
+      </div>
+      <div class="info-box">
+        <h3>Updates</h3>
+        <p class="cv-muted">We’ll contact you by phone, text, or email after the request is submitted.</p>
+      </div>
+      <div class="info-box">
+        <h3>Dashboard-ready</h3>
+        <p class="cv-muted">This form creates the same lead structure your admin dashboard expects.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+let currentStep=1;
+const form=document.getElementById('offerForm');
+const steps=Array.from(document.querySelectorAll('.form-step'));
+const pills=Array.from(document.querySelectorAll('.cv-step'));
+const nextBtn=document.getElementById('nextBtn');
+const prevBtn=document.getElementById('prevBtn');
+const reviewBox=document.getElementById('reviewBox');
+function field(id){return document.getElementById(id)?.value?.trim()||''}
+function setMsg(t,c='ok'){const el=document.getElementById('vinMsg');el.className='vin-msg cv-small '+c;el.textContent=t}
+function setStep(n){currentStep=Math.max(1,Math.min(4,n));steps.forEach(s=>s.classList.toggle('hidden',Number(s.dataset.step)!==currentStep));pills.forEach((p,i)=>p.classList.toggle('active',i+1===currentStep));prevBtn.style.visibility=currentStep===1?'hidden':'visible';nextBtn.classList.toggle('hidden',currentStep===4);if(currentStep===4)renderReview()}
+function normalizeMake(make){const m=(make||'').toUpperCase();const map={TOYOTA:'Toyota',HONDA:'Honda',FORD:'Ford',TESLA:'Tesla',NISSAN:'Nissan',CHEVROLET:'Chevrolet',BMW:'BMW',MERCEDES:'Mercedes-Benz',MERCEDESBENZ:'Mercedes-Benz',VOLKSWAGEN:'Volkswagen',HYUNDAI:'Hyundai',KIA:'Kia',LEXUS:'Lexus',ACURA:'Acura',INFINITI:'INFINITI'};return map[m]||make}
+async function decodeVin(){const vin=field('vin').toUpperCase();document.getElementById('vin').value=vin;if(vin.length!==17){setMsg('Enter a 17-character VIN first.','bad');return}setMsg('Decoding VIN...','warn');try{const res=await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${encodeURIComponent(vin)}?format=json`);const data=await res.json();const r=data.Results&&data.Results[0]?data.Results[0]:{};const vt=(r.VehicleType||'').toLowerCase();const blocked=['motorcycle','trailer','incomplete vehicle','low speed vehicle'];if(blocked.some(x=>vt.includes(x))){setMsg('This VIN appears to be outside passenger car/truck scope. Please review before submitting.','bad')}else{setMsg('VIN decoded. Review/edit anything if needed.','ok')}if(r.ModelYear)document.getElementById('year').value=r.ModelYear;if(r.Make)document.getElementById('make').value=normalizeMake(r.Make);if(r.Model)document.getElementById('model').value=r.Model;if(r.Trim)document.getElementById('trim').value=r.Trim;if(r.BodyClass)document.getElementById('body').value=r.BodyClass;if(r.DriveType)document.getElementById('drive').value=r.DriveType;if(r.FuelTypePrimary)document.getElementById('fuel').value=r.FuelTypePrimary;if(r.EngineModel||r.DisplacementL)document.getElementById('engine').value=[r.EngineModel,r.DisplacementL?r.DisplacementL+'L':''].filter(Boolean).join(' ');if(r.TransmissionStyle)document.getElementById('trans').value=r.TransmissionStyle}catch(e){setMsg('VIN decoder could not connect. You can still enter details manually.','bad')}}
+function formatMiles(){const raw=field('miles').replace(/\D/g,'');document.getElementById('miles').value=raw?Number(raw).toLocaleString():''}
+function formatPhone(){const d=field('phone').replace(/\D/g,'').slice(0,10);document.getElementById('phone').value=d.length>6?`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`:d.length>3?`(${d.slice(0,3)}) ${d.slice(3)}`:d}
+function validateStep(){if(currentStep===1&&!field('vin')&&(!field('year')||!field('make')||!field('model'))){alert('Enter VIN or year/make/model.');return false}if(currentStep===1&&!field('miles')){alert('Enter mileage.');return false}if(currentStep===3){if(!field('firstName')||!field('lastName')){alert('Enter first and last name.');return false}if(field('phone').replace(/\D/g,'').length<10){alert('Enter a valid phone number.');return false}if(!field('zip')){alert('ZIP code is required.');return false}}return true}
+function selectedConditions(){return Array.from(document.querySelectorAll('.choice.active')).map(b=>b.textContent.trim())}
+function renderReview(){const seller=`${field('firstName')} ${field('lastName')}`.trim();reviewBox.innerHTML=`
+<div class="review-row"><b>Seller</b><span>${seller||'—'}</span></div>
+<div class="review-row"><b>Phone</b><span>${field('phone')||'—'}</span></div>
+<div class="review-row"><b>Email</b><span>${field('email')||'—'}</span></div>
+<div class="review-row"><b>Vehicle</b><span>${field('year')} ${field('make')} ${field('model')} ${field('trim')}</span></div>
+<div class="review-row"><b>VIN</b><span>${field('vin')||'—'}</span></div>
+<div class="review-row"><b>Mileage</b><span>${field('miles')||'—'}</span></div>
+<div class="review-row"><b>Title</b><span>${field('titleStatus')||'—'}</span></div>
+<div class="review-row"><b>Registration</b><span>${field('registration')||'—'}</span></div>
+<div class="review-row"><b>ZIP / City</b><span>${field('zip')||'—'} ${field('city')||''}</span></div>
+<div class="review-row"><b>Pickup Address</b><span>${field('address')||'Add after offer accepted'}</span></div>
+<div class="review-row"><b>Condition</b><span>${selectedConditions().join(', ')||'—'}</span></div>
+<div class="review-row"><b>Description</b><span>${field('vehicleDescription')||'—'}</span></div>`}
+function buildLead(){return{id:'CV-DEMO',created:new Date().toISOString(),status:'New Lead',communication:'New quote submitted',priority:'Standard',offer:0,vin:field('vin'),year:field('year'),make:field('make'),model:field('model'),trim:field('trim'),fuel:field('fuel'),body:field('body'),drive:field('drive'),trans:field('trans'),engine:field('engine'),color:field('color'),miles:field('miles'),seller:`${field('firstName')} ${field('lastName')}`.trim(),phone:field('phone'),email:field('email'),address:field('address'),city:field('city'),zip:field('zip'),pickupDate:'',pickupWindow:'Not selected',window:'Not scheduled',instructions:field('customerNotes'),buyer:'—',tow:'—',route:'Yard',title:field('titleStatus'),registration:field('registration'),ownership:'Unknown',vehicleDescription:field('vehicleDescription'),condition:selectedConditions(),customerNotes:field('customerNotes'),buyerNotes:'',towingNotes:'',adminNotes:'',audit:['Lead created from customer quote form','VIN decoded and vehicle fields populated when available']}}
+document.getElementById('decodeBtn').addEventListener('click',decodeVin);document.getElementById('miles').addEventListener('input',formatMiles);document.getElementById('phone').addEventListener('input',formatPhone);document.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>btn.classList.toggle('active')));document.querySelectorAll('[data-radio="registration"] .radio-chip').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-radio="registration"] .radio-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('registration').value=btn.textContent.trim()}));nextBtn.addEventListener('click',()=>{if(validateStep())setStep(currentStep+1)});prevBtn.addEventListener('click',()=>setStep(currentStep-1));form.addEventListener('submit',e=>{e.preventDefault();const lead=buildLead();console.log('Lead ready for dashboard/backend:',lead);alert('Offer request submitted. Preview only: lead object logged to console.')});setStep(1);
+</script>
+</body>
+</html>
