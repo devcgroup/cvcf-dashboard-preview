@@ -459,7 +459,7 @@
 
   <script>
     const SUPABASE_URL = "https://psxqggcmfkmhkrsagnuv.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw";
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -483,6 +483,8 @@
     }
 
     function formatCarId(rawId) {
+      if (lead && lead.car_id) return lead.car_id;
+
       const raw = String(rawId || "");
       const numeric = raw.replace(/\D/g, "");
       if (numeric) return "CV-" + numeric.slice(-6).padStart(6, "0");
@@ -512,13 +514,8 @@
       const v = normalizeText(value);
       if (!v) return null;
 
-      if (["yes", "y", "true", "good", "ok", "okay", "runs", "running", "present", "clean", "has", "available"].includes(v)) {
-        return true;
-      }
-
-      if (["no", "n", "false", "bad", "missing", "none", "not sure", "unknown", "damaged"].includes(v)) {
-        return false;
-      }
+      if (["yes", "y", "true", "good", "ok", "okay", "runs", "running", "present", "clean", "has", "available"].includes(v)) return true;
+      if (["no", "n", "false", "bad", "missing", "none", "not sure", "unknown", "damaged"].includes(v)) return false;
 
       if (v.includes("yes")) return true;
       if (v.includes("no")) return false;
@@ -596,6 +593,19 @@
       }
 
       return "";
+    }
+
+    function isValidPickupAddress(address) {
+      const value = String(address || "").trim().toLowerCase();
+
+      if (!value) return false;
+      if (value.length < 8) return false;
+      if (!/\d/.test(value)) return false;
+      if (["test", "fake", "none", "na", "n/a", "unknown", "asdf", "123"].includes(value)) return false;
+      if (value.includes("test address")) return false;
+      if (value.includes("fake address")) return false;
+
+      return true;
     }
 
     function renderOffer() {
@@ -696,6 +706,8 @@
         .from("leads")
         .update({
           status: "Accepted",
+          offer_accepted: true,
+          offer_declined: false,
           offer_accepted_at: new Date().toISOString()
         })
         .eq("id", lead.id)
@@ -731,6 +743,8 @@
         .from("leads")
         .update({
           status: "Declined",
+          offer_declined: true,
+          offer_accepted: false,
           offer_declined_at: new Date().toISOString()
         })
         .eq("id", lead.id)
@@ -781,8 +795,8 @@
         return;
       }
 
-      if (!pickupAddress) {
-        alert("Please enter the pickup address.");
+      if (!isValidPickupAddress(pickupAddress)) {
+        alert("Please enter a valid pickup address with a street number and street name.");
         return;
       }
 
