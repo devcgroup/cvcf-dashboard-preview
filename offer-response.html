@@ -1,845 +1,866 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your Cash Offer | Central Valley Cash for Cars</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f3f4f6;
-      color: #111827;
-    }
-
-    .page {
-      max-width: 920px;
-      margin: auto;
-      padding: 48px 20px;
-    }
-
-    .card {
-      background: #fff;
-      padding: 32px;
-      border-radius: 18px;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      margin: 0 0 12px;
-      font-size: 30px;
-      letter-spacing: -0.02em;
-    }
-
-    h3 {
-      margin: 22px 0 12px;
-      font-size: 20px;
-    }
-
-    .offer-amount {
-      font-size: 56px;
-      color: #047857;
-      font-weight: 900;
-      margin-bottom: 6px;
-      letter-spacing: -0.02em;
-    }
-
-    #vehicle {
-      color: #6b7280;
-      margin-bottom: 24px;
-      font-weight: 600;
-      font-size: 15px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px 24px;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      border: 1px solid #edf2f7;
-      padding: 12px 14px;
-      border-radius: 10px;
-      min-height: 42px;
-      font-size: 14px;
-      gap: 12px;
-    }
-
-    .row span:last-child {
-      font-weight: 700;
-      text-align: right;
-      overflow-wrap: anywhere;
-    }
-
-    .info-box {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 22px;
-    }
-
-    .info-box h3 {
-      margin-top: 0;
-    }
-
-    .pill {
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-weight: 900;
-      font-size: 13px;
-    }
-
-    .yes {
-      background: #dcfce7;
-      color: #065f46;
-    }
-
-    .no {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .neutral {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    .actions {
-      margin-top: 28px;
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      padding: 13px 20px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: .02em;
-    }
-
-    button:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .accept {
-      background: #047857;
-      color: #fff;
-    }
-
-    .decline {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .continue {
-      background: #111827;
-      color: #fff;
-    }
-
-    .notice {
-      margin-top: 18px;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      display: none;
-      line-height: 1.45;
-    }
-
-    .notice.show {
-      display: block;
-    }
-
-    .notice.success {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-    }
-
-    .notice.danger {
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-
-    .notice.info {
-      background: #eff6ff;
-      color: #1e40af;
-      border: 1px solid #bfdbfe;
-    }
-
-    .step-card {
-      margin-top: 18px;
-      padding-top: 20px;
-      border-top: 1px solid #e5e7eb;
-      display: none;
-    }
-
-    .step-card.show {
-      display: block;
-    }
-
-    label {
-      display: block;
-      font-size: 12px;
-      color: #6b7280;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      margin-bottom: 6px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 14px;
-      background: #fff;
-      margin-bottom: 14px;
-    }
-
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-
-    .congrats-card {
-      display: none;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    .congrats-card.show {
-      display: block;
-    }
-
-    .congrats-hero {
-      background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 60%);
-      padding: 42px 34px 28px;
-      text-align: center;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .checkmark {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: #047857;
-      color: white;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 34px;
-      font-weight: 900;
-      margin-bottom: 16px;
-    }
-
-    .congrats-title {
-      font-size: 34px;
-      margin: 0 0 8px;
-      letter-spacing: -0.03em;
-    }
-
-    .congrats-subtitle {
-      color: #374151;
-      font-size: 17px;
-      margin: 0;
-      line-height: 1.45;
-    }
-
-    .congrats-body {
-      padding: 32px 36px 36px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .summary-item {
-      background: #f9fafb;
-      border: 1px solid #eef2f7;
-      border-radius: 12px;
-      padding: 16px;
-      text-align: left;
-    }
-
-    .summary-label {
-      display: block;
-      font-size: 12px;
-      color: #6b7280;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      margin-bottom: 5px;
-    }
-
-    .summary-value {
-      font-weight: 900;
-      color: #111827;
-      font-size: 15px;
-      overflow-wrap: anywhere;
-    }
-
-    .email-confirm {
-      margin-top: 18px;
-      padding: 16px;
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-      border-radius: 12px;
-      font-weight: 800;
-      text-align: left;
-      line-height: 1.45;
-    }
-
-    .next-actions {
-      margin-top: 24px;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .secondary-link {
-      color: #6b7280;
-      font-weight: 800;
-      text-decoration: none;
-      padding: 12px 18px;
-    }
-
-    .loading {
-      color: #6b7280;
-      font-weight: 700;
-    }
-
-    @media (max-width: 700px) {
-      .grid,
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .offer-amount {
-        font-size: 42px;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CVCF Offer Form</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;background:#eef2f6;margin:0;color:#102033}
+.container{max-width:760px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:15px;border:1px solid #d8e1ec;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+input,select{width:100%;padding:11px;margin-top:8px;margin-bottom:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px;box-sizing:border-box}
+label{display:block;font-weight:700;color:#07142b;margin-top:6px}
+button{padding:12px;background:#07142b;color:#fff;border:none;border-radius:8px;width:100%;font-weight:bold;cursor:pointer}
+button.secondary{background:#f8fafc;color:#07142b;border:1px solid #cbd5e1}
+button:disabled{opacity:.6;cursor:not-allowed}
+.step{display:none}.step.active{display:block}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.small{font-size:12px;color:#64748b;line-height:1.4}
+.warn{color:#92400e;font-weight:bold}
+.ok{color:#166534;font-weight:bold}
+.bad{color:#991b1b;font-weight:bold}
+h3{margin-top:0;color:#07142b}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.progress{background:#fff;border:1px solid #d8e1ec;border-radius:14px;padding:12px;margin-bottom:14px;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+.progress-bar{height:8px;background:#dbe3ee;border-radius:999px;overflow:hidden;margin-bottom:10px}
+.progress-fill{height:100%;width:20%;background:#07142b;border-radius:999px;transition:width .2s ease}
+.progress-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:11px;font-weight:800;color:#64748b;text-align:center}
+.progress-step.active{color:#07142b}
+.progress-step.done{color:#166534}
+.manual-field{display:none}
+@media(max-width:700px){.two,.nav{grid-template-columns:1fr}.progress-steps{font-size:10px}}
+</style>
 </head>
 
 <body>
-  <div class="page">
-    <div class="card" id="offerPage">
-      <h2>Your Offer</h2>
-      <div class="offer-amount" id="amount">Loading...</div>
-      <div id="vehicle" class="loading">Loading vehicle...</div>
+<div class="container">
 
-      <div class="notice info show" id="loadNotice">
-        Loading your real offer details...
-      </div>
-
-      <div class="info-box">
-        <h3>Vehicle Information</h3>
-        <div class="grid">
-          <div class="row">Car ID <span id="carId">—</span></div>
-          <div class="row">VIN <span id="vin">—</span></div>
-          <div class="row">Mileage <span id="miles">—</span></div>
-          <div class="row">Title <span id="title">—</span></div>
-          <div class="row">Drivetrain <span id="drive">—</span></div>
-          <div class="row">Fuel <span id="fuel">—</span></div>
-          <div class="row">Transmission <span id="transType">—</span></div>
-        </div>
-      </div>
-
-      <div class="info-box">
-        <h3>Condition</h3>
-        <div class="grid">
-          <div class="row">Runs & Drives <span id="runs">—</span></div>
-          <div class="row">Engine OK <span id="engine">—</span></div>
-          <div class="row">Transmission OK <span id="trans">—</span></div>
-          <div class="row">Good Tires <span id="tires">—</span></div>
-          <div class="row">Has Key <span id="key">—</span></div>
-          <div class="row">Blown Airbags <span id="airbags">—</span></div>
-          <div class="row">Catalytic Converter <span id="cat">—</span></div>
-          <div class="row">Parts Missing <span id="parts">—</span></div>
-          <div class="row">Body Damage <span id="bodyDamage">—</span></div>
-          <div class="row">Interior Damage <span id="interior">—</span></div>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="accept" id="acceptBtn" type="button" disabled>Accept</button>
-        <button class="decline" id="declineBtn" type="button" disabled>Decline</button>
-      </div>
-
-      <div class="notice success" id="acceptNotice">
-        Offer accepted. Please schedule your pickup below.
-      </div>
-
-      <div class="notice danger" id="declineNotice">
-        Offer declined.
-      </div>
-
-      <div class="step-card" id="scheduleStep">
-        <h3>Schedule Pickup</h3>
-        <p style="color:#6b7280; margin-top:-6px;">
-          Choose a pickup date, time window, and confirm where the vehicle is located.
-        </p>
-
-        <div class="grid">
-          <div>
-            <label for="pickupDate">Pickup Date</label>
-            <input id="pickupDate" type="date" />
-          </div>
-          <div>
-            <label for="pickupWindow">Pickup Window</label>
-            <select id="pickupWindow">
-              <option value="">Select time window</option>
-              <option value="8-12">8 AM – 12 PM</option>
-              <option value="12-4">12 PM – 4 PM</option>
-              <option value="4-8">4 PM – 8 PM</option>
-            </select>
-          </div>
-        </div>
-
-        <label for="pickupAddress">Pickup Address</label>
-        <input id="pickupAddress" placeholder="Street address, city, state, ZIP" />
-
-        <label for="pickupNotes">Pickup Instructions</label>
-        <textarea id="pickupNotes" placeholder="Gate code, key location, where the car is parked, special access notes, etc."></textarea>
-
-        <div class="actions">
-          <button class="continue" id="saveScheduleBtn" type="button">Save Pickup & Continue</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card congrats-card" id="congratsPage">
-      <div class="congrats-hero">
-        <div class="checkmark">✓</div>
-        <h2 class="congrats-title">Congratulations on Your Offer!</h2>
-        <p class="congrats-subtitle">
-          Your offer has been accepted and your pickup appointment is scheduled.
-        </p>
-      </div>
-
-      <div class="congrats-body">
-        <h3 style="margin-top:0;">Pickup Confirmation</h3>
-        <div id="congratsSummary" class="summary-grid"></div>
-
-        <div class="email-confirm">
-          Confirmation details are saved. Admin will see your accepted offer, pickup date, pickup window, address, and vehicle details.
-        </div>
-
-        <div class="next-actions">
-          <button class="continue" id="continueProfileBtn" type="button">Continue to Seller Profile</button>
-          <a class="secondary-link" id="laterLink" href="seller-profile.html">You can complete this later</a>
-        </div>
-      </div>
+  <div class="progress">
+    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+    <div class="progress-steps">
+      <div class="progress-step active" data-progress="1">Vehicle</div>
+      <div class="progress-step" data-progress="2">Condition</div>
+      <div class="progress-step" data-progress="3">Title</div>
+      <div class="progress-step" data-progress="4">Location</div>
+      <div class="progress-step" data-progress="5">Seller</div>
     </div>
   </div>
 
-  <script>
-    const SUPABASE_URL = "https://psxqggcmfkmhkrsagnuv.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw";
+  <form id="form">
 
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <div class="card step active" data-step="1">
+      <h3>Vehicle</h3>
 
-    let lead = null;
+      <input id="vin" placeholder="VIN (required)" maxlength="17" />
+      <button type="button" id="decode">Decode VIN</button>
+      <div id="vinMsg" class="small"></div>
 
-    const params = new URLSearchParams(window.location.search);
-    const leadId = params.get("id");
+      <div class="two">
+        <input id="year" placeholder="Year (required)" />
+        <input id="make" placeholder="Make (required)" />
+      </div>
 
-    function safe(value, fallback = "—") {
-      if (value === null || value === undefined || value === "") return fallback;
-      return String(value);
+      <div class="two">
+        <input id="model" placeholder="Model (required)" />
+        <select id="trim">
+          <option value="">Choose trim</option>
+          <option value="__manual">Other</option>
+        </select>
+      </div>
+
+      <input id="manualTrim" class="manual-field" placeholder="Enter trim manually" />
+      <div id="trimHint" class="small"></div>
+
+      <div class="two">
+        <input id="body" placeholder="Body Type (optional)" />
+        <input id="drivetrain" placeholder="Drivetrain (optional)" />
+      </div>
+
+      <div class="two">
+        <input id="fuel" placeholder="Fuel Type (optional)" />
+        <input id="engineInfo" placeholder="Engine (optional)" />
+      </div>
+
+      <div class="two">
+        <input id="transmissionInfo" placeholder="Transmission (optional)" />
+        <select id="color">
+          <option value="">Choose color</option>
+          <option>White</option>
+          <option>Black</option>
+          <option>Silver</option>
+          <option>Gray</option>
+          <option>Blue</option>
+          <option>Red</option>
+          <option>Green</option>
+          <option>Brown</option>
+          <option>Gold</option>
+          <option>Tan</option>
+          <option>Orange</option>
+          <option>Yellow</option>
+          <option value="__manual">Other</option>
+        </select>
+      </div>
+
+      <input id="manualColor" class="manual-field" placeholder="Enter color manually" />
+      <input id="miles" placeholder="Mileage (required)" inputmode="numeric" />
+
+      <div class="small">VIN must decode successfully before submission. If trim or color is not decoded, choose or enter it manually.</div>
+    </div>
+
+    <div class="card step" data-step="2">
+      <h3>Condition</h3>
+
+      <label>Runs and drives?</label>
+      <select id="runs"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Key?</label>
+      <select id="key"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Good tires?</label>
+      <select id="tires"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Engine OK?</label>
+      <select id="engine"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Transmission OK?</label>
+      <select id="trans"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Blown airbags?</label>
+      <select id="airbags"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Catalytic converter?</label>
+      <select id="cat"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Body damage?</label>
+      <select id="bodyDamage"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+
+      <label>Parts / panels missing?</label>
+      <select id="partsMissing"><option value="">Choose one</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+    </div>
+
+    <div class="card step" data-step="3">
+      <h3>Title</h3>
+
+      <select id="title">
+        <option>Clean Title</option>
+        <option>No Title</option>
+        <option>Salvage</option>
+        <option>Lien</option>
+      </select>
+
+      <select id="owner">
+        <option>In My Name</option>
+        <option>Not In My Name</option>
+      </select>
+    </div>
+
+    <div class="card step" data-step="4">
+      <h3>Location</h3>
+      <input id="zip" placeholder="ZIP (required)" inputmode="numeric" maxlength="5" />
+      <input id="address" placeholder="Pickup address optional until accepted" />
+      <div class="small">Address is optional now. If entered, it must look like a real street address. Pickup scheduling happens only after offer acceptance.</div>
+    </div>
+
+    <div class="card step" data-step="5">
+      <h3>Seller</h3>
+
+      <div class="two">
+        <input id="firstName" placeholder="First Name" />
+        <input id="lastName" placeholder="Last Name" />
+      </div>
+
+      <input id="phone" placeholder="Phone" inputmode="tel" />
+      <input id="email" placeholder="Email" type="email" />
+
+      <div class="small">Most offers are sent within 5–15 minutes.</div>
+    </div>
+
+    <div class="nav">
+      <button type="button" id="back" class="secondary">Back</button>
+      <button type="button" id="next">Next</button>
+    </div>
+
+  </form>
+
+  <div id="successCard" class="card" style="display:none;text-align:center;">
+    <h3>Thank you!</h3>
+    <p>Your request has been received.</p>
+    <p class="small">Redirecting…</p>
+  </div>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+const els = {
+  form: $('form'),
+  vin: $('vin'),
+  decode: $('decode'),
+  vinMsg: $('vinMsg'),
+  year: $('year'),
+  make: $('make'),
+  model: $('model'),
+  trim: $('trim'),
+  manualTrim: $('manualTrim'),
+  trimHint: $('trimHint'),
+  body: $('body'),
+  drivetrain: $('drivetrain'),
+  fuel: $('fuel'),
+  engineInfo: $('engineInfo'),
+  transmissionInfo: $('transmissionInfo'),
+  color: $('color'),
+  manualColor: $('manualColor'),
+  miles: $('miles'),
+  runs: $('runs'),
+  key: $('key'),
+  tires: $('tires'),
+  engine: $('engine'),
+  trans: $('trans'),
+  airbags: $('airbags'),
+  cat: $('cat'),
+  bodyDamage: $('bodyDamage'),
+  partsMissing: $('partsMissing'),
+  title: $('title'),
+  owner: $('owner'),
+  zip: $('zip'),
+  address: $('address'),
+  firstName: $('firstName'),
+  lastName: $('lastName'),
+  phone: $('phone'),
+  email: $('email'),
+  back: $('back'),
+  next: $('next'),
+  progressFill: $('progressFill')
+};
+
+let step = 1;
+const steps = document.querySelectorAll('.step');
+const progressSteps = document.querySelectorAll('.progress-step');
+
+let vinDecodeTimer = null;
+let lastDecodedVin = '';
+let lastSuccessfulDecodedVin = '';
+let vinIsDecoding = false;
+let vinDecodeValid = false;
+
+function show(){
+  steps.forEach(s => s.classList.remove('active'));
+  document.querySelector('[data-step="' + step + '"]').classList.add('active');
+
+  els.progressFill.style.width = (step * 20) + '%';
+
+  progressSteps.forEach(item => {
+    const n = Number(item.dataset.progress);
+    item.classList.toggle('active', n === step);
+    item.classList.toggle('done', n < step);
+  });
+
+  els.next.textContent = step === 5 ? 'Submit' : 'Next';
+}
+
+els.next.onclick = async () => {
+  if(step === 1){
+    const ok = await validateVehicleStepBeforeNext();
+    if(!ok) return;
+  }
+
+  if(step < 5){
+    step++;
+    show();
+  } else {
+    els.form.requestSubmit();
+  }
+};
+
+els.back.onclick = () => {
+  if(step > 1){
+    step--;
+    show();
+  }
+};
+
+const db = supabase.createClient(
+  "https://psxqggcmfkmhkrsagnuv.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw"
+);
+
+function getTrimSuggestions(makeName, modelName){
+  const mk = (makeName || '').toUpperCase();
+  const md = (modelName || '').toUpperCase();
+
+  if(mk === 'TOYOTA' && md.includes('CAMRY')) return ['LE','SE','XLE','XSE','Hybrid LE','Hybrid SE','Hybrid XLE','Hybrid XSE'];
+  if(mk === 'TOYOTA' && md.includes('COROLLA')) return ['L','LE','SE','XLE','XSE','Hybrid LE'];
+  if(mk === 'TOYOTA' && md.includes('PRIUS')) return ['Two','Two Eco','Three','Three Touring','Four','Four Touring','Five','LE','XLE','Limited'];
+
+  if(mk === 'HONDA' && md.includes('ACCORD')) return ['LX','Sport','EX','EX-L','Touring','Hybrid','Hybrid Sport','Hybrid EX-L','Hybrid Touring'];
+  if(mk === 'HONDA' && md.includes('CIVIC')) return ['LX','Sport','EX','EX-L','Touring','Si'];
+
+  if(mk === 'NISSAN' && md.includes('ALTIMA')) return ['S','SV','SR','SL','Platinum'];
+  if(mk === 'NISSAN' && md.includes('SENTRA')) return ['S','SV','SR'];
+
+  if(mk === 'FORD' && md.includes('F-150')) return ['XL','XLT','Lariat','King Ranch','Platinum','Limited','Raptor'];
+
+  if(mk === 'CHEVROLET' && md.includes('SILVERADO')) return ['WT','Custom','LT','RST','LTZ','High Country'];
+
+  if(mk === 'TESLA' && md.includes('MODEL 3')) return ['Standard Range','Standard Range Plus','Long Range','Performance'];
+  if(mk === 'TESLA' && md.includes('MODEL Y')) return ['Long Range','Performance'];
+
+  if(mk === 'LEXUS') return ['Base','Premium','Luxury','F Sport'];
+  if(mk === 'BMW') return ['Base','Sport','Luxury','M Sport','xDrive'];
+
+  return [];
+}
+
+function setTrimSuggestions(list){
+  const unique = [...new Set(list.filter(Boolean))];
+
+  els.trim.innerHTML =
+    '<option value="">Choose trim</option>' +
+    unique.map((t, i) => '<option value="' + t + '" ' + (i === 0 ? 'selected' : '') + '>' + t + '</option>').join('') +
+    '<option value="__manual">Other</option>';
+
+  if(unique.length){
+    els.trim.value = unique[0];
+    els.trimHint.textContent = 'Trim auto-selected. Change if needed.';
+  } else {
+    els.trimHint.textContent = 'Enter trim manually if not available.';
+  }
+}
+
+function splitTrimOptions(value){
+  if(!value) return [];
+  return value
+    .split('/')
+    .map(v => v.trim())
+    .filter(v => v && !v.includes('*') && v.length < 30);
+}
+
+function cleanBodyType(value){
+  const v = (value || '').trim();
+  const lower = v.toLowerCase();
+
+  if(lower.includes('sedan') || lower.includes('saloon')) return 'Sedan';
+  if(lower.includes('hatchback') || lower.includes('liftback') || lower.includes('notchback')) return 'Hatchback';
+  if(lower.includes('sport utility') || lower.includes('suv')) return 'SUV';
+  if(lower.includes('pickup')) return 'Truck';
+  if(lower.includes('van')) return 'Van';
+  if(lower.includes('coupe')) return 'Coupe';
+  if(lower.includes('convertible')) return 'Convertible';
+  if(lower.includes('wagon')) return 'Wagon';
+
+  return v;
+}
+
+function cleanEngineInfo(r){
+  const parts = [];
+
+  if(r.EngineModel && !r.EngineModel.includes('/')) parts.push(r.EngineModel);
+  if(r.DisplacementL) parts.push(r.DisplacementL + 'L');
+  if(r.EngineCylinders) parts.push(r.EngineCylinders + ' cyl');
+
+  return parts.join(' ');
+}
+
+function normalizeColor(value){
+  const v = (value || '').trim();
+  if(!v || v.length > 20) return '';
+
+  const lower = v.toLowerCase();
+
+  if(lower.includes('white')) return 'White';
+  if(lower.includes('black')) return 'Black';
+  if(lower.includes('silver')) return 'Silver';
+  if(lower.includes('gray') || lower.includes('grey')) return 'Gray';
+  if(lower.includes('blue')) return 'Blue';
+  if(lower.includes('red')) return 'Red';
+  if(lower.includes('green')) return 'Green';
+  if(lower.includes('brown')) return 'Brown';
+  if(lower.includes('gold')) return 'Gold';
+  if(lower.includes('tan') || lower.includes('beige')) return 'Tan';
+  if(lower.includes('orange')) return 'Orange';
+  if(lower.includes('yellow')) return 'Yellow';
+
+  return v.charAt(0).toUpperCase() + v.slice(1);
+}
+
+function ensureColorOption(colorName){
+  if(!colorName) return;
+
+  const exists = Array.from(els.color.options).some(o => o.value === colorName || o.textContent === colorName);
+
+  if(!exists){
+    const opt = document.createElement('option');
+    opt.value = colorName;
+    opt.textContent = colorName;
+    els.color.insertBefore(opt, els.color.querySelector('option[value="__manual"]'));
+  }
+}
+
+function formatMileageInput(){
+  const raw = els.miles.value.replace(/\D/g,'');
+  els.miles.value = raw ? Number(raw).toLocaleString() : '';
+}
+
+function formatPhoneInput(){
+  const d = els.phone.value.replace(/\D/g,'').slice(0,10);
+
+  if(d.length > 6){
+    els.phone.value = '(' + d.slice(0,3) + ') ' + d.slice(3,6) + '-' + d.slice(6);
+  } else if(d.length > 3){
+    els.phone.value = '(' + d.slice(0,3) + ') ' + d.slice(3);
+  } else {
+    els.phone.value = d;
+  }
+}
+
+els.miles.addEventListener('input', formatMileageInput);
+els.phone.addEventListener('input', formatPhoneInput);
+els.zip.addEventListener('input', () => {
+  els.zip.value = els.zip.value.replace(/\D/g,'').slice(0,5);
+});
+
+els.trim.addEventListener('change', () => {
+  els.manualTrim.style.display = els.trim.value === '__manual' ? 'block' : 'none';
+  if(els.trim.value !== '__manual') els.manualTrim.value = '';
+});
+
+els.color.addEventListener('change', () => {
+  els.manualColor.style.display = els.color.value === '__manual' ? 'block' : 'none';
+  if(els.color.value !== '__manual') els.manualColor.value = '';
+});
+
+function normalizeVin(vin){
+  return String(vin || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,17);
+}
+
+function isValidVinFormat(vin){
+  const v = normalizeVin(vin);
+  if(v.length !== 17) return false;
+  if(/[IOQ]/.test(v)) return false;
+  if(!/^[A-HJ-NPR-Z0-9]{17}$/.test(v)) return false;
+  if(/^([A-Z0-9])\1{16}$/.test(v)) return false;
+  return true;
+}
+
+function isPassengerVehicle(r){
+  const body = String(r.BodyClass || '').toLowerCase();
+  const vehicleType = String(r.VehicleType || '').toLowerCase();
+  const make = String(r.Make || '').toLowerCase();
+
+  const badWords = [
+    'motorcycle',
+    'trailer',
+    'boat',
+    'bus',
+    'incomplete',
+    'medium/heavy',
+    'low speed vehicle',
+    'off road vehicle'
+  ];
+
+  for(const word of badWords){
+    if(body.includes(word) || vehicleType.includes(word)) return false;
+  }
+
+  if(make.includes('trailer')) return false;
+
+  return true;
+}
+
+function validEmail(email){
+  const value = String(email || '').trim().toLowerCase();
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return false;
+
+  const blockedExact = [
+    'test@test.com',
+    'fake@fake.com',
+    'none@none.com',
+    'no@email.com',
+    'na@na.com',
+    'asdf@asdf.com',
+    'a@a.com'
+  ];
+
+  if(blockedExact.includes(value)) return false;
+  if(value.includes('example.com')) return false;
+  if(value.includes('test.com')) return false;
+  if(value.includes('fake.com')) return false;
+  if(value.includes('mailinator.com')) return false;
+  if(value.includes('tempmail')) return false;
+
+  return true;
+}
+
+function validPhone(phone){
+  const n = String(phone || '').replace(/\D/g,'');
+
+  if(n.length !== 10) return false;
+  if(/^(\d)\1+$/.test(n)) return false;
+  if(n === '1234567890') return false;
+  if(n === '0123456789') return false;
+  if(n.startsWith('000')) return false;
+  if(n.slice(3,6) === '000') return false;
+
+  return true;
+}
+
+function validAddressIfEntered(address){
+  const value = String(address || '').trim().toLowerCase();
+
+  if(!value) return true;
+  if(value.length < 8) return false;
+  if(!/\d/.test(value)) return false;
+  if(['test','fake','none','na','n/a','unknown','asdf','123'].includes(value)) return false;
+  if(value.includes('test address')) return false;
+  if(value.includes('fake address')) return false;
+
+  return true;
+}
+
+function isValidName(name){
+  const value = String(name || '').trim();
+
+  if(value.length < 2) return false;
+  if(/\d/.test(value)) return false;
+  if(['test','fake','na','none','asdf'].includes(value.toLowerCase())) return false;
+
+  return true;
+}
+
+function validateRequiredFields(){
+  const vin = normalizeVin(els.vin.value);
+
+  if(!isValidVinFormat(vin)){
+    alert('Enter a valid 17-character VIN. VIN cannot include I, O, or Q.');
+    step = 1; show(); return false;
+  }
+
+  if(!vinDecodeValid || lastSuccessfulDecodedVin !== vin){
+    alert('VIN must decode successfully before submitting.');
+    step = 1; show(); return false;
+  }
+
+  if(!els.year.value.trim()){alert('Year is required.'); step = 1; show(); return false;}
+  if(!els.make.value.trim()){alert('Make is required.'); step = 1; show(); return false;}
+  if(!els.model.value.trim()){alert('Model is required.'); step = 1; show(); return false;}
+  if(!els.miles.value.trim()){alert('Mileage is required.'); step = 1; show(); return false;}
+
+  const mileageNumber = Number(String(els.miles.value).replace(/\D/g,''));
+  if(!Number.isFinite(mileageNumber) || mileageNumber < 1 || mileageNumber > 999999){
+    alert('Enter a valid mileage.');
+    step = 1; show(); return false;
+  }
+
+  if(!els.zip.value.trim()){alert('ZIP code is required.'); step = 4; show(); return false;}
+  if(els.zip.value.replace(/\D/g,'').length !== 5){alert('Enter a valid 5-digit ZIP code.'); step = 4; show(); return false;}
+
+  if(!validAddressIfEntered(els.address.value)){
+    alert('Pickup address looks invalid. Leave it blank for now or enter a real street address.');
+    step = 4; show(); return false;
+  }
+
+  if(!isValidName(els.firstName.value)){alert('Enter a valid first name.'); step = 5; show(); return false;}
+  if(!isValidName(els.lastName.value)){alert('Enter a valid last name.'); step = 5; show(); return false;}
+
+  if(!validPhone(els.phone.value)){alert('Enter a valid 10-digit phone number.'); step = 5; show(); return false;}
+
+  if(!els.email.value.trim()){alert('Email is required.'); step = 5; show(); return false;}
+  if(!validEmail(els.email.value)){alert('Enter a valid email address.'); step = 5; show(); return false;}
+
+  if(els.trim.value === '__manual' && !els.manualTrim.value.trim()){alert('Enter trim or choose one from the list.'); step = 1; show(); return false;}
+  if(els.color.value === '__manual' && !els.manualColor.value.trim()){alert('Enter color or choose one from the list.'); step = 1; show(); return false;}
+
+  const conditionFields = [
+    {el:els.runs,label:'Runs and drives'},
+    {el:els.key,label:'Key'},
+    {el:els.tires,label:'Good tires'},
+    {el:els.engine,label:'Engine OK'},
+    {el:els.trans,label:'Transmission OK'},
+    {el:els.airbags,label:'Blown airbags'},
+    {el:els.cat,label:'Catalytic converter'},
+    {el:els.bodyDamage,label:'Body damage'},
+    {el:els.partsMissing,label:'Parts / panels missing'}
+  ];
+
+  for(const item of conditionFields){
+    if(!item.el.value){
+      alert('Please answer: ' + item.label);
+      step = 2;
+      show();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function validateVehicleStepBeforeNext(){
+  const vin = normalizeVin(els.vin.value);
+  els.vin.value = vin;
+
+  if(!isValidVinFormat(vin)){
+    alert('Enter a valid 17-character VIN before continuing.');
+    return false;
+  }
+
+  if(!vinDecodeValid || lastSuccessfulDecodedVin !== vin){
+    await decodeVIN(true);
+  }
+
+  if(!vinDecodeValid || lastSuccessfulDecodedVin !== vin){
+    alert('VIN must decode successfully before continuing.');
+    return false;
+  }
+
+  if(!els.year.value.trim() || !els.make.value.trim() || !els.model.value.trim()){
+    alert('VIN must return Year, Make, and Model before continuing.');
+    return false;
+  }
+
+  if(!els.miles.value.trim()){
+    alert('Mileage is required before continuing.');
+    return false;
+  }
+
+  return true;
+}
+
+async function decodeVIN(silent=false){
+  const v = normalizeVin(els.vin.value);
+  els.vin.value = v;
+
+  vinDecodeValid = false;
+
+  if(!isValidVinFormat(v)){
+    els.vinMsg.textContent = 'Enter a valid 17-character VIN. VIN cannot include I, O, or Q.';
+    els.vinMsg.className = 'small bad';
+    if(!silent) alert('Enter a valid 17-character VIN.');
+    return false;
+  }
+
+  if(vinIsDecoding) return false;
+
+  if(v === lastDecodedVin && v === lastSuccessfulDecodedVin && vinDecodeValid){
+    return true;
+  }
+
+  vinIsDecoding = true;
+  els.decode.disabled = true;
+  els.next.disabled = true;
+
+  try{
+    els.vinMsg.textContent = 'Decoding VIN...';
+    els.vinMsg.className = 'small warn';
+
+    const res = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/' + encodeURIComponent(v) + '?format=json');
+    const d = await res.json();
+    const r = d.Results && d.Results[0] ? d.Results[0] : {};
+
+    const errorCode = String(r.ErrorCode || '');
+    const errorText = String(r.ErrorText || '').toLowerCase();
+
+    if(errorCode && errorCode !== '0' && errorText.includes('invalid')){
+      throw new Error('VIN decode returned invalid VIN.');
     }
 
-    function money(value) {
-      return "$" + Number(value || 0).toLocaleString();
+    if(!r.ModelYear || !r.Make || !r.Model){
+      throw new Error('VIN did not return year, make, and model.');
     }
 
-    function numberText(value) {
-      const cleaned = String(value || "").replace(/[^\d]/g, "");
-      return cleaned ? Number(cleaned).toLocaleString() : "—";
+    if(!isPassengerVehicle(r)){
+      throw new Error('This VIN does not appear to be for a passenger car, truck, SUV, or van.');
     }
 
-    function formatCarId(rawId) {
-      if (lead && lead.car_id) return lead.car_id;
+    els.year.value = r.ModelYear || '';
+    els.make.value = r.Make || '';
+    els.model.value = r.Model || '';
+    els.body.value = cleanBodyType(r.BodyClass);
 
-      const raw = String(rawId || "");
-      const numeric = raw.replace(/\D/g, "");
-      if (numeric) return "CV-" + numeric.slice(-6).padStart(6, "0");
+    let rawDrive = r.DriveType || r.DriveTypePrimary || '';
+    const rawDriveLower = rawDrive.toLowerCase();
+    const modelLower = (r.Model || '').toLowerCase();
+    const bodyLower = (r.BodyClass || '').toLowerCase();
 
-      let hash = 0;
-      for (let i = 0; i < raw.length; i++) {
-        hash = ((hash * 31) + raw.charCodeAt(i)) % 1000000;
+    if(rawDriveLower.includes('4wd') || rawDriveLower.includes('4x4')) rawDrive = '4WD';
+    else if(rawDriveLower.includes('awd')) rawDrive = 'AWD';
+    else if(rawDriveLower.includes('fwd')) rawDrive = 'FWD';
+    else if(rawDriveLower.includes('rwd')) rawDrive = 'RWD';
+    else if(rawDriveLower.includes('4x2')) rawDrive = (modelLower.includes('prius') || bodyLower.includes('sedan') || bodyLower.includes('hatchback') || bodyLower.includes('liftback')) ? 'FWD' : 'RWD';
+
+    if(!rawDrive){
+      if(
+        bodyLower.includes('sedan') ||
+        bodyLower.includes('hatchback') ||
+        modelLower.includes('accord') ||
+        modelLower.includes('civic') ||
+        modelLower.includes('camry') ||
+        modelLower.includes('corolla') ||
+        modelLower.includes('prius') ||
+        modelLower.includes('altima') ||
+        modelLower.includes('sentra')
+      ){
+        rawDrive = 'FWD';
       }
-      return "CV-" + String(hash).padStart(6, "0");
     }
 
-    function setText(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.textContent = safe(value);
+    els.drivetrain.value = rawDrive;
+
+    els.fuel.value = r.FuelTypePrimary || r.FuelTypeSecondary || '';
+    els.engineInfo.value = cleanEngineInfo(r);
+
+    if(r.FuelTypePrimary && r.FuelTypePrimary.toLowerCase().includes('electric')){
+      els.transmissionInfo.value = 'Single Speed';
+    } else {
+      const trans = r.TransmissionStyle || '';
+      const speeds = r.TransmissionSpeeds ? r.TransmissionSpeeds + ' speed' : '';
+      els.transmissionInfo.value = (trans + ' ' + speeds).trim() || 'Automatic';
     }
 
-    function setHTML(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = value;
+    const vinColor = normalizeColor(r.ExteriorColor || r.Color || r.VehicleColor || '');
+    if(vinColor){
+      ensureColorOption(vinColor);
+      els.color.value = vinColor;
+      els.manualColor.style.display = 'none';
+      els.manualColor.value = '';
     }
 
-    function normalizeText(value) {
-      return String(value || "").trim().toLowerCase();
+    const rawTrim = r.Trim || r.Trim2 || r.Series || r.Series2 || '';
+    const apiTrimOptions = splitTrimOptions(rawTrim);
+    const suggestions = getTrimSuggestions(r.Make, r.Model);
+    const finalTrimOptions = apiTrimOptions.length ? apiTrimOptions : suggestions;
+
+    setTrimSuggestions(finalTrimOptions);
+
+    els.manualTrim.style.display = 'none';
+    els.manualTrim.value = '';
+
+    if(finalTrimOptions.length){
+      els.trim.value = finalTrimOptions[0];
+    } else if(rawTrim && rawTrim.length < 30 && !rawTrim.includes('*')){
+      els.trim.value = rawTrim.trim();
+    } else {
+      els.trim.value = '';
     }
 
-    function boolFromText(value) {
-      const v = normalizeText(value);
-      if (!v) return null;
-
-      if (["yes", "y", "true", "good", "ok", "okay", "runs", "running", "present", "clean", "has", "available"].includes(v)) return true;
-      if (["no", "n", "false", "bad", "missing", "none", "not sure", "unknown", "damaged"].includes(v)) return false;
-
-      if (v.includes("yes")) return true;
-      if (v.includes("no")) return false;
-      if (v.includes("missing")) return false;
-      if (v.includes("damage")) return false;
-      if (v.includes("blown")) return false;
-
-      return null;
-    }
-
-    function pill(label, good) {
-      if (good === null) {
-        return '<span class="pill neutral">' + safe(label, "—") + '</span>';
-      }
-
-      return '<span class="pill ' + (good ? 'yes' : 'no') + '">' + label + '</span>';
-    }
-
-    function yesNo(value, damageField = false) {
-      const b = typeof value === "boolean" ? value : boolFromText(value);
-
-      if (b === null) return pill("—", null);
-
-      const label = b ? "Yes" : "No";
-      const good = damageField ? !b : b;
-
-      return pill(label, good);
-    }
-
-    function conditionArray() {
-      if (!lead || !lead.condition) return [];
-
-      if (Array.isArray(lead.condition)) return lead.condition;
-
-      if (typeof lead.condition === "string") {
-        try {
-          const parsed = JSON.parse(lead.condition);
-          if (Array.isArray(parsed)) return parsed;
-        } catch (e) {}
-
-        return lead.condition.split("\n").map(v => v.trim()).filter(Boolean);
-      }
-
-      return [];
-    }
-
-    function conditionValue(keys) {
-      const arr = conditionArray();
-
-      for (const item of arr) {
-        const text = String(item || "");
-        const lower = text.toLowerCase();
-
-        for (const key of keys) {
-          if (lower.includes(key.toLowerCase())) {
-            const parts = text.split(":");
-            if (parts.length > 1) return parts.slice(1).join(":").trim();
-            return text;
-          }
-        }
-      }
-
-      return "";
-    }
-
-    function getLeadField(primary, fallbacks = []) {
-      if (!lead) return "";
-
-      const keys = [primary].concat(fallbacks);
-
-      for (const key of keys) {
-        if (lead[key] !== null && lead[key] !== undefined && lead[key] !== "") {
-          return lead[key];
-        }
-      }
-
-      return "";
-    }
-
-    function isValidPickupAddress(address) {
-      const value = String(address || "").trim().toLowerCase();
-
-      if (!value) return false;
-      if (value.length < 8) return false;
-      if (!/\d/.test(value)) return false;
-      if (["test", "fake", "none", "na", "n/a", "unknown", "asdf", "123"].includes(value)) return false;
-      if (value.includes("test address")) return false;
-      if (value.includes("fake address")) return false;
-
-      return true;
-    }
-
-    function renderOffer() {
-      if (!lead) return;
-
-      const vehicle = [lead.year, lead.make, lead.model, lead.trim].filter(Boolean).join(" ") || "Vehicle";
-
-      setText("amount", money(lead.offer_amount));
-      setText("vehicle", vehicle);
-      setText("carId", formatCarId(lead.id));
-      setText("vin", lead.vin);
-      setText("miles", numberText(getLeadField("miles", ["mileage"])) + (numberText(getLeadField("miles", ["mileage"])) !== "—" ? " mi" : ""));
-      setText("title", getLeadField("title", ["title_status"]));
-      setText("drive", getLeadField("drive", ["drivetrain"]));
-      setText("fuel", getLeadField("fuel", ["fuel_type"]));
-      setText("transType", getLeadField("trans", ["transmission"]));
-
-      setHTML("runs", yesNo(getLeadField("runs_drives") || conditionValue(["runs", "runs & drives", "run"])));
-      setHTML("engine", yesNo(getLeadField("engine_ok") || conditionValue(["engine"])));
-      setHTML("trans", yesNo(getLeadField("transmission_ok") || conditionValue(["transmission"])));
-      setHTML("tires", yesNo(getLeadField("good_tires") || conditionValue(["tires", "tire"])));
-      setHTML("key", yesNo(getLeadField("has_key") || conditionValue(["key"])));
-      setHTML("airbags", yesNo(getLeadField("blown_airbags") || conditionValue(["airbags", "airbag"]), true));
-      setHTML("cat", yesNo(getLeadField("catalytic_converter") || conditionValue(["catalytic", "converter", "cat"])));
-      setHTML("parts", yesNo(getLeadField("parts_missing") || conditionValue(["parts missing", "missing parts"]), true));
-      setHTML("bodyDamage", yesNo(getLeadField("body_damage") || conditionValue(["body damage", "body"]), true));
-      setHTML("interior", yesNo(getLeadField("interior_damage") || conditionValue(["interior"]), true));
-
-      document.getElementById("pickupDate").value = safe(lead.pickup_date, "");
-      document.getElementById("pickupWindow").value = safe(lead.pickup_window, "");
-      document.getElementById("pickupAddress").value = safe(lead.pickup_address || lead.address, "");
-      document.getElementById("pickupNotes").value = safe(lead.pickup_notes, "");
-
-      const sellerLink = "seller-profile.html?id=" + encodeURIComponent(lead.id);
-      document.getElementById("laterLink").href = sellerLink;
-
-      document.getElementById("loadNotice").classList.remove("show");
-      document.getElementById("acceptBtn").disabled = false;
-      document.getElementById("declineBtn").disabled = false;
-
-      const status = String(lead.status || "").toLowerCase();
-
-      if (status === "accepted" || status === "pickup_scheduled") {
-        document.getElementById("acceptNotice").classList.add("show");
-        document.getElementById("scheduleStep").classList.add("show");
-        document.getElementById("acceptBtn").disabled = true;
-        document.getElementById("declineBtn").disabled = true;
-      }
-
-      if (status === "declined") {
-        document.getElementById("declineNotice").classList.add("show");
-        document.getElementById("acceptBtn").disabled = true;
-        document.getElementById("declineBtn").disabled = true;
-      }
-    }
-
-    function hideNotices() {
-      document.getElementById("acceptNotice").classList.remove("show");
-      document.getElementById("declineNotice").classList.remove("show");
-      document.getElementById("loadNotice").classList.remove("show");
-    }
-
-    async function loadLead() {
-      if (!leadId) {
-        document.getElementById("amount").textContent = "Missing Offer Link";
-        document.getElementById("vehicle").textContent = "No lead ID was found in the URL.";
-        document.getElementById("loadNotice").textContent = "This page needs a link like offer-response.html?id=LEAD_ID.";
-        return;
-      }
-
-      const { data, error } = await db
-        .from("leads")
-        .select("*")
-        .eq("id", leadId)
-        .single();
-
-      if (error) {
-        console.error(error);
-        document.getElementById("amount").textContent = "Offer Not Found";
-        document.getElementById("vehicle").textContent = "We could not load this offer.";
-        document.getElementById("loadNotice").textContent = "Error loading offer: " + error.message;
-        return;
-      }
-
-      lead = data;
-      renderOffer();
-    }
-
-    async function handleAccept() {
-      if (!lead) return;
-
-      hideNotices();
-
-      document.getElementById("acceptBtn").disabled = true;
-      document.getElementById("declineBtn").disabled = true;
-
-      const { data, error } = await db
-        .from("leads")
-        .update({
-          status: "Accepted",
-          offer_accepted: true,
-          offer_declined: false,
-          offer_accepted_at: new Date().toISOString()
-        })
-        .eq("id", lead.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error(error);
-        alert("Error accepting offer: " + error.message);
-        document.getElementById("acceptBtn").disabled = false;
-        document.getElementById("declineBtn").disabled = false;
-        return;
-      }
-
-      lead = data;
-
-      document.getElementById("acceptNotice").classList.add("show");
-      document.getElementById("scheduleStep").classList.add("show");
-    }
-
-    async function handleDecline() {
-      if (!lead) return;
-
-      const confirmDecline = confirm("Are you sure you want to decline this offer?");
-      if (!confirmDecline) return;
-
-      hideNotices();
-
-      document.getElementById("acceptBtn").disabled = true;
-      document.getElementById("declineBtn").disabled = true;
-
-      const { data, error } = await db
-        .from("leads")
-        .update({
-          status: "Declined",
-          offer_declined: true,
-          offer_accepted: false,
-          offer_declined_at: new Date().toISOString()
-        })
-        .eq("id", lead.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error(error);
-        alert("Error declining offer: " + error.message);
-        document.getElementById("acceptBtn").disabled = false;
-        document.getElementById("declineBtn").disabled = false;
-        return;
-      }
-
-      lead = data;
-      document.getElementById("declineNotice").classList.add("show");
-    }
-
-    function renderCongrats() {
-      const vehicle = [lead.year, lead.make, lead.model, lead.trim].filter(Boolean).join(" ") || "Vehicle";
-
-      document.getElementById("congratsSummary").innerHTML =
-        '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + formatCarId(lead.id) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + safe(vehicle) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Accepted Offer</span><span class="summary-value">' + money(lead.offer_amount) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Pickup Date</span><span class="summary-value">' + safe(lead.pickup_date) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Pickup Window</span><span class="summary-value">' + safe(lead.pickup_window) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Pickup Address</span><span class="summary-value">' + safe(lead.pickup_address || lead.address) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Seller</span><span class="summary-value">' + safe(lead.seller) + '</span></div>';
-    }
-
-    async function saveSchedule() {
-      if (!lead) return;
-
-      const pickupDate = document.getElementById("pickupDate").value;
-      const pickupWindow = document.getElementById("pickupWindow").value;
-      const pickupAddress = document.getElementById("pickupAddress").value.trim();
-      const pickupNotes = document.getElementById("pickupNotes").value.trim();
-
-      if (!pickupDate) {
-        alert("Please select a pickup date.");
-        return;
-      }
-
-      if (!pickupWindow) {
-        alert("Please select a pickup window.");
-        return;
-      }
-
-      if (!isValidPickupAddress(pickupAddress)) {
-        alert("Please enter a valid pickup address with a street number and street name.");
-        return;
-      }
-
-      const { data, error } = await db
-        .from("leads")
-        .update({
-          status: "pickup_scheduled",
-          pickup_date: pickupDate,
-          pickup_window: pickupWindow,
-          pickup_address: pickupAddress,
-          address: pickupAddress,
-          pickup_notes: pickupNotes,
-          pickup_scheduled_at: new Date().toISOString()
-        })
-        .eq("id", lead.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error(error);
-        alert("Error saving pickup schedule: " + error.message);
-        return;
-      }
-
-      lead = data;
-
-      renderCongrats();
-
-      document.getElementById("offerPage").style.display = "none";
-      document.getElementById("congratsPage").classList.add("show");
-    }
-
-    function continueToProfile() {
-      if (!lead) return;
-      window.location.href = "seller-profile.html?id=" + encodeURIComponent(lead.id);
-    }
-
-    document.getElementById("acceptBtn").addEventListener("click", handleAccept);
-    document.getElementById("declineBtn").addEventListener("click", handleDecline);
-    document.getElementById("saveScheduleBtn").addEventListener("click", saveSchedule);
-    document.getElementById("continueProfileBtn").addEventListener("click", continueToProfile);
-
-    loadLead();
-  </script>
+    lastDecodedVin = v;
+    lastSuccessfulDecodedVin = v;
+    vinDecodeValid = true;
+
+    els.vinMsg.textContent = 'VIN decoded successfully. Review fields and complete anything missing.';
+    els.vinMsg.className = 'small ok';
+
+    return true;
+
+  } catch(err){
+    vinDecodeValid = false;
+    lastSuccessfulDecodedVin = '';
+
+    if(!silent) alert('VIN decode failed. Please enter a real VIN or check for typos.');
+
+    els.vinMsg.textContent = err.message || 'VIN decode failed. Please enter a real VIN.';
+    els.vinMsg.className = 'small bad';
+    console.error(err);
+    return false;
+  } finally {
+    vinIsDecoding = false;
+    els.decode.disabled = false;
+    els.next.disabled = false;
+  }
+}
+
+els.decode.onclick = () => decodeVIN(false);
+
+els.vin.addEventListener('input', () => {
+  els.vin.value = normalizeVin(els.vin.value);
+
+  vinDecodeValid = false;
+  lastSuccessfulDecodedVin = '';
+
+  if(vinDecodeTimer) clearTimeout(vinDecodeTimer);
+
+  if(els.vin.value.length === 17){
+    els.vinMsg.textContent = 'VIN complete — decoding…';
+    els.vinMsg.className = 'small warn';
+    vinDecodeTimer = setTimeout(() => decodeVIN(true), 450);
+  } else {
+    lastDecodedVin = '';
+    els.vinMsg.textContent = '';
+  }
+});
+
+els.form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if(!validateRequiredFields()) return;
+
+  const sellerFullName = (els.firstName.value.trim() + ' ' + els.lastName.value.trim()).trim();
+  const finalTrim = els.trim.value === '__manual' ? els.manualTrim.value.trim() : els.trim.value;
+  const finalColor = els.color.value === '__manual' ? els.manualColor.value.trim() : els.color.value;
+
+  const lead = {
+    vin: els.vin.value || null,
+    year: els.year.value || null,
+    make: els.make.value || null,
+    model: els.model.value || null,
+    trim: finalTrim || null,
+    body: els.body.value || null,
+    drive: els.drivetrain.value || null,
+    fuel: els.fuel.value || null,
+    engine: els.engineInfo.value || null,
+    trans: els.transmissionInfo.value || null,
+    color: finalColor || null,
+    miles: els.miles.value || null,
+    seller: sellerFullName || null,
+    phone: els.phone.value || null,
+    email: els.email.value.trim().toLowerCase() || null,
+    zip: els.zip.value || null,
+    address: els.address.value || null,
+    title: els.title.value || null,
+    ownership: els.owner.value || null,
+    status: 'New Lead',
+    priority: 'Standard',
+    communication: 'Not contacted',
+    route: 'Yard',
+    condition: [
+      'Runs and drives: ' + els.runs.value,
+      'Key: ' + els.key.value,
+      'Good tires: ' + els.tires.value,
+      'Engine OK: ' + els.engine.value,
+      'Transmission OK: ' + els.trans.value,
+      'Blown airbags: ' + els.airbags.value,
+      'Catalytic converter: ' + els.cat.value,
+      'Body damage: ' + els.bodyDamage.value,
+      'Parts / panels missing: ' + els.partsMissing.value
+    ]
+  };
+
+  els.next.disabled = true;
+  els.next.textContent = 'Submitting...';
+
+  const { data, error } = await db.from('leads').insert([lead]).select();
+
+  console.log('INSERT RESULT:', data, error);
+
+  if(error){
+    alert('Error saving lead: ' + error.message);
+    console.error(error);
+    els.next.disabled = false;
+    els.next.textContent = 'Submit';
+    return;
+  }
+
+  els.form.style.display = 'none';
+  document.getElementById('successCard').style.display = 'block';
+
+  setTimeout(() => {
+    window.location.replace('/thank-you.html');
+  }, 500);
+});
+
+show();
+</script>
 </body>
 </html>
