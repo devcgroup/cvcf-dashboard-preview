@@ -380,7 +380,7 @@
     let lead = null;
 
     function safe(value, fallback) {
-      return value || fallback || "—";
+      return value === null || value === undefined || value === "" ? (fallback || "—") : value;
     }
 
     function clean(value) {
@@ -392,36 +392,41 @@
     }
 
     function getMileage() {
-      const value = lead.mileage || lead.miles || 0;
+      if (!lead) return "—";
+      const value = lead.miles || lead.mileage || 0;
       const number = String(value).replace(/[^\d]/g, "");
       return number ? Number(number).toLocaleString() + " mi" : "—";
     }
 
     function getSellerName() {
-      return lead.seller_name || lead.seller || "";
+      return lead.seller || lead.seller_name || "";
     }
 
     function getSellerPhone() {
-      return lead.seller_phone || lead.phone || "";
+      return lead.phone || lead.seller_phone || "";
     }
 
     function getSellerEmail() {
-      return lead.seller_email || lead.email || "";
+      return lead.email || lead.seller_email || "";
     }
 
     function getBuyerName() {
-      return lead.buyer_name || lead.buyer || "Not assigned yet";
+      return lead.buyer || lead.buyer_name || "Not assigned yet";
     }
 
     function getBuyerPhone() {
       return lead.buyer_phone || "";
     }
 
+    function getPickupAddress() {
+      return lead.pickup_address || lead.address || "";
+    }
+
     function formatCarId(rawId) {
+      if (lead && lead.car_id) return lead.car_id;
+
       const raw = String(rawId || "");
       const numeric = raw.replace(/\D/g, "");
-
-      if (lead.car_id) return lead.car_id;
 
       if (numeric) {
         return "CV-" + numeric.slice(-6).padStart(6, "0");
@@ -451,10 +456,67 @@
       const el = document.getElementById(id);
       if (!el) return;
       el.classList.remove("show");
+      el.textContent = "";
+    }
+
+    function validEmail(email) {
+      const value = clean(email).toLowerCase();
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return false;
+
+      const blocked = [
+        "test@test.com",
+        "fake@fake.com",
+        "none@none.com",
+        "no@email.com",
+        "na@na.com",
+        "asdf@asdf.com"
+      ];
+
+      if (blocked.includes(value)) return false;
+      if (value.includes("example.com")) return false;
+      if (value.includes("test.com")) return false;
+
+      return true;
+    }
+
+    function validPhone(phone) {
+      const n = String(phone || "").replace(/\D/g, "");
+
+      if (n.length !== 10) return false;
+      if (/^(\d)\1+$/.test(n)) return false;
+      if (n === "1234567890") return false;
+      if (n === "0123456789") return false;
+      if (n.startsWith("000")) return false;
+
+      return true;
+    }
+
+    function validPickupAddress(address) {
+      const value = clean(address).toLowerCase();
+
+      if (!value) return false;
+      if (value.length < 8) return false;
+      if (!/\d/.test(value)) return false;
+      if (["test", "fake", "none", "na", "n/a", "unknown", "asdf", "123"].includes(value)) return false;
+      if (value.includes("test address")) return false;
+      if (value.includes("fake address")) return false;
+
+      return true;
     }
 
     function isClosedStatus() {
-      const closedStatuses = ["completed", "complete", "closed", "in_inventory", "sold", "paid"];
+      if (!lead) return false;
+
+      const closedStatuses = [
+        "completed",
+        "complete",
+        "closed",
+        "in_inventory",
+        "sold",
+        "paid"
+      ];
+
       return closedStatuses.includes(String(lead.status || "").toLowerCase());
     }
 
@@ -470,20 +532,22 @@
 
       document.getElementById("closedPage").classList.add("show");
 
+      const vehicle = [lead.year, lead.make, lead.model].filter(Boolean).join(" ") || "Vehicle";
+
       document.getElementById("closedSummary").innerHTML =
         '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(formatCarId(lead.id)) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + safe(lead.year) + ' ' + safe(lead.make) + ' ' + safe(lead.model) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Payment Status</span><span class="summary-value">Paid</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + safe(vehicle) + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Payment Status</span><span class="summary-value">' + safe(lead.payment_status || "Paid") + '</span></div>' +
         (lead.check_number ? '<div class="summary-item"><span class="summary-label">Check Number</span><span class="summary-value">#' + lead.check_number + '</span></div>' : '');
     }
 
     function renderSummary() {
-      const vehicle = safe(lead.year) + " " + safe(lead.make) + " " + safe(lead.model);
+      const vehicle = [lead.year, lead.make, lead.model, lead.trim].filter(Boolean).join(" ") || "Vehicle";
 
       document.getElementById("dealSummary").innerHTML =
         '<div class="summary-item"><span class="summary-label">Car ID</span><span class="summary-value">' + safe(formatCarId(lead.id)) + '</span></div>' +
-        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + vehicle + '</span></div>' +
+        '<div class="summary-item"><span class="summary-label">Vehicle</span><span class="summary-value">' + safe(vehicle) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">VIN</span><span class="summary-value">' + safe(lead.vin) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">Accepted Offer</span><span class="summary-value">' + money(lead.offer_amount) + '</span></div>' +
         '<div class="summary-item"><span class="summary-label">Pickup</span><span class="summary-value">' + safe(lead.pickup_date) + '<br>' + safe(lead.pickup_window) + '</span></div>' +
@@ -508,7 +572,7 @@
       setValue("buyerPhone", getBuyerPhone());
       setValue("pickupDate", lead.pickup_date);
       setValue("pickupWindow", lead.pickup_window);
-      setValue("pickupAddress", lead.pickup_address || lead.address);
+      setValue("pickupAddress", getPickupAddress());
       setValue("pickupInstructions", lead.pickup_notes);
 
       setValue("paperworkInstructions", lead.paperwork_instructions);
@@ -516,17 +580,22 @@
 
     async function loadLead() {
       clearNotice("errorNotice");
+      clearNotice("loadNotice");
 
       if (!leadId) {
         setNotice("errorNotice", "Missing lead ID. Open this page from a link like seller-profile.html?id=LEAD_ID.");
         return;
       }
 
+      setNotice("loadNotice", "Loading seller profile...");
+
       const { data, error } = await db
         .from("leads")
         .select("*")
         .eq("id", leadId)
         .single();
+
+      clearNotice("loadNotice");
 
       if (error) {
         console.error(error);
@@ -538,6 +607,14 @@
       renderProfile();
     }
 
+    function buildUploadSummary() {
+      return "Upload Summary: " +
+        "Car Photos: " + document.getElementById("carPhotos").files.length + ", " +
+        "Driver License: " + document.getElementById("driverLicense").files.length + ", " +
+        "Title Upload: " + document.getElementById("titleUpload").files.length + ", " +
+        "Extra Docs: " + document.getElementById("extraDocs").files.length;
+    }
+
     function buildAdminNotes() {
       const existing = lead.admin_notes || "";
 
@@ -545,15 +622,13 @@
       const rescheduleWindow = clean(document.getElementById("rescheduleWindow").value);
       const rescheduleReason = clean(document.getElementById("rescheduleReason").value);
       const paperwork = clean(document.getElementById("paperworkInstructions").value);
-
-      const uploadSummary =
-        "Upload Summary: " +
-        "Car Photos: " + document.getElementById("carPhotos").files.length + ", " +
-        "Driver License: " + document.getElementById("driverLicense").files.length + ", " +
-        "Title Upload: " + document.getElementById("titleUpload").files.length + ", " +
-        "Extra Docs: " + document.getElementById("extraDocs").files.length;
+      const pickupInstructions = clean(document.getElementById("pickupInstructions").value);
 
       let added = "\n\nSeller Profile Update - " + new Date().toLocaleString();
+
+      if (pickupInstructions) {
+        added += "\nPickup Instructions: " + pickupInstructions;
+      }
 
       if (paperwork) {
         added += "\nPaperwork Instructions: " + paperwork;
@@ -566,24 +641,71 @@
           (rescheduleReason || "No reason");
       }
 
-      added += "\n" + uploadSummary;
+      added += "\n" + buildUploadSummary();
 
       return (existing + added).trim();
     }
 
     async function saveProfile() {
-      if (!lead) return;
+      if (!lead) return false;
 
       clearNotice("errorNotice");
       clearNotice("saveNotice");
 
+      const seller = clean(document.getElementById("sellerName").value);
+      const phone = clean(document.getElementById("sellerPhone").value);
+      const email = clean(document.getElementById("sellerEmail").value);
+      const pickupInstructions = clean(document.getElementById("pickupInstructions").value);
+      const paperworkInstructions = clean(document.getElementById("paperworkInstructions").value);
+      const rescheduleDate = clean(document.getElementById("rescheduleDate").value);
+      const rescheduleWindow = clean(document.getElementById("rescheduleWindow").value);
+      const rescheduleReason = clean(document.getElementById("rescheduleReason").value);
+      const currentPickupAddress = clean(document.getElementById("pickupAddress").value);
+
+      if (!seller) {
+        setNotice("errorNotice", "Seller name is required.");
+        return false;
+      }
+
+      if (!validPhone(phone)) {
+        setNotice("errorNotice", "Enter a valid 10-digit phone number.");
+        return false;
+      }
+
+      if (!validEmail(email)) {
+        setNotice("errorNotice", "Enter a valid email address.");
+        return false;
+      }
+
+      if (!validPickupAddress(currentPickupAddress)) {
+        setNotice("errorNotice", "Pickup address is missing or invalid. Go back to the offer response page and enter the full pickup address.");
+        return false;
+      }
+
+      if ((rescheduleDate && !rescheduleWindow) || (!rescheduleDate && rescheduleWindow)) {
+        setNotice("errorNotice", "To request a reschedule, choose both a new pickup date and pickup window.");
+        return false;
+      }
+
+      if ((rescheduleDate || rescheduleWindow) && !rescheduleReason) {
+        setNotice("errorNotice", "Please enter a reason for the reschedule request.");
+        return false;
+      }
+
       const payload = {
-        seller: clean(document.getElementById("sellerName").value),
-        phone: clean(document.getElementById("sellerPhone").value),
-        email: clean(document.getElementById("sellerEmail").value),
-        pickup_notes: clean(document.getElementById("pickupInstructions").value),
+        seller: seller,
+        phone: phone,
+        email: email,
+        pickup_notes: pickupInstructions,
+        paperwork_instructions: paperworkInstructions,
         admin_notes: buildAdminNotes()
       };
+
+      if (rescheduleDate && rescheduleWindow) {
+        payload.pickup_date = rescheduleDate;
+        payload.pickup_window = rescheduleWindow;
+        payload.status = "pickup_scheduled";
+      }
 
       const { data, error } = await db
         .from("leads")
@@ -614,6 +736,9 @@
 
     async function demoBuyerComplete() {
       if (!lead) return;
+
+      const saved = await saveProfile();
+      if (!saved) return;
 
       const checkNumber = prompt("Optional check number for P&L records:", lead.check_number || "4748");
 
