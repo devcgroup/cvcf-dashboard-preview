@@ -270,7 +270,12 @@ function escText(value){
     .replaceAll(">","&gt;");
 }
 
-function formatLeadId(rawId){
+function formatLeadId(recordOrId){
+  if(recordOrId && typeof recordOrId === "object" && recordOrId.car_id){
+    return String(recordOrId.car_id);
+  }
+
+  const rawId = typeof recordOrId === "object" ? recordOrId.id : recordOrId;
   const raw = String(rawId ?? "");
   const numeric = raw.replace(/\D/g, "");
 
@@ -282,6 +287,7 @@ function formatLeadId(rawId){
   for(let i=0;i<raw.length;i++){
     hash = ((hash * 31) + raw.charCodeAt(i)) % 1000000;
   }
+
   return "CV-" + String(hash).padStart(6, "0");
 }
 
@@ -332,6 +338,18 @@ function normalizeCondition(value){
 }
 
 function mapLeadFromDb(l){
+  const structuredCondition = [
+    l.runs ? "Runs and drives: " + l.runs : "",
+    l.has_key ? "Key: " + l.has_key : "",
+    l.tires ? "Good tires: " + l.tires : "",
+    l.engine_ok ? "Engine OK: " + l.engine_ok : "",
+    l.trans_ok ? "Transmission OK: " + l.trans_ok : "",
+    l.airbags ? "Blown airbags: " + l.airbags : "",
+    l.catalytic ? "Catalytic converter: " + l.catalytic : "",
+    l.body_damage ? "Body damage: " + l.body_damage : "",
+    l.parts_missing ? "Parts / panels missing: " + l.parts_missing : ""
+  ].filter(Boolean);
+
   const condition = normalizeCondition(l.condition);
   const pickupWindow = safeText(l.pickup_window, l.status === "Accepted" ? "Not selected" : "Pending acceptance");
   const pickupDate = safeText(l.pickup_date, "");
@@ -340,7 +358,7 @@ function mapLeadFromDb(l){
 
   return {
     db_id: l.id,
-    id: formatLeadId(l.id),
+    id: formatLeadId(l),
     created: l.created_at || new Date().toISOString(),
     status: safeText(l.status, "New Lead"),
     communication: safeText(l.communication, "Not contacted"),
@@ -355,11 +373,11 @@ function mapLeadFromDb(l){
     fuel: safeText(l.fuel, ""),
     body: safeText(l.body, ""),
     drive: safeText(l.drive, ""),
-    trans: safeText(l.trans, ""),
+    trans: safeText(l.trans, "") || safeText(l.transmission, ""),
     color: safeText(l.color, ""),
     miles: safeText(l.miles, ""),
 
-    seller: safeText(l.seller, ""),
+    seller: safeText(l.seller_name, "") || safeText(l.seller, ""),
     phone: safeText(l.phone, ""),
     email: safeText(l.email, ""),
     zip: safeText(l.zip, ""),
@@ -375,11 +393,11 @@ function mapLeadFromDb(l){
     tow: safeText(l.tow_driver, "") || safeText(l.tow_driver_name, "") || "—",
     route: safeText(l.route, "Yard"),
 
-    title: safeText(l.title, ""),
-    ownership: safeText(l.ownership, "Owned"),
+    title: safeText(l.title_status, "") || safeText(l.title, ""),
+    ownership: safeText(l.owner_status, "") || safeText(l.ownership, "Owned"),
     vehicleDescription: safeText(l.vehicle_description, "") || displayVehicle,
 
-    condition: condition.length ? condition : ["No condition answers saved yet"],
+    condition: condition.length ? condition : structuredCondition.length ? structuredCondition : ["No condition answers saved yet"],
 
     customerNotes: safeText(l.customer_notes, ""),
     buyerNotes: safeText(l.buyer_notes, ""),
@@ -389,7 +407,6 @@ function mapLeadFromDb(l){
     audit: normalizeCondition(l.audit).length ? normalizeCondition(l.audit) : ["Lead created from offer form"]
   };
 }
-
 function dbPayloadFromLead(l){
   return {
     status: l.status || "New Lead",
