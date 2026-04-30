@@ -270,8 +270,12 @@ els.back.onclick = () => {
 
 const db = supabase.createClient(
   "https://psxqggcmfkmhkrsagnuv.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzeHFnZ2NtZmttaGtyc2FnbnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzQzNzMsImV4cCI6MjA5MjkxMDM3M30.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJwc3hxZ2djbWZrbWhrcnNhZ251diIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc3MzM0MzczLCJleHAiOjIwOTI5MTAzNzN9.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw"
 );
+
+function generateCarId(){
+  return "CV-" + Math.floor(100000 + Math.random() * 900000);
+}
 
 function getTrimSuggestions(makeName, modelName){
   const mk = (makeName || '').toUpperCase();
@@ -598,7 +602,25 @@ els.form.addEventListener('submit', async (e) => {
   const finalTrim = els.trim.value === '__manual' ? els.manualTrim.value.trim() : els.trim.value;
   const finalColor = els.color.value === '__manual' ? els.manualColor.value.trim() : els.color.value;
 
+  const carId = generateCarId();
+
+  const conditionSummary = [
+    'Runs and drives: ' + els.runs.value,
+    'Key: ' + els.key.value,
+    'Good tires: ' + els.tires.value,
+    'Engine OK: ' + els.engine.value,
+    'Transmission OK: ' + els.trans.value,
+    'Blown airbags: ' + els.airbags.value,
+    'Catalytic converter: ' + els.cat.value,
+    'Body damage: ' + els.bodyDamage.value,
+    'Parts / panels missing: ' + els.partsMissing.value
+  ];
+
   const lead = {
+    car_id: carId,
+    status: 'New Lead',
+    created_at: new Date().toISOString(),
+
     vin: els.vin.value || null,
     year: els.year.value || null,
     make: els.make.value || null,
@@ -609,25 +631,35 @@ els.form.addEventListener('submit', async (e) => {
     fuel: els.fuel.value || null,
     engine: els.engineInfo.value || null,
     trans: els.transmissionInfo.value || null,
+    transmission: els.transmissionInfo.value || null,
     color: finalColor || null,
     miles: els.miles.value || null,
+
     seller: sellerFullName || null,
+    seller_name: sellerFullName || null,
+    first_name: els.firstName.value.trim() || null,
+    last_name: els.lastName.value.trim() || null,
     phone: els.phone.value || null,
     email: els.email.value || null,
+
     zip: els.zip.value || null,
     address: els.address.value || null,
+
     title: els.title.value || null,
-    condition: [
-      'Runs and drives: ' + els.runs.value,
-      'Key: ' + els.key.value,
-      'Good tires: ' + els.tires.value,
-      'Engine OK: ' + els.engine.value,
-      'Transmission OK: ' + els.trans.value,
-      'Blown airbags: ' + els.airbags.value,
-      'Catalytic converter: ' + els.cat.value,
-      'Body damage: ' + els.bodyDamage.value,
-      'Parts / panels missing: ' + els.partsMissing.value
-    ]
+    title_status: els.title.value || null,
+    owner_status: els.owner.value || null,
+
+    runs: els.runs.value || null,
+    has_key: els.key.value || null,
+    tires: els.tires.value || null,
+    engine_ok: els.engine.value || null,
+    trans_ok: els.trans.value || null,
+    airbags: els.airbags.value || null,
+    catalytic: els.cat.value || null,
+    body_damage: els.bodyDamage.value || null,
+    parts_missing: els.partsMissing.value || null,
+
+    condition: conditionSummary
   };
 
   const { data, error } = await db.from('leads').insert([lead]).select();
