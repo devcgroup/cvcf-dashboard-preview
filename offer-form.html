@@ -13,11 +13,14 @@ input,select{width:100%;padding:11px;margin-top:8px;margin-bottom:12px;border:1p
 label{display:block;font-weight:700;color:#07142b;margin-top:6px}
 button{padding:12px;background:#07142b;color:#fff;border:none;border-radius:8px;width:100%;font-weight:bold;cursor:pointer}
 button.secondary{background:#f8fafc;color:#07142b;border:1px solid #cbd5e1}
+button:disabled{opacity:.6;cursor:not-allowed}
 .step{display:none}.step.active{display:block}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .small{font-size:12px;color:#64748b;line-height:1.4}
 .warn{color:#92400e;font-weight:bold}
 .ok{color:#166534;font-weight:bold}
+.bad{color:#991b1b;font-weight:bold}
+.test{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:10px;margin-bottom:14px;font-size:13px;font-weight:bold}
 h3{margin-top:0;color:#07142b}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .progress{background:#fff;border:1px solid #d8e1ec;border-radius:14px;padding:12px;margin-bottom:14px;box-shadow:0 1px 4px rgba(15,23,42,.06)}
@@ -33,6 +36,10 @@ h3{margin-top:0;color:#07142b}
 
 <body>
 <div class="container">
+
+  <div id="testBanner" class="test" style="display:none;">
+    TEST MODE ON — fake/test names, emails, phones, and addresses are allowed. Turn TEST_MODE off before production.
+  </div>
 
   <div class="progress">
     <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
@@ -50,7 +57,7 @@ h3{margin-top:0;color:#07142b}
     <div class="card step active" data-step="1">
       <h3>Vehicle</h3>
 
-      <input id="vin" placeholder="VIN (recommended)" maxlength="17" />
+      <input id="vin" placeholder="VIN (required)" maxlength="17" />
       <button type="button" id="decode">Decode VIN</button>
       <div id="vinMsg" class="small"></div>
 
@@ -103,7 +110,7 @@ h3{margin-top:0;color:#07142b}
       <input id="manualColor" class="manual-field" placeholder="Enter color manually" />
       <input id="miles" placeholder="Mileage (required)" inputmode="numeric" />
 
-      <div class="small">VIN can auto-complete most fields. If trim or color is not decoded, choose or enter it manually.</div>
+      <div class="small">VIN must decode successfully before submission. If trim or color is not decoded, choose or enter it manually.</div>
     </div>
 
     <div class="card step" data-step="2">
@@ -190,6 +197,17 @@ h3{margin-top:0;color:#07142b}
 </div>
 
 <script>
+const TEST_MODE = true;
+
+const SUPABASE_URL = "https://psxqggcmfkmhkrsagnuv.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_J9Z4Bx_hqt26gjC_zUEGfg_L8t4VF9A";
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+if(TEST_MODE){
+  document.getElementById("testBanner").style.display = "block";
+}
+
 const $ = (id) => document.getElementById(id);
 
 const els = {
@@ -237,6 +255,12 @@ let step = 1;
 const steps = document.querySelectorAll('.step');
 const progressSteps = document.querySelectorAll('.progress-step');
 
+let vinDecodeTimer = null;
+let lastDecodedVin = '';
+let lastSuccessfulDecodedVin = '';
+let vinIsDecoding = false;
+let vinDecodeValid = false;
+
 function show(){
   steps.forEach(s => s.classList.remove('active'));
   document.querySelector('[data-step="' + step + '"]').classList.add('active');
@@ -252,7 +276,12 @@ function show(){
   els.next.textContent = step === 5 ? 'Submit' : 'Next';
 }
 
-els.next.onclick = () => {
+els.next.onclick = async () => {
+  if(step === 1){
+    const ok = await validateVehicleStepBeforeNext();
+    if(!ok) return;
+  }
+
   if(step < 5){
     step++;
     show();
@@ -268,13 +297,99 @@ els.back.onclick = () => {
   }
 };
 
-const db = supabase.createClient(
-  "https://psxqggcmfkmhkrsagnuv.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJwc3hxZ2djbWZrbWhrcnNhZ251diIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc3MzM0MzczLCJleHAiOjIwOTI5MTAzNzN9.imCVqrrOPJMh7AdlZ-PrFhxZgcXD6IUcgFO2RYQ0bbw"
-);
-
 function generateCarId(){
   return "CV-" + Math.floor(100000 + Math.random() * 900000);
+}
+
+function normalizeVin(vin){
+  return String(vin || '').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,17);
+}
+
+function isValidVinFormat(vin){
+  const v = normalizeVin(vin);
+  if(v.length !== 17) return false;
+  if(/[IOQ]/.test(v)) return false;
+  if(!/^[A-HJ-NPR-Z0-9]{17}$/.test(v)) return false;
+  if(/^([A-Z0-9])\1{16}$/.test(v)) return false;
+  return true;
+}
+
+function isPassengerVehicle(r){
+  const body = String(r.BodyClass || '').toLowerCase();
+  const vehicleType = String(r.VehicleType || '').toLowerCase();
+  const make = String(r.Make || '').toLowerCase();
+
+  const badWords = ['motorcycle','trailer','boat','bus','incomplete','medium/heavy','low speed vehicle','off road vehicle'];
+
+  for(const word of badWords){
+    if(body.includes(word) || vehicleType.includes(word)) return false;
+  }
+
+  if(make.includes('trailer')) return false;
+  return true;
+}
+
+function validEmail(email){
+  const value = String(email || '').trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return false;
+
+  if(TEST_MODE) return true;
+
+  const blockedExact = ['test@test.com','fake@fake.com','none@none.com','no@email.com','na@na.com','asdf@asdf.com','a@a.com'];
+
+  if(blockedExact.includes(value)) return false;
+  if(value.includes('example.com')) return false;
+  if(value.includes('test.com')) return false;
+  if(value.includes('fake.com')) return false;
+  if(value.includes('mailinator.com')) return false;
+  if(value.includes('tempmail')) return false;
+
+  return true;
+}
+
+function validPhone(phone){
+  const n = String(phone || '').replace(/\D/g,'');
+
+  if(n.length !== 10) return false;
+
+  if(TEST_MODE) return true;
+
+  if(/^(\d)\1+$/.test(n)) return false;
+  if(n === '1234567890') return false;
+  if(n === '0123456789') return false;
+  if(n.startsWith('000')) return false;
+  if(n.slice(3,6) === '000') return false;
+
+  return true;
+}
+
+function validAddressIfEntered(address){
+  const value = String(address || '').trim().toLowerCase();
+
+  if(!value) return true;
+  if(value.length < 8) return false;
+  if(!/\d/.test(value)) return false;
+
+  if(TEST_MODE) return true;
+
+  if(['test','fake','none','na','n/a','unknown','asdf','123'].includes(value)) return false;
+  if(value.includes('test address')) return false;
+  if(value.includes('fake address')) return false;
+
+  return true;
+}
+
+function isValidName(name){
+  const value = String(name || '').trim();
+
+  if(value.length < 2) return false;
+  if(/\d/.test(value)) return false;
+
+  if(TEST_MODE) return true;
+
+  if(['test','fake','na','none','asdf'].includes(value.toLowerCase())) return false;
+
+  return true;
 }
 
 function getTrimSuggestions(makeName, modelName){
@@ -292,7 +407,6 @@ function getTrimSuggestions(makeName, modelName){
   if(mk === 'NISSAN' && md.includes('SENTRA')) return ['S','SV','SR'];
 
   if(mk === 'FORD' && md.includes('F-150')) return ['XL','XLT','Lariat','King Ranch','Platinum','Limited','Raptor'];
-
   if(mk === 'CHEVROLET' && md.includes('SILVERADO')) return ['WT','Custom','LT','RST','LTZ','High Country'];
 
   if(mk === 'TESLA' && md.includes('MODEL 3')) return ['Standard Range','Standard Range Plus','Long Range','Performance'];
@@ -322,10 +436,7 @@ function setTrimSuggestions(list){
 
 function splitTrimOptions(value){
   if(!value) return [];
-  return value
-    .split('/')
-    .map(v => v.trim())
-    .filter(v => v && !v.includes('*') && v.length < 30);
+  return value.split('/').map(v => v.trim()).filter(v => v && !v.includes('*') && v.length < 30);
 }
 
 function cleanBodyType(value){
@@ -423,21 +534,44 @@ els.color.addEventListener('change', () => {
 });
 
 function validateRequiredFields(){
+  const vin = normalizeVin(els.vin.value);
+
+  if(!isValidVinFormat(vin)){
+    alert('Enter a valid 17-character VIN. VIN cannot include I, O, or Q.');
+    step = 1; show(); return false;
+  }
+
+  if(!vinDecodeValid || lastSuccessfulDecodedVin !== vin){
+    alert('VIN must decode successfully before submitting.');
+    step = 1; show(); return false;
+  }
+
   if(!els.year.value.trim()){alert('Year is required.'); step = 1; show(); return false;}
   if(!els.make.value.trim()){alert('Make is required.'); step = 1; show(); return false;}
   if(!els.model.value.trim()){alert('Model is required.'); step = 1; show(); return false;}
   if(!els.miles.value.trim()){alert('Mileage is required.'); step = 1; show(); return false;}
 
+  const mileageNumber = Number(String(els.miles.value).replace(/\D/g,''));
+  if(!Number.isFinite(mileageNumber) || mileageNumber < 1 || mileageNumber > 999999){
+    alert('Enter a valid mileage.');
+    step = 1; show(); return false;
+  }
+
   if(!els.zip.value.trim()){alert('ZIP code is required.'); step = 4; show(); return false;}
   if(els.zip.value.replace(/\D/g,'').length !== 5){alert('Enter a valid 5-digit ZIP code.'); step = 4; show(); return false;}
 
-  if(!els.firstName.value.trim()){alert('First name is required.'); step = 5; show(); return false;}
-  if(!els.lastName.value.trim()){alert('Last name is required.'); step = 5; show(); return false;}
+  if(!validAddressIfEntered(els.address.value)){
+    alert('Pickup address looks invalid. Leave it blank for now or enter a real street address.');
+    step = 4; show(); return false;
+  }
 
-  if(els.phone.value.replace(/\D/g,'').length !== 10){alert('Enter a valid 10-digit phone number.'); step = 5; show(); return false;}
+  if(!isValidName(els.firstName.value)){alert('Enter a valid first name.'); step = 5; show(); return false;}
+  if(!isValidName(els.lastName.value)){alert('Enter a valid last name.'); step = 5; show(); return false;}
+
+  if(!validPhone(els.phone.value)){alert('Enter a valid 10-digit phone number.'); step = 5; show(); return false;}
 
   if(!els.email.value.trim()){alert('Email is required.'); step = 5; show(); return false;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.email.value.trim())){alert('Enter a valid email address.'); step = 5; show(); return false;}
+  if(!validEmail(els.email.value)){alert('Enter a valid email address.'); step = 5; show(); return false;}
 
   if(els.trim.value === '__manual' && !els.manualTrim.value.trim()){alert('Enter trim or choose one from the list.'); step = 1; show(); return false;}
   if(els.color.value === '__manual' && !els.manualColor.value.trim()){alert('Enter color or choose one from the list.'); step = 1; show(); return false;}
@@ -466,22 +600,55 @@ function validateRequiredFields(){
   return true;
 }
 
-let vinDecodeTimer = null;
-let lastDecodedVin = '';
-let vinIsDecoding = false;
+async function validateVehicleStepBeforeNext(){
+  const vin = normalizeVin(els.vin.value);
+  els.vin.value = vin;
 
-async function decodeVIN(silent=false){
-  const v = els.vin.value.trim().toUpperCase();
-  els.vin.value = v;
-
-  if(v.length !== 17){
-    if(!silent) alert('Enter full VIN');
-    return;
+  if(!isValidVinFormat(vin)){
+    alert('Enter a valid 17-character VIN before continuing.');
+    return false;
   }
 
-  if(vinIsDecoding || v === lastDecodedVin) return;
+  if(!vinDecodeValid || lastSuccessfulDecodedVin !== vin){
+    await decodeVIN(true);
+  }
+
+  if(!vinDecodeValid || lastSuccessfulDecodedVin !== vin){
+    alert('VIN must decode successfully before continuing.');
+    return false;
+  }
+
+  if(!els.year.value.trim() || !els.make.value.trim() || !els.model.value.trim()){
+    alert('VIN must return Year, Make, and Model before continuing.');
+    return false;
+  }
+
+  if(!els.miles.value.trim()){
+    alert('Mileage is required before continuing.');
+    return false;
+  }
+
+  return true;
+}
+
+async function decodeVIN(silent=false){
+  const v = normalizeVin(els.vin.value);
+  els.vin.value = v;
+
+  vinDecodeValid = false;
+
+  if(!isValidVinFormat(v)){
+    els.vinMsg.textContent = 'Enter a valid 17-character VIN. VIN cannot include I, O, or Q.';
+    els.vinMsg.className = 'small bad';
+    if(!silent) alert('Enter a valid 17-character VIN.');
+    return false;
+  }
+
+  if(vinIsDecoding) return false;
 
   vinIsDecoding = true;
+  els.decode.disabled = true;
+  els.next.disabled = true;
 
   try{
     els.vinMsg.textContent = 'Decoding VIN...';
@@ -490,6 +657,21 @@ async function decodeVIN(silent=false){
     const res = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/' + encodeURIComponent(v) + '?format=json');
     const d = await res.json();
     const r = d.Results && d.Results[0] ? d.Results[0] : {};
+
+    const errorCode = String(r.ErrorCode || '');
+    const errorText = String(r.ErrorText || '').toLowerCase();
+
+    if(errorCode && errorCode !== '0' && errorText.includes('invalid')){
+      throw new Error('VIN decode returned invalid VIN.');
+    }
+
+    if(!r.ModelYear || !r.Make || !r.Model){
+      throw new Error('VIN did not return year, make, and model.');
+    }
+
+    if(!isPassengerVehicle(r)){
+      throw new Error('This VIN does not appear to be for a passenger car, truck, SUV, or van.');
+    }
 
     els.year.value = r.ModelYear || '';
     els.make.value = r.Make || '';
@@ -524,7 +706,6 @@ async function decodeVIN(silent=false){
     }
 
     els.drivetrain.value = rawDrive;
-
     els.fuel.value = r.FuelTypePrimary || r.FuelTypeSecondary || '';
     els.engineInfo.value = cleanEngineInfo(r);
 
@@ -563,23 +744,38 @@ async function decodeVIN(silent=false){
     }
 
     lastDecodedVin = v;
-    els.vinMsg.textContent = 'VIN decoded. Review fields and complete anything missing.';
+    lastSuccessfulDecodedVin = v;
+    vinDecodeValid = true;
+
+    els.vinMsg.textContent = 'VIN decoded successfully. Review fields and complete anything missing.';
     els.vinMsg.className = 'small ok';
 
+    return true;
+
   } catch(err){
-    if(!silent) alert('VIN decode failed. You can enter vehicle details manually.');
-    els.vinMsg.textContent = 'VIN decode failed. You can enter vehicle details manually.';
-    els.vinMsg.className = 'small warn';
+    vinDecodeValid = false;
+    lastSuccessfulDecodedVin = '';
+
+    if(!silent) alert('VIN decode failed. Please enter a real VIN or check for typos.');
+
+    els.vinMsg.textContent = err.message || 'VIN decode failed. Please enter a real VIN.';
+    els.vinMsg.className = 'small bad';
     console.error(err);
+    return false;
   } finally {
     vinIsDecoding = false;
+    els.decode.disabled = false;
+    els.next.disabled = false;
   }
 }
 
 els.decode.onclick = () => decodeVIN(false);
 
 els.vin.addEventListener('input', () => {
-  els.vin.value = els.vin.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,17);
+  els.vin.value = normalizeVin(els.vin.value);
+
+  vinDecodeValid = false;
+  lastSuccessfulDecodedVin = '';
 
   if(vinDecodeTimer) clearTimeout(vinDecodeTimer);
 
@@ -601,7 +797,6 @@ els.form.addEventListener('submit', async (e) => {
   const sellerFullName = (els.firstName.value.trim() + ' ' + els.lastName.value.trim()).trim();
   const finalTrim = els.trim.value === '__manual' ? els.manualTrim.value.trim() : els.trim.value;
   const finalColor = els.color.value === '__manual' ? els.manualColor.value.trim() : els.color.value;
-
   const carId = generateCarId();
 
   const conditionSummary = [
@@ -619,6 +814,9 @@ els.form.addEventListener('submit', async (e) => {
   const lead = {
     car_id: carId,
     status: 'New Lead',
+    priority: 'Standard',
+    communication: TEST_MODE ? 'Test lead submitted' : 'Not contacted',
+    route: 'Yard',
     created_at: new Date().toISOString(),
 
     vin: els.vin.value || null,
@@ -640,13 +838,15 @@ els.form.addEventListener('submit', async (e) => {
     first_name: els.firstName.value.trim() || null,
     last_name: els.lastName.value.trim() || null,
     phone: els.phone.value || null,
-    email: els.email.value || null,
+    email: els.email.value.trim().toLowerCase() || null,
 
     zip: els.zip.value || null,
     address: els.address.value || null,
+    pickup_address: els.address.value || null,
 
     title: els.title.value || null,
     title_status: els.title.value || null,
+    ownership: els.owner.value || null,
     owner_status: els.owner.value || null,
 
     runs: els.runs.value || null,
@@ -659,8 +859,15 @@ els.form.addEventListener('submit', async (e) => {
     body_damage: els.bodyDamage.value || null,
     parts_missing: els.partsMissing.value || null,
 
-    condition: conditionSummary
+    condition: conditionSummary,
+    customer_notes: TEST_MODE ? 'TEST MODE lead' : null,
+    audit: [
+      TEST_MODE ? 'Test lead created from offer form' : 'Lead created from offer form'
+    ]
   };
+
+  els.next.disabled = true;
+  els.next.textContent = 'Submitting...';
 
   const { data, error } = await db.from('leads').insert([lead]).select();
 
@@ -669,6 +876,8 @@ els.form.addEventListener('submit', async (e) => {
   if(error){
     alert('Error saving lead: ' + error.message);
     console.error(error);
+    els.next.disabled = false;
+    els.next.textContent = 'Submit';
     return;
   }
 
